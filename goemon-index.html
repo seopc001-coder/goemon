@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="五右衛門 - 最新トレンドのメンズ・レディースファッション通販サイト。高品質な服を手頃な価格でご提供。">
+    <meta name="keywords" content="五右衛門,ファッション,通販,メンズ,レディース,オンラインショップ">
+    <title>五右衛門 | レディースファッション通販</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./assets/goemon/favicon.png">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="./css/goemon-style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <!-- ハンバーガーメニュー（モバイルのみ） -->
+            <button class="btn-menu-sp" id="mobileMenuBtn" aria-label="メニュー">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <!-- ロゴ -->
+            <div class="header-logo">
+                <a href="goemon-index.html">
+                    <h1>五右衛門</h1>
+                </a>
+            </div>
+
+            <!-- 検索とユーティリティのラッパー -->
+            <div class="header-right">
+                <!-- 検索バー（PCのみ） -->
+                <div class="header-search">
+                    <input type="search" placeholder="SEARCH" aria-label="商品検索">
+                    <button type="submit" aria-label="検索実行">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+
+                <!-- ユーティリティナビ -->
+                <nav class="header-utility">
+                    <ul>
+                        <!-- 検索アイコン（モバイルのみ） -->
+                        <li class="mobile-only">
+                            <button class="btn-search-sp" id="searchBtnSp" aria-label="検索">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </li>
+                        <!-- PC表示用 -->
+                        <li class="pc-only">
+                            <a href="goemon-mypage.html" aria-label="マイページ">
+                                <i class="far fa-user"></i>
+                            </a>
+                        </li>
+                        <li class="pc-only">
+                            <a href="goemon-favorites.html" aria-label="お気に入り">
+                                <i class="far fa-heart"></i>
+                            </a>
+                        </li>
+                        <!-- カート（常に表示） -->
+                        <li>
+                            <a href="goemon-cart.html" aria-label="カート">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="txt-noti">0</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- モバイルメニュー -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <button class="close-menu-btn" id="closeMenuBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="mobile-menu-nav">
+            <ul>
+                <li><a href="goemon-products.html">新着</a></li>
+                <li><a href="goemon-products.html">ランキング</a></li>
+                <li><a href="goemon-products.html">アウター</a></li>
+                <li><a href="goemon-products.html">トップス</a></li>
+                <li><a href="goemon-products.html">ボトムス</a></li>
+                <li><a href="goemon-products.html">ワンピース</a></li>
+                <li><a href="goemon-products.html">小物</a></li>
+                <li><a href="goemon-products.html">セール</a></li>
+            </ul>
+            <div class="mobile-menu-user">
+                <a href="goemon-login.html" class="btn-mobile-login">ログイン</a>
+                <a href="goemon-register.html" class="btn-mobile-register">新規会員登録</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- メインビジュアル（スライダー） -->
+    <section class="hero-cmn-01">
+        <div class="swiper hero-swiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <a href="goemon-products.html" class="hero-slide-link">
+                        <div class="hero-slide" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div class="hero-content">
+                                <h2>2025 SPRING COLLECTION</h2>
+                                <p>春の新作コレクション入荷</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="swiper-slide">
+                    <a href="goemon-products.html" class="hero-slide-link">
+                        <div class="hero-slide" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <div class="hero-content">
+                                <h2>SALE MAX 70% OFF</h2>
+                                <p>春夏アイテムがお買い得</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="swiper-slide">
+                    <a href="goemon-register.html" class="hero-slide-link">
+                        <div class="hero-slide" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <div class="hero-content">
+                                <h2>NEW MEMBER CAMPAIGN</h2>
+                                <p>新規登録で500円クーポン</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </section>
+
+    <!-- モバイル検索バー -->
+    <div class="mobile-search-bar">
+        <div class="container">
+            <div class="mobile-search-input">
+                <input type="search" placeholder="商品を検索" aria-label="商品検索">
+                <button type="submit" aria-label="検索実行">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- メインコンテンツエリア -->
+    <div class="contents-products">
+        <div class="container">
+            <!-- サイドバー -->
+            <aside class="contents-sub">
+                <div class="sidebar-widget">
+                    <h3 class="widget-title">商品タイプから探す</h3>
+                    <ul class="category-list-sidebar">
+                        <li><a href="goemon-products.html">新着アイテム</a></li>
+                        <li><a href="goemon-products.html">予約アイテム</a></li>
+                        <li><a href="goemon-products.html">再入荷</a></li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-widget">
+                    <h3 class="widget-title">カテゴリー</h3>
+                    <ul class="category-list-sidebar">
+                        <li><a href="goemon-products.html">アウター</a></li>
+                        <li><a href="goemon-products.html">トップス</a></li>
+                        <li><a href="goemon-products.html">ボトムス</a></li>
+                        <li><a href="goemon-products.html">ワンピース</a></li>
+                        <li><a href="goemon-products.html">小物</a></li>
+                        <li><a href="goemon-products.html">セール</a></li>
+                    </ul>
+                </div>
+
+                <!-- 通知バナー -->
+                <div class="bnr-cmn-notice">
+                    <p>送料無料</p>
+                    <span>5,000円以上のご購入で</span>
+                </div>
+            </aside>
+
+            <!-- メインコンテンツ -->
+            <main class="contents-main">
+                <!-- 新着商品 -->
+                <section class="box-category-discount">
+                    <div class="section-header-top">
+                        <h2 class="section-title-top">新着アイテム</h2>
+                    </div>
+
+                    <div class="list-products-01">
+                        <!-- 商品カード（自動生成） -->
+                    </div>
+
+                    <div class="view-all-wrapper">
+                        <a href="goemon-products.html" class="view-all-link">すべて見る <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                </section>
+
+                <!-- ランキング -->
+                <section class="box-category-ranking">
+                    <div class="section-header-top">
+                        <h2 class="section-title-top">人気ランキング</h2>
+                    </div>
+
+                    <div class="list-products-01" id="rankingProducts">
+                        <!-- 商品カード（自動生成） -->
+                    </div>
+
+                    <div class="view-all-wrapper">
+                        <a href="goemon-products.html" class="view-all-link">すべて見る <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                </section>
+
+                <!-- SALE -->
+                <section class="box-category-sale">
+                    <div class="section-header-top">
+                        <h2 class="section-title-top">SALE</h2>
+                    </div>
+
+                    <div class="list-products-01" id="saleProducts">
+                        <!-- 商品カード（自動生成） -->
+                    </div>
+
+                    <div class="view-all-wrapper">
+                        <a href="goemon-products.html" class="view-all-link">すべて見る <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                </section>
+
+                <!-- INSTAGRAM -->
+                <section class="box-instagram">
+                    <div class="section-header-top">
+                        <h2 class="section-title-top">INSTAGRAM</h2>
+                    </div>
+
+                    <div class="instagram-feed" id="instagramFeed">
+                        <!-- Instagram投稿（自動生成） -->
+                        <div class="instagram-post">
+                            <img src="https://via.placeholder.com/300" alt="Instagram post 1">
+                            <div class="instagram-overlay">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                        </div>
+                        <div class="instagram-post">
+                            <img src="https://via.placeholder.com/300" alt="Instagram post 2">
+                            <div class="instagram-overlay">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                        </div>
+                        <div class="instagram-post">
+                            <img src="https://via.placeholder.com/300" alt="Instagram post 3">
+                            <div class="instagram-overlay">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                        </div>
+                        <div class="instagram-post">
+                            <img src="https://via.placeholder.com/300" alt="Instagram post 4">
+                            <div class="instagram-overlay">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                        </div>
+                        <div class="instagram-post">
+                            <img src="https://via.placeholder.com/300" alt="Instagram post 5">
+                            <div class="instagram-overlay">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                        </div>
+                        <div class="instagram-post">
+                            <img src="https://via.placeholder.com/300" alt="Instagram post 6">
+                            <div class="instagram-overlay">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                        </div>
+                        <div class="instagram-post">
+                            <img src="https://via.placeholder.com/300" alt="Instagram post 7">
+                            <div class="instagram-overlay">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                        </div>
+                        <div class="instagram-post">
+                            <img src="https://via.placeholder.com/300" alt="Instagram post 8">
+                            <div class="instagram-overlay">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                        </div>
+                        <div class="instagram-post">
+                            <img src="https://via.placeholder.com/300" alt="Instagram post 9">
+                            <div class="instagram-overlay">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                        </div>
+                        <div class="instagram-post">
+                            <img src="https://via.placeholder.com/300" alt="Instagram post 10">
+                            <div class="instagram-overlay">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="view-all-wrapper">
+                        <a href="https://www.instagram.com/" target="_blank" class="view-all-link">@goemon_official <i class="fab fa-instagram"></i></a>
+                    </div>
+                </section>
+
+                <!-- ページネーション -->
+                <nav class="box-pagination-01">
+                    <button class="page-prev" disabled><i class="fas fa-chevron-left"></i></button>
+                    <button class="page-num active">1</button>
+                    <button class="page-num">2</button>
+                    <button class="page-num">3</button>
+                    <button class="page-num">4</button>
+                    <button class="page-num">5</button>
+                    <button class="page-next"><i class="fas fa-chevron-right"></i></button>
+                </nav>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links-container">
+                <div class="footer-column">
+                    <h3>ショッピングガイド</h3>
+                    <ul>
+                        <li><a href="#">ご利用ガイド</a></li>
+                        <li><a href="#">配送・送料について</a></li>
+                        <li><a href="#">返品・交換について</a></li>
+                        <li><a href="#">お支払い方法</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>サポート</h3>
+                    <ul>
+                        <li><a href="#">よくある質問</a></li>
+                        <li><a href="#">お問い合わせ</a></li>
+                        <li><a href="#">サイズガイド</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>会社情報</h3>
+                    <ul>
+                        <li><a href="#">会社概要</a></li>
+                        <li><a href="#">採用情報</a></li>
+                        <li><a href="#">プライバシーポリシー</a></li>
+                        <li><a href="#">利用規約</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>SNS</h3>
+                    <ul class="list-footer-sns">
+                        <li><a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a></li>
+                        <li><a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a></li>
+                        <li><a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a></li>
+                        <li><a href="#" aria-label="LINE"><i class="fab fa-line"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-lower">
+                <nav class="footer-utility-nav">
+                    <ul>
+                        <li><a href="#">特定商取引法に基づく表記</a></li>
+                        <li><a href="#">プライバシーポリシー</a></li>
+                        <li><a href="#">利用規約</a></li>
+                    </ul>
+                </nav>
+                <p class="copyright">&copy; 2024 五右衛門. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- モーダルオーバーレイ -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+    <!-- カート追加確認モーダル -->
+    <div class="modal-cmn-container modal-addcart-confirm" id="addToCartModal">
+        <button class="modal-close" aria-label="閉じる">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-content">
+            <h3>カートに追加しました</h3>
+            <div class="modal-product-info">
+                <div class="modal-product-image">
+                    <i class="fas fa-tshirt fa-2x"></i>
+                </div>
+                <div class="modal-product-details">
+                    <p class="modal-product-name">商品名</p>
+                    <p class="modal-product-price">¥2,990</p>
+                    <p class="modal-product-options">カラー: ホワイト / サイズ: M</p>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-cmn-01 modal-continue-shopping">買い物を続ける</button>
+                <a href="goemon-cart.html" class="btn-cmn-02">カートを見る</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- スクロールトップボタン -->
+    <button class="scroll-to-top" id="scrollToTop" aria-label="トップへ戻る">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="./js/goemon-main.js"></script>
+    <script src="./js/goemon-index.js"></script>
+</body>
+</html>

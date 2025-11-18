@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新規会員登録 | 五右衛門</title>
+    <link rel="stylesheet" href="./css/goemon-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- シンプルヘッダー -->
+    <header class="header-simple">
+        <div class="container">
+            <div class="header-logo">
+                <a href="goemon-index.html">
+                    <h1>五右衛門</h1>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 会員登録フォーム -->
+    <main class="auth-page">
+        <div class="container-small">
+            <div class="auth-container">
+                <h1 class="auth-title">新規会員登録</h1>
+                <p class="auth-subtitle">会員登録いただくと、お得な特典がたくさん！</p>
+
+                <!-- 会員特典 -->
+                <div class="member-benefits">
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> 新規登録で500円クーポンプレゼント</li>
+                        <li><i class="fas fa-check-circle"></i> お買い物ごとにポイント還元</li>
+                        <li><i class="fas fa-check-circle"></i> お気に入り商品の保存</li>
+                        <li><i class="fas fa-check-circle"></i> 限定セール情報をいち早くお届け</li>
+                    </ul>
+                </div>
+
+                <form class="auth-form" id="registerForm" novalidate>
+                    <!-- メールアドレス -->
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            メールアドレス<span class="required">必須</span>
+                        </label>
+                        <div class="form-cmn-input-01">
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="example@email.com"
+                                required
+                                autocomplete="email"
+                            >
+                        </div>
+                        <p class="form-error" id="emailError"></p>
+                    </div>
+
+                    <!-- パスワード -->
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            パスワード<span class="required">必須</span>
+                        </label>
+                        <div class="form-cmn-input-01 password-input">
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="8文字以上の英数字"
+                                required
+                                autocomplete="new-password"
+                            >
+                            <button type="button" class="password-toggle" aria-label="パスワード表示切替">
+                                <i class="far fa-eye"></i>
+                            </button>
+                        </div>
+                        <p class="form-hint">8文字以上の英数字を入力してください</p>
+                        <p class="form-error" id="passwordError"></p>
+                    </div>
+
+                    <!-- パスワード確認 -->
+                    <div class="form-group">
+                        <label for="passwordConfirm" class="form-label">
+                            パスワード（確認）<span class="required">必須</span>
+                        </label>
+                        <div class="form-cmn-input-01 password-input">
+                            <input
+                                type="password"
+                                id="passwordConfirm"
+                                name="passwordConfirm"
+                                placeholder="パスワードを再入力"
+                                required
+                                autocomplete="new-password"
+                            >
+                            <button type="button" class="password-toggle" aria-label="パスワード表示切替">
+                                <i class="far fa-eye"></i>
+                            </button>
+                        </div>
+                        <p class="form-error" id="passwordConfirmError"></p>
+                    </div>
+
+                    <!-- お名前（姓） -->
+                    <div class="form-group">
+                        <label for="lastName" class="form-label">
+                            お名前（姓）<span class="required">必須</span>
+                        </label>
+                        <div class="form-cmn-input-01">
+                            <input
+                                type="text"
+                                id="lastName"
+                                name="lastName"
+                                placeholder="山田"
+                                required
+                                autocomplete="family-name"
+                            >
+                        </div>
+                        <p class="form-error" id="lastNameError"></p>
+                    </div>
+
+                    <!-- お名前（名） -->
+                    <div class="form-group">
+                        <label for="firstName" class="form-label">
+                            お名前（名）<span class="required">必須</span>
+                        </label>
+                        <div class="form-cmn-input-01">
+                            <input
+                                type="text"
+                                id="firstName"
+                                name="firstName"
+                                placeholder="太郎"
+                                required
+                                autocomplete="given-name"
+                            >
+                        </div>
+                        <p class="form-error" id="firstNameError"></p>
+                    </div>
+
+                    <!-- お名前カナ（姓） -->
+                    <div class="form-group">
+                        <label for="lastNameKana" class="form-label">
+                            お名前カナ（姓）<span class="required">必須</span>
+                        </label>
+                        <div class="form-cmn-input-01">
+                            <input
+                                type="text"
+                                id="lastNameKana"
+                                name="lastNameKana"
+                                placeholder="ヤマダ"
+                                required
+                                pattern="[ァ-ヴー]+"
+                            >
+                        </div>
+                        <p class="form-hint">全角カタカナで入力してください</p>
+                        <p class="form-error" id="lastNameKanaError"></p>
+                    </div>
+
+                    <!-- お名前カナ（名） -->
+                    <div class="form-group">
+                        <label for="firstNameKana" class="form-label">
+                            お名前カナ（名）<span class="required">必須</span>
+                        </label>
+                        <div class="form-cmn-input-01">
+                            <input
+                                type="text"
+                                id="firstNameKana"
+                                name="firstNameKana"
+                                placeholder="タロウ"
+                                required
+                                pattern="[ァ-ヴー]+"
+                            >
+                        </div>
+                        <p class="form-hint">全角カタカナで入力してください</p>
+                        <p class="form-error" id="firstNameKanaError"></p>
+                    </div>
+
+                    <!-- 郵便番号 -->
+                    <div class="form-group">
+                        <label for="postalCode" class="form-label">
+                            郵便番号<span class="required">必須</span>
+                        </label>
+                        <div class="postal-code-input">
+                            <div class="form-cmn-input-01">
+                                <input
+                                    type="text"
+                                    id="postalCode"
+                                    name="postalCode"
+                                    placeholder="1234567"
+                                    maxlength="7"
+                                    pattern="[0-9]{7}"
+                                    required
+                                    autocomplete="postal-code"
+                                >
+                            </div>
+                            <button type="button" class="btn-address-search" id="addressSearchBtn">
+                                住所を自動入力
+                            </button>
+                        </div>
+                        <p class="form-hint">ハイフンなしで入力してください</p>
+                        <p class="form-error" id="postalCodeError"></p>
+                    </div>
+
+                    <!-- 都道府県 -->
+                    <div class="form-group">
+                        <label for="prefecture" class="form-label">
+                            都道府県<span class="required">必須</span>
+                        </label>
+                        <div class="form-cmn-select-01">
+                            <select id="prefecture" name="prefecture" required autocomplete="address-level1">
+                                <option value="">選択してください</option>
+                                <option value="北海道">北海道</option>
+                                <option value="青森県">青森県</option>
+                                <option value="岩手県">岩手県</option>
+                                <option value="宮城県">宮城県</option>
+                                <option value="秋田県">秋田県</option>
+                                <option value="山形県">山形県</option>
+                                <option value="福島県">福島県</option>
+                                <option value="茨城県">茨城県</option>
+                                <option value="栃木県">栃木県</option>
+                                <option value="群馬県">群馬県</option>
+                                <option value="埼玉県">埼玉県</option>
+                                <option value="千葉県">千葉県</option>
+                                <option value="東京都">東京都</option>
+                                <option value="神奈川県">神奈川県</option>
+                                <option value="新潟県">新潟県</option>
+                                <option value="富山県">富山県</option>
+                                <option value="石川県">石川県</option>
+                                <option value="福井県">福井県</option>
+                                <option value="山梨県">山梨県</option>
+                                <option value="長野県">長野県</option>
+                                <option value="岐阜県">岐阜県</option>
+                                <option value="静岡県">静岡県</option>
+                                <option value="愛知県">愛知県</option>
+                                <option value="三重県">三重県</option>
+                                <option value="滋賀県">滋賀県</option>
+                                <option value="京都府">京都府</option>
+                                <option value="大阪府">大阪府</option>
+                                <option value="兵庫県">兵庫県</option>
+                                <option value="奈良県">奈良県</option>
+                                <option value="和歌山県">和歌山県</option>
+                                <option value="鳥取県">鳥取県</option>
+                                <option value="島根県">島根県</option>
+                                <option value="岡山県">岡山県</option>
+                                <option value="広島県">広島県</option>
+                                <option value="山口県">山口県</option>
+                                <option value="徳島県">徳島県</option>
+                                <option value="香川県">香川県</option>
+                                <option value="愛媛県">愛媛県</option>
+                                <option value="高知県">高知県</option>
+                                <option value="福岡県">福岡県</option>
+                                <option value="佐賀県">佐賀県</option>
+                                <option value="長崎県">長崎県</option>
+                                <option value="熊本県">熊本県</option>
+                                <option value="大分県">大分県</option>
+                                <option value="宮崎県">宮崎県</option>
+                                <option value="鹿児島県">鹿児島県</option>
+                                <option value="沖縄県">沖縄県</option>
+                            </select>
+                        </div>
+                        <p class="form-error" id="prefectureError"></p>
+                    </div>
+
+                    <!-- 市区町村 -->
+                    <div class="form-group">
+                        <label for="city" class="form-label">
+                            市区町村<span class="required">必須</span>
+                        </label>
+                        <div class="form-cmn-input-01">
+                            <input
+                                type="text"
+                                id="city"
+                                name="city"
+                                placeholder="渋谷区"
+                                required
+                                autocomplete="address-level2"
+                            >
+                        </div>
+                        <p class="form-error" id="cityError"></p>
+                    </div>
+
+                    <!-- 番地 -->
+                    <div class="form-group">
+                        <label for="address1" class="form-label">
+                            番地<span class="required">必須</span>
+                        </label>
+                        <div class="form-cmn-input-01">
+                            <input
+                                type="text"
+                                id="address1"
+                                name="address1"
+                                placeholder="道玄坂1-2-3"
+                                required
+                                autocomplete="address-line1"
+                            >
+                        </div>
+                        <p class="form-error" id="address1Error"></p>
+                    </div>
+
+                    <!-- 建物名・部屋番号 -->
+                    <div class="form-group">
+                        <label for="address2" class="form-label">
+                            建物名・部屋番号<span class="optional">任意</span>
+                        </label>
+                        <div class="form-cmn-input-01">
+                            <input
+                                type="text"
+                                id="address2"
+                                name="address2"
+                                placeholder="〇〇マンション101号室"
+                                autocomplete="address-line2"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- 電話番号 -->
+                    <div class="form-group">
+                        <label for="phone" class="form-label">
+                            電話番号<span class="required">必須</span>
+                        </label>
+                        <div class="form-cmn-input-01">
+                            <input
+                                type="tel"
+                                id="phone"
+                                name="phone"
+                                placeholder="09012345678"
+                                pattern="[0-9]{10,11}"
+                                required
+                                autocomplete="tel"
+                            >
+                        </div>
+                        <p class="form-hint">ハイフンなしで入力してください</p>
+                        <p class="form-error" id="phoneError"></p>
+                    </div>
+
+                    <!-- 生年月日 -->
+                    <div class="form-group">
+                        <label for="birthYear" class="form-label">
+                            生年月日<span class="optional">任意</span>
+                        </label>
+                        <div class="birth-date-inputs">
+                            <div class="form-cmn-select-01">
+                                <select id="birthYear" name="birthYear" autocomplete="bday-year">
+                                    <option value="">----</option>
+                                </select>
+                            </div>
+                            <span>年</span>
+                            <div class="form-cmn-select-01">
+                                <select id="birthMonth" name="birthMonth" autocomplete="bday-month">
+                                    <option value="">--</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                </select>
+                            </div>
+                            <span>月</span>
+                            <div class="form-cmn-select-01">
+                                <select id="birthDay" name="birthDay" autocomplete="bday-day">
+                                    <option value="">--</option>
+                                </select>
+                            </div>
+                            <span>日</span>
+                        </div>
+                        <p class="form-hint">誕生日月にクーポンをプレゼント！</p>
+                    </div>
+
+                    <!-- 性別 -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            性別<span class="optional">任意</span>
+                        </label>
+                        <div class="form-cmn-radio-01">
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="female">
+                                <span class="radio-custom"></span>
+                                <span>女性</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="male">
+                                <span class="radio-custom"></span>
+                                <span>男性</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="other">
+                                <span class="radio-custom"></span>
+                                <span>その他</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 利用規約 -->
+                    <div class="form-group">
+                        <div class="form-cmn-check-01">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="terms" id="terms" required>
+                                <span class="checkbox-custom"></span>
+                                <span>
+                                    <a href="goemon-terms.html" target="_blank" class="link-text">利用規約</a>および
+                                    <a href="goemon-privacy.html" target="_blank" class="link-text">プライバシーポリシー</a>に同意する
+                                </span>
+                            </label>
+                        </div>
+                        <p class="form-error" id="termsError"></p>
+                    </div>
+
+                    <!-- 送信ボタン -->
+                    <div class="form-submit">
+                        <button type="submit" class="btn-cmn-02 btn-submit">
+                            会員登録する
+                        </button>
+                        <p class="form-error" id="submitError"></p>
+                    </div>
+                </form>
+
+                <!-- ログインリンク -->
+                <div class="auth-footer">
+                    <p>すでに会員の方は<a href="goemon-login.html" class="link-text">こちらからログイン</a></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター（シンプル版） -->
+    <footer class="footer-simple">
+        <div class="container">
+            <p>&copy; 2025 五右衛門 All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/goemon-register.js"></script>
+</body>
+</html>
