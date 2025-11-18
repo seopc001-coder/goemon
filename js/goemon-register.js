@@ -232,8 +232,8 @@ function initializeAddressSearch() {
                 // 町域を番地欄に設定
                 document.getElementById('address1').value = address.address3;
 
-                // 成功メッセージ
-                alert('住所を自動入力しました');
+                // 成功メッセージ（非表示）
+                // alert('住所を自動入力しました');
             } else {
                 alert('郵便番号に該当する住所が見つかりませんでした');
             }
@@ -411,7 +411,7 @@ async function submitRegistration() {
             email: email,
             password: password,
             options: {
-                emailRedirectTo: window.location.origin + '/goemon-login.html',
+                emailRedirectTo: window.location.origin + '/goemon-email-confirmed.html',
                 data: {
                     last_name: lastName,
                     first_name: firstName,

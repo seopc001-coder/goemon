@@ -8,6 +8,7 @@ function initializeMyPage() {
     checkLoginStatus();
     initializeLogout();
     initializeEditLinks();
+    initializeAddressManagement();
 }
 
 // ログイン状態を確認（Supabase連携）
@@ -48,6 +49,9 @@ function loadUserInfo(user) {
     if (favoritesCountElement) {
         favoritesCountElement.textContent = `お気に入り: ${wishlist.length}件`;
     }
+
+    // 住所情報を読み込み
+    loadAddresses(user);
 }
 
 // ログアウト機能（Supabase連携）
@@ -77,7 +81,7 @@ function initializeLogout() {
 // 編集リンクの初期化
 function initializeEditLinks() {
     // 会員情報編集リンク
-    const editProfileLinks = document.querySelectorAll('.section-header-mypage a[href="#"]');
+    const editProfileLinks = document.querySelectorAll('.section-header-mypage a[href="#"]:not(#addAddressBtn)');
 
     editProfileLinks.forEach(link => {
         const linkText = link.textContent.trim();
@@ -100,4 +104,202 @@ function initializeEditLinks() {
             });
         }
     });
+}
+
+// 住所管理機能
+function initializeAddressManagement() {
+    const addAddressBtn = document.getElementById('addAddressBtn');
+    const addressModal = document.getElementById('addressModal');
+    const addressModalOverlay = document.getElementById('addressModalOverlay');
+    const closeAddressModal = document.getElementById('closeAddressModal');
+    const addAddressForm = document.getElementById('addAddressForm');
+    const searchAddressBtn = document.getElementById('searchAddressBtn');
+
+    // モーダルを開く
+    if (addAddressBtn) {
+        addAddressBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            addressModal.style.display = 'block';
+            addressModalOverlay.style.display = 'block';
+        });
+    }
+
+    // モーダルを閉じる
+    if (closeAddressModal) {
+        closeAddressModal.addEventListener('click', function() {
+            addressModal.style.display = 'none';
+            addressModalOverlay.style.display = 'none';
+            addAddressForm.reset();
+        });
+    }
+
+    // オーバーレイクリックでモーダルを閉じる
+    if (addressModalOverlay) {
+        addressModalOverlay.addEventListener('click', function() {
+            addressModal.style.display = 'none';
+            addressModalOverlay.style.display = 'none';
+            addAddressForm.reset();
+        });
+    }
+
+    // 郵便番号から住所検索
+    if (searchAddressBtn) {
+        searchAddressBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const postalCode = document.getElementById('newPostalCode').value.replace(/[^0-9]/g, '');
+
+            if (postalCode.length !== 7) {
+                alert('7桁の郵便番号を入力してください');
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${postalCode}`);
+                const data = await response.json();
+
+                if (data.results) {
+                    const result = data.results[0];
+                    document.getElementById('newPrefecture').value = result.address1;
+                    document.getElementById('newCity').value = result.address2 + result.address3;
+                } else {
+                    alert('住所が見つかりませんでした');
+                }
+            } catch (error) {
+                console.error('Address search error:', error);
+                alert('住所の検索に失敗しました');
+            }
+        });
+    }
+
+    // フォーム送信
+    if (addAddressForm) {
+        addAddressForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const newAddress = {
+                id: Date.now().toString(),
+                name: document.getElementById('newAddressName').value,
+                postalCode: document.getElementById('newPostalCode').value,
+                prefecture: document.getElementById('newPrefecture').value,
+                city: document.getElementById('newCity').value,
+                address1: document.getElementById('newAddress1').value,
+                address2: document.getElementById('newAddress2').value,
+                phone: document.getElementById('newPhone').value,
+                isDefault: false
+            };
+
+            try {
+                // localStorageに保存
+                const addresses = JSON.parse(localStorage.getItem('goemonaddresses')) || [];
+                addresses.push(newAddress);
+                localStorage.setItem('goemonaddresses', JSON.stringify(addresses));
+
+                // モーダルを閉じる
+                addressModal.style.display = 'none';
+                addressModalOverlay.style.display = 'none';
+                addAddressForm.reset();
+
+                // 住所リストを再読み込み
+                checkLoginStatus();
+                alert('住所を追加しました');
+            } catch (error) {
+                console.error('Error saving address:', error);
+                alert('住所の保存に失敗しました');
+            }
+        });
+    }
+}
+
+// 住所情報を読み込み
+async function loadAddresses(user) {
+    try {
+        // Supabaseから住所データを取得
+        const addresses = [];
+
+        // 会員登録時の住所を取得（user.user_metadataから）
+        if (user.user_metadata) {
+            const metadata = user.user_metadata;
+            if (metadata.postalCode || metadata.prefecture || metadata.city || metadata.address1) {
+                addresses.push({
+                    id: 'default',
+                    name: `${metadata.lastName || ''} ${metadata.firstName || ''}`.trim() || '登録住所',
+                    postalCode: metadata.postalCode || '',
+                    prefecture: metadata.prefecture || '',
+                    city: metadata.city || '',
+                    address1: metadata.address1 || '',
+                    address2: metadata.address2 || '',
+                    phone: metadata.phone || '',
+                    isDefault: true
+                });
+            }
+        }
+
+        // localStorageから追加の住所を取得
+        const savedAddresses = JSON.parse(localStorage.getItem('goemonaddresses')) || [];
+        addresses.push(...savedAddresses);
+
+        // 住所リストを表示
+        displayAddresses(addresses);
+    } catch (error) {
+        console.error('Error loading addresses:', error);
+    }
+}
+
+// 住所リストを表示
+function displayAddresses(addresses) {
+    const addressList = document.getElementById('addressList');
+    const noAddressMessage = document.getElementById('noAddressMessage');
+
+    if (!addressList) return;
+
+    if (addresses.length === 0) {
+        noAddressMessage.style.display = 'block';
+        addressList.innerHTML = '';
+        return;
+    }
+
+    noAddressMessage.style.display = 'none';
+    addressList.innerHTML = addresses.map((addr, index) => `
+        <div class="address-item" style="padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; background: #fff;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                <strong style="font-size: 16px;">
+                    ${addr.name || '配送先' + (index + 1)}
+                    ${addr.isDefault ? '<span style="background: #4CAF50; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px;">登録住所</span>' : ''}
+                </strong>
+                ${!addr.isDefault ? `<button class="btn-delete-address" data-id="${addr.id}" style="color: #f44336; background: none; border: none; cursor: pointer; font-size: 14px;"><i class="fas fa-trash"></i> 削除</button>` : ''}
+            </div>
+            <p style="margin: 5px 0; color: #666;">
+                〒${addr.postalCode}<br>
+                ${addr.prefecture}${addr.city}${addr.address1}${addr.address2 ? ' ' + addr.address2 : ''}<br>
+                ${addr.phone ? `電話番号: ${addr.phone}` : ''}
+            </p>
+        </div>
+    `).join('');
+
+    // 削除ボタンのイベントリスナーを追加
+    const deleteButtons = document.querySelectorAll('.btn-delete-address');
+    deleteButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const addressId = this.getAttribute('data-id');
+            deleteAddress(addressId);
+        });
+    });
+}
+
+// 住所を削除
+function deleteAddress(addressId) {
+    if (!confirm('この住所を削除しますか?')) return;
+
+    try {
+        const addresses = JSON.parse(localStorage.getItem('goemonaddresses')) || [];
+        const updatedAddresses = addresses.filter(addr => addr.id !== addressId);
+        localStorage.setItem('goemonaddresses', JSON.stringify(updatedAddresses));
+
+        // 再読み込み
+        checkLoginStatus();
+        alert('住所を削除しました');
+    } catch (error) {
+        console.error('Error deleting address:', error);
+        alert('住所の削除に失敗しました');
+    }
 }

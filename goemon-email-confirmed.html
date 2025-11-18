@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メール認証完了 | 五右衛門</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./assets/goemon/favicon.png">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="./css/goemon-style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- ヘッダー（シンプル版） -->
+    <header class="header-simple">
+        <div class="container">
+            <div class="header-logo">
+                <a href="goemon-index.html">
+                    <h1>五右衛門</h1>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="auth-main">
+        <div class="auth-container">
+            <div class="auth-box">
+                <!-- 成功アイコン -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <i class="fas fa-check-circle" style="font-size: 80px; color: #4CAF50;"></i>
+                </div>
+
+                <!-- タイトル -->
+                <h1 class="auth-title" style="text-align: center; margin-bottom: 20px;">
+                    メール認証が完了しました
+                </h1>
+
+                <!-- メッセージ -->
+                <p style="text-align: center; color: #666; margin-bottom: 40px; line-height: 1.8;">
+                    メールアドレスの認証が正常に完了しました。<br>
+                    これでログインしてサービスをご利用いただけます。
+                </p>
+
+                <!-- マイページボタン -->
+                <div class="form-submit">
+                    <a href="goemon-mypage.html" class="btn-cmn-02" style="display: block; text-align: center; text-decoration: none;">
+                        マイページへ
+                    </a>
+                </div>
+
+                <!-- トップページリンク -->
+                <div class="auth-footer" style="margin-top: 20px;">
+                    <p><a href="goemon-index.html" class="link-text">トップページに戻る</a></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター（シンプル版） -->
+    <footer class="footer-simple">
+        <div class="container">
+            <p>&copy; 2025 五右衛門 All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    <script>
+        // ページ読み込み時にログイン状態を確認して維持
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Supabaseのセッションを確認
+                const { data: { user } } = await supabase.auth.getUser();
+
+                if (user) {
+                    // ログイン状態をローカルストレージに保存
+                    localStorage.setItem('goemonloggedin', 'true');
+                    console.log('User is authenticated:', user.email);
+                } else {
+                    console.log('No user session found');
+                }
+            } catch (error) {
+                console.error('Error checking user session:', error);
+            }
+        });
+    </script>
+</body>
+</html>
