@@ -3,41 +3,31 @@
 // グローバル変数
 let wishlist = JSON.parse(localStorage.getItem('goemonwishlist')) || [];
 
-// 商品データを生成（goemon-products.jsと同じロジック）
-function generateProductsData(count) {
-    const products = {};
-    const names = [
-        'カジュアルコットンブラウス', 'ニットカーディガン', 'フローラルワンピース',
-        'ハイウエストデニムパンツ', 'レーストップス', 'オーバーサイズニット',
-        'マキシ丈スカート', 'ストライプシャツ', 'ワイドパンツ', 'デニムジャケット'
-    ];
+// 商品データ（共通データを使用）
+let productsData = {};
 
-    for (let i = 0; i < count; i++) {
-        const price = Math.floor(Math.random() * 8000) + 2000;
-        const originalPrice = Math.random() > 0.7 ? price + Math.floor(Math.random() * 2000) : null;
-
-        products[String(i + 1)] = {
-            id: String(i + 1),
-            name: names[i % names.length] + (i > 9 ? ` ${Math.floor(i / 10)}` : ''),
-            price: price,
-            originalPrice: originalPrice
-        };
+// 商品データを初期化
+function initializeProductsData() {
+    if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.generateProductsData === 'function') {
+        productsData = window.GOEMON_PRODUCTS.generateProductsData(100);
+    } else {
+        console.error('GOEMON_PRODUCTS not loaded');
     }
-
-    return products;
 }
-
-// 商品データ（実際の実装ではAPIから取得）
-const productsData = generateProductsData(100);
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeFavoritesPage();
 });
 
 function initializeFavoritesPage() {
+    // 商品データを初期化
+    initializeProductsData();
+
     // デバッグ: お気に入りデータを確認
     console.log('Wishlist data:', wishlist);
     console.log('Wishlist length:', wishlist.length);
+    console.log('Products data loaded:', Object.keys(productsData).length);
+
     renderFavoritesList();
 }
 
