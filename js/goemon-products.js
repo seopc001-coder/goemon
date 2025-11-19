@@ -77,6 +77,10 @@ function updatePageTitle(slug, filterType) {
 
     if (!titleElement) return;
 
+    // URLパラメータを取得
+    const urlParams = new URLSearchParams(window.location.search);
+    const typeParam = urlParams.get('type');
+
     if (filterType === 'category') {
         // カテゴリー名を取得
         const savedCategories = localStorage.getItem('goemoncategories');
@@ -84,6 +88,22 @@ function updatePageTitle(slug, filterType) {
             const categories = JSON.parse(savedCategories);
             const category = categories.find(c => c.slug === slug);
             if (category) {
+                // 商品タイプとカテゴリの両方が指定されている場合
+                if (typeParam) {
+                    const savedProductTypes = localStorage.getItem('goemonproducttypes');
+                    if (savedProductTypes) {
+                        const productTypes = JSON.parse(savedProductTypes);
+                        const productType = productTypes.find(t => t.slug === typeParam);
+                        if (productType) {
+                            titleElement.innerHTML = `${productType.name}<br>↪${category.name}`;
+                            if (descriptionElement) {
+                                descriptionElement.textContent = category.description;
+                            }
+                            return;
+                        }
+                    }
+                }
+                // カテゴリのみの場合
                 titleElement.textContent = category.name;
                 if (descriptionElement && category.description) {
                     descriptionElement.textContent = category.description;
