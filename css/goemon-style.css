@@ -3556,3 +3556,250 @@ input, select, textarea {
     color: #e74c3c;
     font-weight: bold;
 }
+
+/* ===================================
+   設定画面スタイル
+   =================================== */
+
+/* タブナビゲーション */
+.settings-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.settings-tab {
+    padding: 15px 30px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #666;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.settings-tab:hover {
+    color: #333;
+    background: #f5f5f5;
+}
+
+.settings-tab.active {
+    color: #c691a5;
+    border-bottom-color: #c691a5;
+}
+
+.settings-tab i {
+    margin-right: 8px;
+}
+
+/* タブコンテンツ */
+.settings-tab-content {
+    display: none;
+}
+
+.settings-tab-content.active {
+    display: block;
+}
+
+/* カテゴリリスト */
+.categories-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.category-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.category-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.category-drag-handle {
+    cursor: grab;
+    color: #999;
+    font-size: 20px;
+    padding: 5px;
+}
+
+.category-drag-handle:active {
+    cursor: grabbing;
+}
+
+.category-info {
+    flex: 1;
+}
+
+.category-info h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.category-info p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.category-slug {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #666;
+    font-family: monospace;
+}
+
+.category-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* ヒーロー画像リスト */
+.hero-images-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.hero-image-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.hero-image-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.hero-drag-handle {
+    cursor: grab;
+    color: #999;
+    font-size: 20px;
+    padding: 5px;
+}
+
+.hero-drag-handle:active {
+    cursor: grabbing;
+}
+
+.hero-image-preview {
+    width: 200px;
+    height: 100px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+}
+
+.hero-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-image-info {
+    flex: 1;
+}
+
+.hero-image-info h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.hero-image-info p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.hero-image-order {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+    margin-top: 8px;
+}
+
+.hero-image-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* 情報ボックス */
+.info-box {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    background: #e3f2fd;
+    border: 1px solid #90caf9;
+    border-radius: 8px;
+    color: #1976d2;
+}
+
+.info-box i {
+    font-size: 24px;
+}
+
+.info-box p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* 空の状態 */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border: 2px dashed #e0e0e0;
+    border-radius: 8px;
+}
+
+.empty-state i {
+    font-size: 48px;
+    color: #999;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #999;
+    font-size: 14px;
+}
+
+/* Sortableドラッグ中のスタイル */
+.sortable-ghost {
+    opacity: 0.4;
+}
+
+.sortable-drag {
+    opacity: 1;
+    cursor: grabbing !important;
+}
