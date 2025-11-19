@@ -112,7 +112,8 @@ function initializeDefaultDataIfNeeded() {
         const defaultProductTypes = [
             { id: 'new-arrivals', name: '新着アイテム', slug: 'new-arrivals', description: '最新の入荷商品', tag: 'NEW', tagColor: 'green', order: 0 },
             { id: 'pre-order', name: '予約アイテム', slug: 'pre-order', description: '予約受付中の商品', tag: '予約', tagColor: 'orange', order: 1 },
-            { id: 'restock', name: '再入荷', slug: 'restock', description: '人気商品が再入荷', tag: '再入荷', tagColor: 'purple', order: 2 }
+            { id: 'restock', name: '再入荷', slug: 'restock', description: '人気商品が再入荷', tag: '再入荷', tagColor: 'purple', order: 2 },
+            { id: 'sale', name: 'SALE', slug: 'sale', description: 'セール対象商品', tag: 'SALE', tagColor: 'red', order: 3 }
         ];
         localStorage.setItem('goemonproducttypes', JSON.stringify(defaultProductTypes));
         console.log('Default product types initialized on index page');
