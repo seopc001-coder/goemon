@@ -678,10 +678,27 @@ input, select, textarea {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .product-placeholder {
     color: #ddd;
+}
+
+/* 売り切れバッジ */
+.sold-out-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 4px;
+    z-index: 10;
+    pointer-events: none;
 }
 
 /* お気に入りボタン - 商品一覧では非表示、商品詳細ページのみ表示 */

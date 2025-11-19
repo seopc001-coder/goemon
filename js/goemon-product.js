@@ -134,6 +134,45 @@ function updateProductDisplay() {
     if (metaDescription) {
         metaDescription.setAttribute('content', `${productData.name} - 五右衛門`);
     }
+
+    // 在庫状況を更新
+    updateStockStatus();
+}
+
+// 在庫状況を更新
+function updateStockStatus() {
+    const stockStatusElement = document.querySelector('.stock-status');
+    const addToCartBtn = document.getElementById('addToCartBtn');
+
+    if (!stockStatusElement) return;
+
+    const isSoldOut = productData.stock === 0;
+
+    if (isSoldOut) {
+        // 売り切れの場合
+        stockStatusElement.className = 'stock-status out-of-stock';
+        stockStatusElement.innerHTML = '<i class="fas fa-times-circle"></i> 売り切れ';
+
+        // カートに追加ボタンを無効化
+        if (addToCartBtn) {
+            addToCartBtn.disabled = true;
+            addToCartBtn.style.background = '#ccc';
+            addToCartBtn.style.cursor = 'not-allowed';
+            addToCartBtn.innerHTML = '<i class="fas fa-times-circle"></i> 売り切れ';
+        }
+    } else {
+        // 在庫ありの場合
+        stockStatusElement.className = 'stock-status in-stock';
+        stockStatusElement.innerHTML = '<i class="fas fa-check-circle"></i> 在庫あり';
+
+        // カートに追加ボタンを有効化
+        if (addToCartBtn) {
+            addToCartBtn.disabled = false;
+            addToCartBtn.style.background = '';
+            addToCartBtn.style.cursor = '';
+            addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> カートに追加';
+        }
+    }
 }
 
 // 商品タグを更新（商品タイプに応じて）
@@ -624,12 +663,16 @@ function createProductCard(product) {
         discountPercent = `${discount}%OFF`;
     }
 
+    // 在庫チェック
+    const isSoldOut = product.stock === 0;
+
     card.innerHTML = `
         <div class="product-image">
             <div class="product-img-wrapper">
                 <div class="product-placeholder">
                     <i class="fas fa-tshirt fa-3x"></i>
                 </div>
+                ${isSoldOut ? `<div class="sold-out-badge">売り切れ</div>` : ''}
             </div>
         </div>
         <div class="product-info">

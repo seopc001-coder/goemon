@@ -400,6 +400,19 @@
                     <div class="form-group">
                         <label for="productStock">在庫数 <span style="color: #f44336;">*</span></label>
                         <input type="number" id="productStock" min="0" value="0" required>
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            在庫が0の場合、ECサイトでは「売り切れ」として表示されます
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="isPublished" style="width: auto; margin: 0;" checked>
+                            <span>公開する</span>
+                        </label>
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            チェックを外すと、ECサイトに表示されなくなります。非公開→公開時は最新商品として上位表示されます。
+                        </small>
                     </div>
 
                     <div class="form-group">

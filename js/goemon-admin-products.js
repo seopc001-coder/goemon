@@ -250,6 +250,8 @@ function renderProducts(products) {
         // 在庫数を取得（初期データ作成時に設定済み）
         const stock = product.stock || 0;
         const isLowStock = stock < 10;
+        const isSoldOut = stock === 0;
+        const soldOutConfirmed = product.soldOutConfirmed || false;
 
         return `
             <div class="product-card">
@@ -265,12 +267,19 @@ function renderProducts(products) {
                     <div class="product-meta">
                         <span class="stock-info ${isLowStock ? 'stock-low' : ''}">
                             <i class="fas fa-boxes"></i> 在庫: ${stock}
+                            ${isSoldOut && !soldOutConfirmed ? '<span style="color: #ff4444; font-weight: bold; margin-left: 8px;">売り切れ</span>' : ''}
+                            ${soldOutConfirmed ? '<span style="color: #999; margin-left: 8px;">確認済み</span>' : ''}
                         </span>
                         <span style="font-size: 12px; color: #999;">
                             ${product.category || '食品'}
                         </span>
                     </div>
                     <div class="product-actions">
+                        ${isSoldOut && !soldOutConfirmed ? `
+                            <button class="btn-small btn-confirm-soldout" onclick="confirmSoldOut(${product.id})" style="background: #ff9800; color: white;">
+                                <i class="fas fa-check"></i> 売り切れ確認
+                            </button>
+                        ` : ''}
                         <button class="btn-small btn-edit" onclick="editProduct(${product.id})">
                             <i class="fas fa-edit"></i> 編集
                         </button>
@@ -307,11 +316,12 @@ function searchProducts() {
 function filterLowStockProducts() {
     filteredProducts = {};
 
-    // 在庫が10未満の商品のみ抽出
+    // 在庫が10未満かつ売り切れ確認済みでない商品のみ抽出
     Object.keys(allProducts).forEach(key => {
         const product = allProducts[key];
         const stock = product.stock || 0;
-        if (stock < 10) {
+        // 売り切れ確認済み商品を除外
+        if (stock < 10 && !product.soldOutConfirmed) {
             filteredProducts[key] = product;
         }
     });
@@ -369,6 +379,9 @@ function editProduct(productId) {
     document.getElementById('productStock').value = product.stock || 0;
     document.getElementById('productDescription').value = product.description || '';
 
+    // 公開/非公開設定
+    document.getElementById('isPublished').checked = product.isPublished !== false; // デフォルトtrue
+
     // ランキング設定
     const showInRankingCheckbox = document.getElementById('showInRanking');
     const rankingPositionGroup = document.getElementById('rankingPositionGroup');
@@ -412,6 +425,12 @@ function handleProductFormSubmit(e) {
     const productImage4 = document.getElementById('productImage4').value.trim();
     const showInRanking = document.getElementById('showInRanking').checked;
     const rankingPosition = document.getElementById('rankingPosition').value ? parseInt(document.getElementById('rankingPosition').value) : null;
+    const isPublished = document.getElementById('isPublished').checked;
+
+    // 非公開→公開の状態変化を検出
+    const wasUnpublished = editingProductId && allProducts[editingProductId] && allProducts[editingProductId].isPublished === false;
+    const willBePublished = isPublished;
+    const needsNewId = wasUnpublished && willBePublished;
 
     // バリデーション
     if (!productName) {
@@ -453,19 +472,40 @@ function handleProductFormSubmit(e) {
         image3: productImage3 || null,
         image4: productImage4 || null,
         showInRanking: showInRanking,
-        rankingPosition: showInRanking ? rankingPosition : null
+        rankingPosition: showInRanking ? rankingPosition : null,
+        isPublished: isPublished
     };
 
     if (editingProductId) {
-        // 編集モード - 既存のviewCountを保持
+        // 編集モード
         const existingProduct = allProducts[editingProductId];
-        allProducts[editingProductId] = {
-            ...existingProduct,
-            ...productData,
-            viewCount: existingProduct.viewCount || 0 // 既存のviewCountを保持
-        };
 
-        showAlertModal('商品を更新しました', 'success');
+        if (needsNewId) {
+            // 非公開→公開: 古いIDを削除して新しいIDで再登録（最新商品として上位表示）
+            const newId = Math.max(...Object.keys(allProducts).map(Number)) + 1;
+            delete allProducts[editingProductId];
+
+            allProducts[newId] = {
+                id: newId,
+                ...existingProduct,
+                ...productData,
+                viewCount: existingProduct.viewCount || 0,
+                publishedAt: Date.now() // 公開日時を記録
+            };
+
+            editingProductId = newId; // 編集中のIDを更新
+            showAlertModal('商品を公開しました（最新商品として上位表示されます）', 'success');
+        } else {
+            // 通常の編集
+            allProducts[editingProductId] = {
+                ...existingProduct,
+                ...productData,
+                viewCount: existingProduct.viewCount || 0,
+                publishedAt: existingProduct.publishedAt || Date.now()
+            };
+
+            showAlertModal('商品を更新しました', 'success');
+        }
     } else {
         // 新規追加モード
         const newId = Math.max(...Object.keys(allProducts).map(Number)) + 1;
@@ -473,7 +513,8 @@ function handleProductFormSubmit(e) {
         allProducts[newId] = {
             id: newId,
             ...productData,
-            viewCount: 0 // 新規商品は閲覧数0
+            viewCount: 0,
+            publishedAt: isPublished ? Date.now() : null
         };
 
         showAlertModal('商品を追加しました', 'success');
@@ -507,6 +548,35 @@ function deleteProduct(productId) {
             localStorage.setItem('goemonproducts', JSON.stringify(allProducts));
 
             showAlertModal('商品を削除しました', 'success');
+            searchProducts();
+        }
+    );
+}
+
+// 売り切れ確認
+function confirmSoldOut(productId) {
+    const product = allProducts[productId];
+
+    if (!product) {
+        showAlertModal('商品が見つかりません', 'error');
+        return;
+    }
+
+    if (product.stock !== 0) {
+        showAlertModal('この商品は売り切れではありません', 'error');
+        return;
+    }
+
+    showConfirmModal(
+        `「${product.name}」の売り切れを確認しますか？\n\n確認すると在庫アラートから除外されます。`,
+        () => {
+            // 売り切れ確認フラグを設定
+            allProducts[productId].soldOutConfirmed = true;
+
+            // localStorageに保存
+            localStorage.setItem('goemonproducts', JSON.stringify(allProducts));
+
+            showAlertModal('売り切れを確認しました', 'success');
             searchProducts();
         }
     );

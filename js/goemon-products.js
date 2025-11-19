@@ -274,6 +274,11 @@ function resetFilters() {
 // フィルターを適用
 function applyFilters() {
     filteredProducts = allProducts.filter(product => {
+        // 非公開商品を除外（最優先）
+        if (product.isPublished === false) {
+            return false;
+        }
+
         // カテゴリーフィルター
         if (filters.category !== 'all' && product.category !== filters.category) {
             return false;
@@ -386,6 +391,9 @@ function createProductCard(product) {
     // 画像URLを確認
     const imageUrl = product.image || '';
 
+    // 在庫チェック
+    const isSoldOut = product.stock === 0;
+
     card.innerHTML = `
         <div class="product-image">
             <div class="product-img-wrapper">
@@ -394,6 +402,7 @@ function createProductCard(product) {
                     <i class="fas fa-tshirt fa-3x"></i>
                 </div>
                 `}
+                ${isSoldOut ? `<div class="sold-out-badge">売り切れ</div>` : ''}
             </div>
         </div>
         <div class="product-info">

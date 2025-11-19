@@ -176,10 +176,11 @@ function calculateLowStockCount() {
 
         let lowStockCount = 0;
 
-        // 在庫が10未満の商品をカウント
+        // 在庫が10未満の商品をカウント（売り切れ確認済み商品を除外）
         Object.keys(products).forEach(key => {
             const product = products[key];
-            if (product.stock < 10) {
+            // 在庫が10未満かつ売り切れ確認済みでない商品のみカウント
+            if (product.stock < 10 && !product.soldOutConfirmed) {
                 lowStockCount++;
             }
         });

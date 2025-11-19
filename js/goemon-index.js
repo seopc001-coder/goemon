@@ -369,8 +369,10 @@ function loadNewArrivals() {
     // 全商品を配列に変換
     const productsArray = Object.values(allProducts);
 
-    // 商品タイプが「new-arrivals」の商品のみフィルタリング
-    const newArrivalsProducts = productsArray.filter(product => product.productType === 'new-arrivals');
+    // 商品タイプが「new-arrivals」かつ公開中の商品のみフィルタリング
+    const newArrivalsProducts = productsArray.filter(product =>
+        product.productType === 'new-arrivals' && product.isPublished !== false
+    );
 
     // IDの降順（新しい順）にソート
     newArrivalsProducts.sort((a, b) => {
@@ -393,8 +395,8 @@ function loadRanking() {
     const container = document.querySelector('.box-category-ranking .list-products-01');
     if (!container) return;
 
-    // 全商品を配列に変換
-    const productsArray = Object.values(allProducts);
+    // 全商品を配列に変換（公開中のみ）
+    const productsArray = Object.values(allProducts).filter(p => p.isPublished !== false);
 
     // 手動設定の商品と自動の商品を分離
     const manualRankingProducts = productsArray.filter(p => p.showInRanking && p.rankingPosition);
@@ -467,6 +469,9 @@ function createProductCard(product) {
     // 画像URLを確認
     const imageUrl = product.image || '';
 
+    // 在庫チェック
+    const isSoldOut = product.stock === 0;
+
     card.innerHTML = `
         <div class="product-image">
             <div class="product-img-wrapper">
@@ -475,6 +480,7 @@ function createProductCard(product) {
                     <i class="fas fa-tshirt fa-3x"></i>
                 </div>
                 `}
+                ${isSoldOut ? `<div class="sold-out-badge">売り切れ</div>` : ''}
             </div>
         </div>
         <div class="product-info">
@@ -505,8 +511,10 @@ function loadSaleItems() {
     // 全商品を配列に変換
     const productsArray = Object.values(allProducts);
 
-    // 商品タイプが「sale」の商品のみフィルタリング
-    const saleProducts = productsArray.filter(product => product.productType === 'sale');
+    // 商品タイプが「sale」かつ公開中の商品のみフィルタリング
+    const saleProducts = productsArray.filter(product =>
+        product.productType === 'sale' && product.isPublished !== false
+    );
 
     // IDの降順（新しい順）にソート
     saleProducts.sort((a, b) => {

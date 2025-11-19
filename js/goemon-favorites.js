@@ -148,12 +148,16 @@
             discountPercent = `${discount}%OFF`;
         }
 
+        // 在庫チェック
+        const isSoldOut = product.stock === 0;
+
         card.innerHTML = `
             <div class="product-image">
                 <div class="product-img-wrapper">
                     <div class="product-placeholder">
                         <i class="fas fa-tshirt fa-3x"></i>
                     </div>
+                    ${isSoldOut ? `<div class="sold-out-badge">売り切れ</div>` : ''}
                 </div>
                 <button class="btn-wishlist active" data-product-id="${product.id}" aria-label="お気に入りから削除">
                     <i class="fas fa-heart"></i>
