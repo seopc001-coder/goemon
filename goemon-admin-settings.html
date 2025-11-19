@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>設定 | 五右衛門 管理画面</title>
+    <link rel="stylesheet" href="./css/goemon-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="admin-header">
+        <div class="admin-header-left">
+            <h1><i class="fas fa-cog"></i> 設定</h1>
+        </div>
+        <div class="admin-header-right">
+            <span class="admin-user">
+                <i class="fas fa-user-shield"></i>
+                <span id="adminName">admin</span>
+            </span>
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> ログアウト
+            </button>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <!-- サイドバー -->
+        <aside class="admin-sidebar">
+            <nav class="admin-nav">
+                <a href="goemon-admin.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>ダッシュボード</span>
+                </a>
+                <a href="goemon-admin-orders.html" class="nav-item">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>注文管理</span>
+                </a>
+                <a href="goemon-admin-products.html" class="nav-item">
+                    <i class="fas fa-box"></i>
+                    <span>商品管理</span>
+                </a>
+                <a href="goemon-admin-users.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>ユーザー管理</span>
+                </a>
+                <a href="goemon-admin-withdrawn.html" class="nav-item">
+                    <i class="fas fa-user-times"></i>
+                    <span>退会ユーザー管理</span>
+                </a>
+                <a href="goemon-admin-coupons.html" class="nav-item">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>クーポン管理</span>
+                </a>
+                <a href="goemon-admin-settings.html" class="nav-item active">
+                    <i class="fas fa-cog"></i>
+                    <span>設定</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- メインコンテンツ -->
+        <main class="admin-main">
+            <!-- タブナビゲーション -->
+            <div class="settings-tabs">
+                <button class="settings-tab active" onclick="switchTab('categories')">
+                    <i class="fas fa-tags"></i> カテゴリ管理
+                </button>
+                <button class="settings-tab" onclick="switchTab('hero')">
+                    <i class="fas fa-image"></i> ヒーロー画像設定
+                </button>
+            </div>
+
+            <!-- カテゴリ管理タブ -->
+            <div id="categoriesTab" class="settings-tab-content active">
+                <div class="content-header">
+                    <h2><i class="fas fa-tags"></i> カテゴリ管理</h2>
+                    <button class="btn-cmn-01" onclick="openAddCategoryModal()">
+                        <i class="fas fa-plus"></i> カテゴリを追加
+                    </button>
+                </div>
+
+                <div class="categories-container">
+                    <div class="info-box" style="margin-bottom: 20px;">
+                        <i class="fas fa-info-circle"></i>
+                        <p>カテゴリをドラッグ&ドロップして並び順を変更できます</p>
+                    </div>
+
+                    <div id="categoriesList" class="categories-list">
+                        <!-- カテゴリリストがここに表示されます -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ヒーロー画像設定タブ -->
+            <div id="heroTab" class="settings-tab-content">
+                <div class="content-header">
+                    <h2><i class="fas fa-image"></i> ヒーロー画像設定</h2>
+                    <button class="btn-cmn-01" onclick="openAddHeroImageModal()">
+                        <i class="fas fa-plus"></i> 画像を追加
+                    </button>
+                </div>
+
+                <div class="hero-images-container">
+                    <div class="info-box" style="margin-bottom: 20px;">
+                        <i class="fas fa-info-circle"></i>
+                        <p>トップページのヒーロースライダーに表示される画像を管理します。ドラッグ&ドロップで並び順を変更できます。</p>
+                    </div>
+
+                    <div id="heroImagesList" class="hero-images-list">
+                        <!-- ヒーロー画像リストがここに表示されます -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- カテゴリ追加・編集モーダル -->
+    <div id="categoryModal" class="modal-cmn">
+        <div class="modal-cmn-container">
+            <div class="modal-cmn-header">
+                <h2 id="categoryModalTitle"><i class="fas fa-plus"></i> カテゴリを追加</h2>
+                <button class="modal-cmn-close" onclick="closeCategoryModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-cmn-body">
+                <form id="categoryForm">
+                    <input type="hidden" id="categoryId">
+
+                    <div class="form-group">
+                        <label for="categoryName">
+                            カテゴリ名 <span style="color: #f44336;">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="categoryName"
+                            class="form-control"
+                            placeholder="例: メンズ、レディース、アクセサリー"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="categorySlug">
+                            スラッグ（URL用） <span style="color: #f44336;">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="categorySlug"
+                            class="form-control"
+                            placeholder="例: mens, ladies, accessories"
+                            required
+                        >
+                        <small style="color: #666; font-size: 12px;">半角英数字とハイフンのみ使用可能</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="categoryDescription">説明</label>
+                        <textarea
+                            id="categoryDescription"
+                            class="form-control"
+                            rows="3"
+                            placeholder="カテゴリの説明（任意）"
+                        ></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cmn-03" onclick="closeCategoryModal()">
+                            キャンセル
+                        </button>
+                        <button type="submit" class="btn-cmn-02">
+                            <i class="fas fa-save"></i> 保存
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ヒーロー画像追加・編集モーダル -->
+    <div id="heroImageModal" class="modal-cmn">
+        <div class="modal-cmn-container">
+            <div class="modal-cmn-header">
+                <h2 id="heroImageModalTitle"><i class="fas fa-plus"></i> ヒーロー画像を追加</h2>
+                <button class="modal-cmn-close" onclick="closeHeroImageModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-cmn-body">
+                <form id="heroImageForm">
+                    <input type="hidden" id="heroImageId">
+
+                    <div class="form-group">
+                        <label for="heroImageUrl">
+                            画像URL <span style="color: #f44336;">*</span>
+                        </label>
+                        <input
+                            type="url"
+                            id="heroImageUrl"
+                            class="form-control"
+                            placeholder="https://example.com/image.jpg"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="heroImageLink">リンク先URL</label>
+                        <input
+                            type="url"
+                            id="heroImageLink"
+                            class="form-control"
+                            placeholder="https://example.com/page（任意）"
+                        >
+                        <small style="color: #666; font-size: 12px;">画像をクリックしたときの遷移先URL</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="heroImageAlt">
+                            代替テキスト <span style="color: #f44336;">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="heroImageAlt"
+                            class="form-control"
+                            placeholder="画像の説明"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="heroImageTitle">画像タイトル</label>
+                        <input
+                            type="text"
+                            id="heroImageTitle"
+                            class="form-control"
+                            placeholder="画像のタイトル（任意）"
+                        >
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cmn-03" onclick="closeHeroImageModal()">
+                            キャンセル
+                        </button>
+                        <button type="submit" class="btn-cmn-02">
+                            <i class="fas fa-save"></i> 保存
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- アラートモーダル -->
+    <div id="alertModal" class="modal-cmn">
+        <div class="modal-cmn-container modal-alert">
+            <div class="modal-cmn-body">
+                <div id="alertIcon" class="alert-icon"></div>
+                <p id="alertMessage"></p>
+                <button class="btn-cmn-01" onclick="closeAlertModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 確認モーダル -->
+    <div id="confirmModal" class="modal-cmn">
+        <div class="modal-cmn-container modal-confirm">
+            <div class="modal-cmn-body">
+                <div class="confirm-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <p id="confirmMessage"></p>
+                <div class="modal-actions">
+                    <button class="btn-cmn-03" onclick="closeConfirmModal()">キャンセル</button>
+                    <button class="btn-cmn-02" id="confirmButton">確認</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="./js/goemon-modal.js"></script>
+    <script src="./js/goemon-admin-settings.js"></script>
+</body>
+</html>
