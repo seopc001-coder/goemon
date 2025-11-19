@@ -158,6 +158,18 @@ async function submitLogin(email, password) {
             return;
         }
 
+        // 退会済みユーザーチェック
+        if (data?.user?.user_metadata?.status === 'withdrawn') {
+            showAlertModal('このアカウントは退会済みです。\n\n再度ご利用になる場合は、新規会員登録をお願いいたします。', 'error');
+
+            // ログアウト処理
+            await supabase.auth.signOut();
+
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            return;
+        }
+
         // ログイン成功
         const rememberMe = document.getElementById('rememberMe').checked;
 

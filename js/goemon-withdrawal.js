@@ -151,14 +151,48 @@ async function processWithdrawal() {
             return;
         }
 
-        // Supabaseアカウント削除（注意: 実際の本番環境では管理者権限が必要）
-        // ここではローカルデータのクリアとログアウトのみ実行
+        // 論理削除: ユーザーステータスを「退会済み」に更新
+        const withdrawalReason = document.getElementById('reason').value.trim();
+        const withdrawalData = {
+            status: 'withdrawn',
+            deleted_at: new Date().toISOString(),
+            deletion_reason: withdrawalReason || null
+        };
 
-        // ローカルストレージをクリア
+        // Supabaseのユーザーメタデータを更新
+        const { error: updateError } = await supabase.auth.updateUser({
+            data: withdrawalData
+        });
+
+        if (updateError) {
+            console.error('Update user metadata error:', updateError);
+            showAlertModal('退会処理中にエラーが発生しました', 'error');
+            hideModal(confirmModal);
+            return;
+        }
+
+        // 退会ユーザー情報を管理用に保存
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        const withdrawnUserRecord = {
+            userId: currentUser.id,
+            email: email,
+            deleted_at: withdrawalData.deleted_at,
+            deletion_reason: withdrawalData.deletion_reason,
+            withdrawal_timestamp: Date.now()
+        };
+
+        // 管理用に退会ユーザーリストに追加
+        const withdrawnUsers = JSON.parse(localStorage.getItem('goemonwithdrawnusers')) || [];
+        withdrawnUsers.push(withdrawnUserRecord);
+        localStorage.setItem('goemonwithdrawnusers', JSON.stringify(withdrawnUsers));
+
+        // 注文履歴は保持（法的要件のため削除しない）
+        // localStorage.removeItem('goemonorders'); // 保持
+
+        // その他のローカルデータをクリア
         localStorage.removeItem('goemonloggedin');
         localStorage.removeItem('goemoncart');
         localStorage.removeItem('goemonwishlist');
-        localStorage.removeItem('goemonorders');
         localStorage.removeItem('goemonaddresses');
         localStorage.removeItem('goemonappliedcoupon');
 

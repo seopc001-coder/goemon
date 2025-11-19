@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>退会ユーザー管理 | 五右衛門 管理画面</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="./css/goemon-style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- ヘッダー(シンプル版) -->
+    <header class="header-simple">
+        <div class="container">
+            <div class="header-logo">
+                <a href="goemon-admin.html">
+                    <h1>五右衛門 管理画面</h1>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content" style="padding: 40px 0; min-height: 60vh; background: #f5f5f5;">
+        <div class="container" style="max-width: 1200px;">
+            <!-- ページタイトル -->
+            <div style="margin-bottom: 30px;">
+                <a href="goemon-admin.html" class="link-text" style="display: inline-block; margin-bottom: 15px;">
+                    <i class="fas fa-arrow-left"></i> 管理画面トップに戻る
+                </a>
+                <h1 style="font-size: 28px; margin-bottom: 10px;">
+                    <i class="fas fa-user-times"></i> 退会ユーザー管理
+                </h1>
+                <p style="color: #666;">退会済みユーザーの情報を検索・確認できます</p>
+            </div>
+
+            <!-- 検索セクション -->
+            <div style="background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 30px;">
+                <h2 style="font-size: 20px; margin-bottom: 20px;">
+                    <i class="fas fa-search"></i> ユーザー検索
+                </h2>
+                <form id="searchForm" style="display: grid; grid-template-columns: 1fr auto; gap: 15px; align-items: end;">
+                    <div class="form-group" style="margin: 0;">
+                        <label for="searchEmail" class="form-label">メールアドレス</label>
+                        <input type="email" id="searchEmail" class="form-input" placeholder="user@example.com" required>
+                    </div>
+                    <button type="submit" class="btn-cmn-02" style="padding: 12px 30px;">
+                        <i class="fas fa-search"></i> 検索
+                    </button>
+                </form>
+            </div>
+
+            <!-- 検索結果エリア -->
+            <div id="searchResults" style="display: none;">
+                <!-- 検索結果がここに表示されます -->
+            </div>
+
+            <!-- 注意事項 -->
+            <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 20px; margin-top: 30px;">
+                <h3 style="color: #856404; margin-bottom: 10px; font-size: 16px;">
+                    <i class="fas fa-exclamation-triangle"></i> 重要事項
+                </h3>
+                <ul style="color: #856404; line-height: 1.8; padding-left: 20px; margin: 0;">
+                    <li>退会ユーザーの個人情報は厳重に管理してください</li>
+                    <li>注文履歴は法的要件により7年間保持されます</li>
+                    <li>不正アクセス防止のため、検索履歴は記録されています</li>
+                    <li>退会ユーザーの再登録は新規アカウント作成が必要です</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="footer-simple">
+        <div class="container">
+            <p>&copy; 2025 五右衛門 All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/goemon-modal.js"></script>
+    <script src="./js/goemon-admin-withdrawn.js"></script>
+</body>
+</html>
