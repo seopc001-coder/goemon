@@ -249,20 +249,20 @@ function displayAddresses(addresses) {
 
 // 住所を削除
 function deleteAddress(addressId) {
-    if (!confirm('この住所を削除しますか?')) return;
+    showConfirmModal('この住所を削除しますか?', () => {
+        try {
+            const addresses = JSON.parse(localStorage.getItem('goemonaddresses')) || [];
+            const updatedAddresses = addresses.filter(addr => addr.id !== addressId);
+            localStorage.setItem('goemonaddresses', JSON.stringify(updatedAddresses));
 
-    try {
-        const addresses = JSON.parse(localStorage.getItem('goemonaddresses')) || [];
-        const updatedAddresses = addresses.filter(addr => addr.id !== addressId);
-        localStorage.setItem('goemonaddresses', JSON.stringify(updatedAddresses));
-
-        // 再読み込み
-        checkLoginStatus();
-        alert('住所を削除しました');
-    } catch (error) {
-        console.error('Error deleting address:', error);
-        alert('住所の削除に失敗しました');
-    }
+            // 再読み込み
+            checkLoginStatus();
+            showAlertModal('住所を削除しました', 'success');
+        } catch (error) {
+            console.error('Error deleting address:', error);
+            showAlertModal('住所の削除に失敗しました', 'error');
+        }
+    });
 }
 
 // 注文履歴を読み込み

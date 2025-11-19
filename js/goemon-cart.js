@@ -366,7 +366,7 @@ function initializeCouponInput() {
             const couponCode = couponInput.value.trim();
 
             if (!couponCode) {
-                alert('クーポンコードを入力してください');
+                showAlertModal('クーポンコードを入力してください', 'warning');
                 return;
             }
 
@@ -399,9 +399,9 @@ function applyCoupon(couponCode) {
         }
 
         renderCartSummary();
-        alert('クーポン「' + couponCode + '」が適用されました！\n' + formatPrice(discountAmount) + '割引');
+        showAlertModal('クーポン「' + couponCode + '」が適用されました！\n' + formatPrice(discountAmount) + '割引', 'success');
     } else {
-        alert('無効なクーポンコードです');
+        showAlertModal('無効なクーポンコードです', 'error');
     }
 }
 

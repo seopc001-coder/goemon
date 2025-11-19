@@ -207,7 +207,7 @@ function initializeAddressSearch() {
         const postalCode = postalCodeInput.value.replace(/-/g, '');
 
         if (!validatePostalCode(postalCode)) {
-            alert('正しい郵便番号を入力してください（7桁の数字）');
+            showAlertModal('正しい郵便番号を入力してください（7桁の数字）', 'warning');
             return;
         }
 
@@ -233,13 +233,13 @@ function initializeAddressSearch() {
                 document.getElementById('address1').value = address.address3;
 
                 // 成功メッセージ（非表示）
-                // alert('住所を自動入力しました');
+                // showAlertModal('住所を自動入力しました', 'success');
             } else {
-                alert('郵便番号に該当する住所が見つかりませんでした');
+                showAlertModal('郵便番号に該当する住所が見つかりませんでした', 'warning');
             }
         } catch (error) {
             console.error('Address search error:', error);
-            alert('住所検索中にエラーが発生しました');
+            showAlertModal('住所検索中にエラーが発生しました', 'error');
         } finally {
             // ボタンを再度有効化
             searchBtn.disabled = false;
@@ -436,7 +436,7 @@ async function submitRegistration() {
             if (error.message.includes('already registered')) {
                 showError('emailError', 'このメールアドレスは既に登録されています');
             } else {
-                alert('登録に失敗しました: ' + error.message);
+                showAlertModal('登録に失敗しました: ' + error.message, 'error');
             }
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
@@ -463,7 +463,7 @@ async function submitRegistration() {
 
     } catch (error) {
         console.error('Registration error:', error);
-        alert('登録処理中にエラーが発生しました。もう一度お試しください。');
+        showAlertModal('登録処理中にエラーが発生しました。もう一度お試しください。', 'error');
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
     }
