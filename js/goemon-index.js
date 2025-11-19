@@ -366,19 +366,26 @@ function loadNewArrivals() {
         return;
     }
 
-    // 全商品を配列に変換してIDの降順（新しい順）にソート
+    // 全商品を配列に変換
     const productsArray = Object.values(allProducts);
-    productsArray.sort((a, b) => {
+
+    // 商品タイプが「new-arrivals」の商品のみフィルタリング
+    const newArrivalsProducts = productsArray.filter(product => product.productType === 'new-arrivals');
+
+    // IDの降順（新しい順）にソート
+    newArrivalsProducts.sort((a, b) => {
         const idA = parseInt(a.id) || 0;
         const idB = parseInt(b.id) || 0;
         return idB - idA; // 降順（新しい順）
     });
 
     // 最新10件を表示
-    productsArray.slice(0, 10).forEach(product => {
+    newArrivalsProducts.slice(0, 10).forEach(product => {
         const card = createProductCard(product);
         container.appendChild(card);
     });
+
+    console.log('New arrivals loaded:', newArrivalsProducts.length);
 }
 
 // ランキング商品を読み込み
@@ -456,19 +463,26 @@ function loadSaleItems() {
     const container = document.getElementById('saleProducts');
     if (!container) return;
 
-    // 全商品を配列に変換してIDの降順（新しい順）にソート
+    // 全商品を配列に変換
     const productsArray = Object.values(allProducts);
-    productsArray.sort((a, b) => {
+
+    // 商品タイプが「sale」の商品のみフィルタリング
+    const saleProducts = productsArray.filter(product => product.productType === 'sale');
+
+    // IDの降順（新しい順）にソート
+    saleProducts.sort((a, b) => {
         const idA = parseInt(a.id) || 0;
         const idB = parseInt(b.id) || 0;
         return idB - idA; // 降順（新しい順）
     });
 
-    // 21件目から30件目を表示（ランキングの次に新しい商品）
-    productsArray.slice(20, 30).forEach(product => {
+    // 最新10件を表示
+    saleProducts.slice(0, 10).forEach(product => {
         const card = createProductCard(product);
         container.appendChild(card);
     });
+
+    console.log('Sale items loaded:', saleProducts.length);
 }
 
 // 価格フォーマット
