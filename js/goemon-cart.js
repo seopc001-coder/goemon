@@ -81,12 +81,6 @@ function createCartItemElement(item) {
     const productName = product.name || item.name;
 
     itemDiv.innerHTML = `
-        <div class="cart-item-select">
-            <label class="checkbox-label">
-                <input type="checkbox" class="item-checkbox" checked>
-                <span class="checkbox-custom"></span>
-            </label>
-        </div>
         <div class="cart-item-image">
             <div class="product-placeholder">
                 <i class="fas fa-tshirt fa-2x"></i>
