@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理画面ログイン | 五右衛門</title>
+    <link rel="stylesheet" href="../css/goemon-style.css">
+    <link rel="stylesheet" href="./css/admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="admin-login-page">
+    <div class="admin-login-container">
+        <div class="admin-login-box">
+            <div class="admin-login-header">
+                <i class="fas fa-shield-alt"></i>
+                <h1>五右衛門</h1>
+                <p>管理画面</p>
+            </div>
+
+            <form id="adminLoginForm" class="admin-login-form">
+                <div class="form-group">
+                    <label for="adminPassword" class="form-label">
+                        <i class="fas fa-lock"></i> パスワード
+                    </label>
+                    <input
+                        type="password"
+                        id="adminPassword"
+                        class="form-input"
+                        placeholder="管理者パスワードを入力"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <button type="submit" class="btn-admin-primary btn-full">
+                    <i class="fas fa-sign-in-alt"></i> ログイン
+                </button>
+
+                <div id="loginError" class="alert alert-error" style="display: none; margin-top: 15px;">
+                    パスワードが正しくありません
+                </div>
+            </form>
+
+            <div class="admin-login-footer">
+                <a href="../goemon-index.html">
+                    <i class="fas fa-home"></i> ECサイトに戻る
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/admin-login.js"></script>
+</body>
+</html>

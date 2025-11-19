@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>購入手続き | 五右衛門</title>
+    <link rel="stylesheet" href="./css/goemon-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- シンプルヘッダー -->
+    <header class="header-simple">
+        <div class="container">
+            <div class="header-logo">
+                <a href="goemon-index.html">
+                    <h1>五右衛門</h1>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- チェックアウトページ -->
+    <main class="cart-page">
+        <div class="container">
+            <!-- 購入手順インジケーター -->
+            <div class="checkout-steps">
+                <div class="step completed">
+                    <div class="step-number">1</div>
+                    <div class="step-label">カート</div>
+                </div>
+                <div class="step-line completed"></div>
+                <div class="step active">
+                    <div class="step-number">2</div>
+                    <div class="step-label">配送・お支払い</div>
+                </div>
+                <div class="step-line"></div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-label">確認</div>
+                </div>
+                <div class="step-line"></div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-label">完了</div>
+                </div>
+            </div>
+
+            <h1 class="page-title">購入手続き</h1>
+
+            <div class="cart-layout">
+                <!-- メインコンテンツ -->
+                <div class="cart-items-section">
+                    <!-- 配送先情報 -->
+                    <section class="checkout-section">
+                        <h2><i class="fas fa-truck"></i> 配送先情報</h2>
+                        <div class="form-group">
+                            <label class="form-label">お名前 <span class="required">*</span></label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <input type="text" id="lastName" class="form-input" placeholder="姓" required>
+                                <input type="text" id="firstName" class="form-input" placeholder="名" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="postalCode" class="form-label">郵便番号 <span class="required">*</span></label>
+                            <input type="text" id="postalCode" class="form-input" placeholder="1234567（ハイフンなし）" pattern="[0-9]{7}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="prefecture" class="form-label">都道府県 <span class="required">*</span></label>
+                            <select id="prefecture" class="form-input" required>
+                                <option value="">選択してください</option>
+                                <option value="北海道">北海道</option>
+                                <option value="青森県">青森県</option>
+                                <option value="岩手県">岩手県</option>
+                                <option value="宮城県">宮城県</option>
+                                <option value="秋田県">秋田県</option>
+                                <option value="山形県">山形県</option>
+                                <option value="福島県">福島県</option>
+                                <option value="茨城県">茨城県</option>
+                                <option value="栃木県">栃木県</option>
+                                <option value="群馬県">群馬県</option>
+                                <option value="埼玉県">埼玉県</option>
+                                <option value="千葉県">千葉県</option>
+                                <option value="東京都">東京都</option>
+                                <option value="神奈川県">神奈川県</option>
+                                <option value="新潟県">新潟県</option>
+                                <option value="富山県">富山県</option>
+                                <option value="石川県">石川県</option>
+                                <option value="福井県">福井県</option>
+                                <option value="山梨県">山梨県</option>
+                                <option value="長野県">長野県</option>
+                                <option value="岐阜県">岐阜県</option>
+                                <option value="静岡県">静岡県</option>
+                                <option value="愛知県">愛知県</option>
+                                <option value="三重県">三重県</option>
+                                <option value="滋賀県">滋賀県</option>
+                                <option value="京都府">京都府</option>
+                                <option value="大阪府">大阪府</option>
+                                <option value="兵庫県">兵庫県</option>
+                                <option value="奈良県">奈良県</option>
+                                <option value="和歌山県">和歌山県</option>
+                                <option value="鳥取県">鳥取県</option>
+                                <option value="島根県">島根県</option>
+                                <option value="岡山県">岡山県</option>
+                                <option value="広島県">広島県</option>
+                                <option value="山口県">山口県</option>
+                                <option value="徳島県">徳島県</option>
+                                <option value="香川県">香川県</option>
+                                <option value="愛媛県">愛媛県</option>
+                                <option value="高知県">高知県</option>
+                                <option value="福岡県">福岡県</option>
+                                <option value="佐賀県">佐賀県</option>
+                                <option value="長崎県">長崎県</option>
+                                <option value="熊本県">熊本県</option>
+                                <option value="大分県">大分県</option>
+                                <option value="宮崎県">宮崎県</option>
+                                <option value="鹿児島県">鹿児島県</option>
+                                <option value="沖縄県">沖縄県</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="city" class="form-label">市区町村 <span class="required">*</span></label>
+                            <input type="text" id="city" class="form-input" placeholder="例: 渋谷区" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address1" class="form-label">番地 <span class="required">*</span></label>
+                            <input type="text" id="address1" class="form-input" placeholder="例: 1-2-3" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address2" class="form-label">建物名・部屋番号</label>
+                            <input type="text" id="address2" class="form-input" placeholder="例: ○○マンション101号室">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone" class="form-label">電話番号 <span class="required">*</span></label>
+                            <input type="tel" id="phone" class="form-input" placeholder="09012345678（ハイフンなし）" pattern="[0-9]{10,11}" required>
+                        </div>
+                    </section>
+
+                    <!-- お支払い方法 -->
+                    <section class="checkout-section">
+                        <h2><i class="fas fa-credit-card"></i> お支払い方法</h2>
+                        <div class="payment-methods">
+                            <label class="payment-method">
+                                <input type="radio" name="paymentMethod" value="credit" checked>
+                                <span><i class="fas fa-credit-card"></i> クレジットカード</span>
+                            </label>
+                            <label class="payment-method">
+                                <input type="radio" name="paymentMethod" value="convenience">
+                                <span><i class="fas fa-store"></i> コンビニ決済</span>
+                            </label>
+                            <label class="payment-method">
+                                <input type="radio" name="paymentMethod" value="bank">
+                                <span><i class="fas fa-university"></i> 銀行振込</span>
+                            </label>
+                            <label class="payment-method">
+                                <input type="radio" name="paymentMethod" value="cod">
+                                <span><i class="fas fa-money-bill-wave"></i> 代金引換</span>
+                            </label>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- 注文サマリー -->
+                <aside class="cart-summary">
+                    <h3>注文内容</h3>
+                    <div id="orderSummary" class="summary-items">
+                        <!-- JavaScriptで動的に生成 -->
+                    </div>
+                    <div class="summary-row">
+                        <span>小計</span>
+                        <span id="subtotal">¥0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>送料</span>
+                        <span id="shipping">¥500</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>合計</span>
+                        <span id="total">¥0</span>
+                    </div>
+                    <button class="btn-cmn-02 btn-full" id="btnConfirmOrder">
+                        注文を確認する
+                    </button>
+                    <button class="btn-cmn-01 btn-full" onclick="location.href='goemon-cart.html'" style="margin-top: 10px;">
+                        <i class="fas fa-arrow-left"></i> カートに戻る
+                    </button>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/goemon-products-data.js"></script>
+    <script src="./js/goemon-checkout.js"></script>
+</body>
+</html>

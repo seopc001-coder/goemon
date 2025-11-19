@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ご注文完了 | 五右衛門</title>
+    <link rel="stylesheet" href="./css/goemon-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- シンプルヘッダー -->
+    <header class="header-simple">
+        <div class="container">
+            <div class="header-logo">
+                <a href="goemon-index.html">
+                    <h1>五右衛門</h1>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 注文完了ページ -->
+    <main class="cart-page">
+        <div class="container">
+            <!-- 購入手順インジケーター -->
+            <div class="checkout-steps">
+                <div class="step completed">
+                    <div class="step-number">1</div>
+                    <div class="step-label">カート</div>
+                </div>
+                <div class="step-line completed"></div>
+                <div class="step completed">
+                    <div class="step-number">2</div>
+                    <div class="step-label">配送・お支払い</div>
+                </div>
+                <div class="step-line completed"></div>
+                <div class="step completed">
+                    <div class="step-number">3</div>
+                    <div class="step-label">確認</div>
+                </div>
+                <div class="step-line completed"></div>
+                <div class="step active completed">
+                    <div class="step-number"><i class="fas fa-check"></i></div>
+                    <div class="step-label">完了</div>
+                </div>
+            </div>
+
+            <!-- 完了メッセージ -->
+            <div class="order-complete-message" style="text-align: center; padding: 60px 20px;">
+                <div class="success-icon" style="width: 100px; height: 100px; background: #4CAF50; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px;">
+                    <i class="fas fa-check" style="font-size: 50px; color: white;"></i>
+                </div>
+
+                <h1 style="font-size: 28px; margin-bottom: 15px;">ご注文ありがとうございました!</h1>
+                <p style="color: #666; font-size: 16px; margin-bottom: 30px;">ご注文を承りました。</p>
+
+                <div class="order-info-box" style="background: #f9f9f9; border-radius: 10px; padding: 30px; max-width: 600px; margin: 0 auto 30px;">
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: #999; font-size: 14px; margin-bottom: 5px;">注文番号</p>
+                        <p id="orderId" style="font-size: 24px; font-weight: bold; color: #333;"></p>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: #999; font-size: 14px; margin-bottom: 5px;">ご注文日時</p>
+                        <p id="orderDate" style="font-size: 16px; color: #333;"></p>
+                    </div>
+
+                    <div>
+                        <p style="color: #999; font-size: 14px; margin-bottom: 5px;">お支払い金額</p>
+                        <p id="orderTotal" style="font-size: 28px; font-weight: bold; color: #4CAF50;"></p>
+                    </div>
+                </div>
+
+                <div class="alert alert-info" style="max-width: 600px; margin: 0 auto 30px; padding: 20px; background: #e3f2fd; border-radius: 5px; text-align: left;">
+                    <h3 style="font-size: 16px; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> 今後の流れ</h3>
+                    <ol style="margin: 0; padding-left: 20px; color: #666;">
+                        <li style="margin-bottom: 8px;">ご登録のメールアドレスに注文確認メールをお送りします</li>
+                        <li style="margin-bottom: 8px;">商品の発送準備が整い次第、発送完了メールをお送りします</li>
+                        <li style="margin-bottom: 8px;">配送状況はマイページの注文履歴から確認できます</li>
+                    </ol>
+                </div>
+
+                <div class="action-buttons" style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <a href="goemon-orders.html" class="btn-cmn-02" style="min-width: 200px;">
+                        <i class="fas fa-list"></i> 注文履歴を見る
+                    </a>
+                    <a href="goemon-index.html" class="btn-cmn-01" style="min-width: 200px;">
+                        <i class="fas fa-home"></i> トップページへ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="./js/goemon-order-complete.js"></script>
+</body>
+</html>

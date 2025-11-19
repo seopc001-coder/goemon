@@ -3428,3 +3428,131 @@ input, select, textarea {
     }
 }
 .breadcrumb { display: none; }
+
+/* ===================================
+   購入フロー追加スタイル
+   =================================== */
+
+/* ローディングスピナー */
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ステップ完了状態 */
+.checkout-steps .step.completed .step-number {
+    background: #4CAF50;
+    color: white;
+}
+
+.checkout-steps .step-line.completed {
+    background: #4CAF50;
+}
+
+/* 情報ボックス */
+.info-box {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.info-box p {
+    margin: 5px 0;
+}
+
+/* 注文アイテムリスト */
+.order-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* アラート */
+.alert {
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+}
+
+.alert-info {
+    background: #e3f2fd;
+    color: #1976d2;
+    border: 1px solid #bbdefb;
+}
+
+.alert-error {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+/* 支払い方法選択 */
+.payment-methods {
+    display: grid;
+    gap: 10px;
+}
+
+.payment-method {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.payment-method:hover {
+    border-color: var(--accent-color);
+    background: #fafafa;
+}
+
+.payment-method input[type="radio"] {
+    margin-right: 10px;
+}
+
+.payment-method input[type="radio"]:checked + span {
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+.payment-method span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* チェックアウトセクション */
+.checkout-section {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.checkout-section h2 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 必須マーク */
+.required {
+    color: #e74c3c;
+    font-weight: bold;
+}
