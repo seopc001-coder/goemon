@@ -193,15 +193,28 @@
 
                     <div class="form-group">
                         <label for="heroImageUrl">
-                            画像URL <span style="color: #f44336;">*</span>
+                            画像 <span style="color: #f44336;">*</span>
                         </label>
-                        <input
-                            type="url"
-                            id="heroImageUrl"
-                            class="form-control"
-                            placeholder="https://example.com/image.jpg"
-                            required
-                        >
+                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                            <div style="flex: 1;">
+                                <input
+                                    type="file"
+                                    id="heroImageFile"
+                                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                                    class="form-control"
+                                    style="margin-bottom: 8px;"
+                                >
+                                <input
+                                    type="url"
+                                    id="heroImageUrl"
+                                    class="form-control"
+                                    placeholder="画像URLまたは上記からファイルを選択"
+                                    required
+                                >
+                                <small style="color: #666; font-size: 12px; display: block; margin-top: 4px;">ファイルをアップロード、またはURLを直接入力。形式: JPG, PNG, WebP / 最大5MB</small>
+                            </div>
+                            <div id="heroImagePreview" style="display: none; min-width: 100px;"></div>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -341,7 +354,9 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="./js/goemon-image-upload.js"></script>
     <script src="./js/goemon-modal.js"></script>
     <script src="./js/goemon-admin-settings.js"></script>
 </body>

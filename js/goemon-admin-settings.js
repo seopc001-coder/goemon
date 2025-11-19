@@ -33,6 +33,9 @@ async function initializeSettings() {
     document.getElementById('productTypeForm').addEventListener('submit', handleProductTypeFormSubmit);
     document.getElementById('heroImageForm').addEventListener('submit', handleHeroImageFormSubmit);
 
+    // 画像アップロード機能を初期化
+    initializeImageUploads();
+
     console.log('initializeSettings completed - Global functions available:', {
         openAddCategoryModal: typeof window.openAddCategoryModal,
         editCategory: typeof window.editCategory,
@@ -881,6 +884,20 @@ window.closeHeroImageModal = function() {
 // IDを生成
 function generateId() {
     return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+// 画像アップロード機能を初期化
+function initializeImageUploads() {
+    // 画像アップロードライブラリが読み込まれているか確認
+    if (typeof setupFileInput !== 'function') {
+        console.warn('Image upload library not loaded');
+        return;
+    }
+
+    // ヒーロー画像のファイル入力を設定
+    setupFileInput('heroImageFile', 'heroImagePreview', 'heroImageUrl');
+
+    console.log('Image upload functionality initialized for hero images');
 }
 
 // モーダル外クリックで閉じる

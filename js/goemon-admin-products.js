@@ -22,6 +22,9 @@ async function initializeProductManagement() {
     // 商品データを読み込み
     loadProducts();
 
+    // 画像アップロード機能を初期化
+    initializeImageUploads();
+
     // URLパラメータをチェック
     const urlParams = new URLSearchParams(window.location.search);
     const filter = urlParams.get('filter');
@@ -498,3 +501,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// 画像アップロード機能を初期化
+function initializeImageUploads() {
+    // 画像アップロードライブラリが読み込まれているか確認
+    if (typeof setupFileInput !== 'function') {
+        console.warn('Image upload library not loaded');
+        return;
+    }
+
+    // 商品画像のファイル入力を設定
+    setupFileInput('productImageFile', 'productImagePreview', 'productImage');
+    setupFileInput('productImage2File', 'productImage2Preview', 'productImage2');
+    setupFileInput('productImage3File', 'productImage3Preview', 'productImage3');
+    setupFileInput('productImage4File', 'productImage4Preview', 'productImage4');
+
+    console.log('Image upload functionality initialized');
+}

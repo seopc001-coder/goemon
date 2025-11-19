@@ -390,19 +390,48 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="productImage">メイン画像URL <span style="color: #f44336;">*</span></label>
-                        <input type="text" id="productImage" placeholder="https://example.com/image.jpg" required>
-                        <small style="color: #666; font-size: 12px;">商品のメイン画像として表示されます</small>
+                        <label for="productImage">メイン画像 <span style="color: #f44336;">*</span></label>
+                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                            <div style="flex: 1;">
+                                <input type="file" id="productImageFile" accept="image/jpeg,image/jpg,image/png,image/webp" style="margin-bottom: 8px;">
+                                <input type="text" id="productImage" placeholder="画像URLまたは上記からファイルを選択" required>
+                                <small style="color: #666; font-size: 12px; display: block; margin-top: 4px;">ファイルをアップロード、またはURLを直接入力</small>
+                            </div>
+                            <div id="productImagePreview" style="display: none; min-width: 100px;"></div>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label>サブ画像URL（任意）</label>
-                        <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <input type="text" id="productImage2" placeholder="サブ画像1のURL（任意）" style="margin-bottom: 5px;">
-                            <input type="text" id="productImage3" placeholder="サブ画像2のURL（任意）" style="margin-bottom: 5px;">
-                            <input type="text" id="productImage4" placeholder="サブ画像3のURL（任意）">
+                        <label>サブ画像（任意）</label>
+
+                        <!-- サブ画像1 -->
+                        <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="flex: 1;">
+                                <input type="file" id="productImage2File" accept="image/jpeg,image/jpg,image/png,image/webp" style="margin-bottom: 8px;">
+                                <input type="text" id="productImage2" placeholder="サブ画像1のURL（任意）">
+                            </div>
+                            <div id="productImage2Preview" style="display: none; min-width: 100px;"></div>
                         </div>
-                        <small style="color: #666; font-size: 12px;">最大3枚のサブ画像を追加できます（合計4枚）</small>
+
+                        <!-- サブ画像2 -->
+                        <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="flex: 1;">
+                                <input type="file" id="productImage3File" accept="image/jpeg,image/jpg,image/png,image/webp" style="margin-bottom: 8px;">
+                                <input type="text" id="productImage3" placeholder="サブ画像2のURL（任意）">
+                            </div>
+                            <div id="productImage3Preview" style="display: none; min-width: 100px;"></div>
+                        </div>
+
+                        <!-- サブ画像3 -->
+                        <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px;">
+                            <div style="flex: 1;">
+                                <input type="file" id="productImage4File" accept="image/jpeg,image/jpg,image/png,image/webp" style="margin-bottom: 8px;">
+                                <input type="text" id="productImage4" placeholder="サブ画像3のURL（任意）">
+                            </div>
+                            <div id="productImage4Preview" style="display: none; min-width: 100px;"></div>
+                        </div>
+
+                        <small style="color: #666; font-size: 12px;">最大3枚のサブ画像を追加できます（合計4枚）。形式: JPG, PNG, WebP / 最大5MB</small>
                     </div>
 
                     <div class="form-actions">
@@ -427,7 +456,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="./js/supabase-config.js"></script>
+    <script src="./js/goemon-image-upload.js"></script>
     <script src="./js/goemon-modal.js"></script>
     <script src="./js/goemon-products-data.js"></script>
     <script src="./js/goemon-admin-products.js"></script>
