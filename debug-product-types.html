@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品タイプデバッグ - 五右衛門ECサイト</title>
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #8B4513;
+            padding-bottom: 10px;
+        }
+        .section {
+            background: #f9f9f9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #8B4513;
+        }
+        h2 {
+            color: #8B4513;
+            margin-top: 0;
+        }
+        pre {
+            background: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #ddd;
+        }
+        .btn {
+            background: #8B4513;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .btn:hover {
+            background: #654321;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .link-test {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .link-test a {
+            color: #8B4513;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .link-test a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 商品タイプデバッグページ</h1>
+        <p>このページは、商品タイプのリンクが正しく機能しているか確認するためのデバッグツールです。</p>
+
+        <div class="section">
+            <h2>現在のlocalStorageデータ</h2>
+            <button class="btn" onclick="showData()">データを表示</button>
+            <pre id="dataOutput">ボタンをクリックしてデータを表示...</pre>
+        </div>
+
+        <div class="section">
+            <h2>生成されるリンク</h2>
+            <div id="linksOutput">
+                <p>データを読み込んでいます...</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>修正オプション</h2>
+            <button class="btn btn-success" onclick="resetToDefault()">デフォルトデータにリセット</button>
+            <p style="margin-top: 10px; font-size: 14px; color: #666;">
+                ※ このボタンをクリックすると、商品タイプが正しいslug値でリセットされます。
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>ナビゲーション</h2>
+            <a href="goemon-index.html" class="btn">トップページに戻る</a>
+            <a href="goemon-admin-settings.html" class="btn">設定画面を開く</a>
+        </div>
+    </div>
+
+    <script>
+        // データを表示
+        function showData() {
+            const productTypesData = localStorage.getItem('goemonproducttypes');
+            const output = document.getElementById('dataOutput');
+
+            if (!productTypesData) {
+                output.textContent = 'エラー: localStorageに商品タイプデータが見つかりません。';
+                return;
+            }
+
+            try {
+                const productTypes = JSON.parse(productTypesData);
+                output.textContent = JSON.stringify(productTypes, null, 2);
+
+                // リンクも生成
+                generateLinks(productTypes);
+            } catch (error) {
+                output.textContent = 'エラー: データの解析に失敗しました。\n' + error.message;
+            }
+        }
+
+        // リンクを生成して表示
+        function generateLinks(productTypes) {
+            const linksOutput = document.getElementById('linksOutput');
+            linksOutput.innerHTML = '';
+
+            if (!productTypes || productTypes.length === 0) {
+                linksOutput.innerHTML = '<p style="color: red;">商品タイプが見つかりません。</p>';
+                return;
+            }
+
+            // 並び順でソート
+            productTypes.sort((a, b) => a.order - b.order);
+
+            productTypes.forEach(type => {
+                const linkTest = document.createElement('div');
+                linkTest.className = 'link-test';
+
+                const url = `goemon-products.html?type=${type.slug}`;
+
+                linkTest.innerHTML = `
+                    <strong>${type.name}</strong><br>
+                    ID: <code>${type.id}</code><br>
+                    Slug: <code>${type.slug}</code><br>
+                    生成URL: <a href="${url}" target="_blank">${url}</a>
+                `;
+
+                linksOutput.appendChild(linkTest);
+            });
+        }
+
+        // デフォルトデータにリセット
+        function resetToDefault() {
+            if (!confirm('商品タイプをデフォルト値にリセットしますか？\n\n注意: カスタマイズした商品タイプは失われます。')) {
+                return;
+            }
+
+            const defaultProductTypes = [
+                { id: 'new-arrivals', name: '新着アイテム', slug: 'new-arrivals', description: '最新の入荷商品', order: 0 },
+                { id: 'pre-order', name: '予約アイテム', slug: 'pre-order', description: '予約受付中の商品', order: 1 },
+                { id: 'restock', name: '再入荷', slug: 'restock', description: '人気商品が再入荷', order: 2 }
+            ];
+
+            localStorage.setItem('goemonproducttypes', JSON.stringify(defaultProductTypes));
+
+            alert('商品タイプをデフォルト値にリセットしました。\n\nトップページと商品一覧ページをリロードして確認してください。');
+
+            // データを再表示
+            showData();
+        }
+
+        // ページ読み込み時にデータを表示
+        window.addEventListener('DOMContentLoaded', function() {
+            showData();
+        });
+    </script>
+</body>
+</html>

@@ -7,6 +7,7 @@ let currentPage = 1;
 const productsPerPage = 20;
 let filters = {
     category: 'all',
+    productType: 'all',
     price: [],
     size: [],
     color: []
@@ -23,6 +24,43 @@ function initializeProductsPage() {
     initializeFilters();
     initializeSort();
     initializePagination();
+
+    // URLパラメータからカテゴリーと商品タイプを取得して適用
+    applyURLFilters();
+}
+
+// URLパラメータからフィルターを適用
+function applyURLFilters() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('category');
+    const typeParam = urlParams.get('type');
+
+    if (categoryParam) {
+        // カテゴリーフィルターを適用
+        filters.category = categoryParam;
+
+        // カテゴリーリンクのアクティブ状態を更新
+        const categoryLinks = document.querySelectorAll('.category-list a');
+        categoryLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.dataset.category === categoryParam) {
+                link.classList.add('active');
+            }
+        });
+
+        console.log('Applied category filter from URL:', categoryParam);
+    }
+
+    if (typeParam) {
+        // 商品タイプでフィルター（カテゴリーと同じロジックで処理）
+        filters.productType = typeParam;
+        console.log('Applied product type filter from URL:', typeParam);
+    }
+
+    // フィルターを適用して再表示
+    if (categoryParam || typeParam) {
+        applyFilters();
+    }
 }
 
 // カテゴリをlocalStorageから読み込んで表示
@@ -167,6 +205,7 @@ function initializeFilters() {
 function resetFilters() {
     filters = {
         category: 'all',
+        productType: 'all',
         price: [],
         size: [],
         color: []
@@ -190,6 +229,11 @@ function applyFilters() {
     filteredProducts = allProducts.filter(product => {
         // カテゴリーフィルター
         if (filters.category !== 'all' && product.category !== filters.category) {
+            return false;
+        }
+
+        // 商品タイプフィルター
+        if (filters.productType !== 'all' && product.productType !== filters.productType) {
             return false;
         }
 
