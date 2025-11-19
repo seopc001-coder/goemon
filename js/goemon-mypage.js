@@ -9,6 +9,7 @@ function initializeMyPage() {
     initializeLogout();
     initializeEditLinks();
     initializeAddressManagement();
+    loadOrderHistory();
 }
 
 // ログイン状態を確認（Supabase連携）
@@ -261,5 +262,36 @@ function deleteAddress(addressId) {
     } catch (error) {
         console.error('Error deleting address:', error);
         alert('住所の削除に失敗しました');
+    }
+}
+
+// 注文履歴を読み込み
+function loadOrderHistory() {
+    const orderHistoryMessage = document.getElementById('orderHistoryMessage');
+    if (!orderHistoryMessage) return;
+
+    try {
+        // localStorageから注文履歴を取得
+        const orders = JSON.parse(localStorage.getItem('goemonorders')) || [];
+
+        if (orders.length === 0) {
+            orderHistoryMessage.textContent = 'まだ注文がありません';
+            return;
+        }
+
+        // 未発送の注文があるかチェック
+        const unshippedOrders = orders.filter(order => {
+            // ステータスが「発送準備中」または「注文確認中」の場合は未発送
+            return order.status === '発送準備中' || order.status === '注文確認中' || order.status === '準備中';
+        });
+
+        if (unshippedOrders.length > 0) {
+            orderHistoryMessage.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #ff9800; margin-right: 5px;"></i>未発送の商品がございます';
+        } else {
+            orderHistoryMessage.textContent = 'こちらから注文状況が確認できます';
+        }
+    } catch (error) {
+        console.error('Error loading order history:', error);
+        orderHistoryMessage.textContent = 'まだ注文がありません';
     }
 }
