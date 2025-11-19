@@ -21,7 +21,10 @@ function initializeIndexPage() {
 // 新着商品を読み込み
 function loadNewArrivals() {
     const container = document.querySelector('.box-category-discount .list-products-01');
-    if (!container) return;
+    if (!container) {
+        console.error('New arrivals container not found');
+        return;
+    }
 
     // ID 1-10の商品を表示
     const productIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
@@ -31,6 +34,8 @@ function loadNewArrivals() {
         if (product) {
             const card = createProductCard(product);
             container.appendChild(card);
+        } else {
+            console.error(`Product ${id} not found`);
         }
     });
 }

@@ -24,7 +24,52 @@ function loadProductData() {
         const product = window.GOEMON_PRODUCTS.getProductById(productId);
         if (product) {
             productData = product;
+            updateProductDisplay();
         }
+    }
+}
+
+// 商品情報を画面に表示
+function updateProductDisplay() {
+    // 商品タイトル
+    const titleElement = document.querySelector('.product-title');
+    if (titleElement) {
+        titleElement.textContent = productData.name;
+    }
+
+    // 商品価格
+    const priceElement = document.querySelector('.price-detail-current');
+    if (priceElement) {
+        priceElement.textContent = `¥${productData.price.toLocaleString()}`;
+    }
+
+    // 元の価格と割引率を表示（存在する場合）
+    const hasDiscount = productData.originalPrice && productData.originalPrice > productData.price;
+    if (hasDiscount) {
+        const discount = Math.round(((productData.originalPrice - productData.price) / productData.originalPrice) * 100);
+
+        // 元の価格を追加
+        const originalPriceHTML = `<span class="price-detail-original" style="text-decoration: line-through; color: #999; margin-left: 10px;">¥${productData.originalPrice.toLocaleString()}</span>`;
+        const discountHTML = `<span class="price-detail-discount" style="background: #ff4444; color: white; padding: 4px 8px; border-radius: 3px; font-size: 14px; margin-left: 10px;">${discount}%OFF</span>`;
+
+        if (priceElement && !document.querySelector('.price-detail-original')) {
+            priceElement.insertAdjacentHTML('afterend', originalPriceHTML + discountHTML);
+        }
+    }
+
+    // パンくずリストの商品名を更新
+    const breadcrumbElement = document.querySelector('.breadcrumb li:last-child');
+    if (breadcrumbElement) {
+        breadcrumbElement.textContent = productData.name;
+    }
+
+    // ページタイトルを更新
+    document.title = `${productData.name} | 五右衛門`;
+
+    // メタディスクリプションを更新
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+        metaDescription.setAttribute('content', `${productData.name} - 五右衛門`);
     }
 }
 
