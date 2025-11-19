@@ -3,12 +3,21 @@
     'use strict';
 
     document.addEventListener('DOMContentLoaded', function() {
+        // 注文完了ページを表示したことがあるかチェック
+        const orderCompleteViewed = sessionStorage.getItem('orderCompleteViewed');
+
+        if (orderCompleteViewed === 'true') {
+            // 2回目以降のアクセスは注文履歴ページへリダイレクト
+            window.location.href = 'goemon-orders.html';
+            return;
+        }
+
         // セッションストレージから完了した注文を取得
         const completedOrderData = sessionStorage.getItem('completedOrder');
 
         if (!completedOrderData) {
-            // 注文データがない場合はトップページへリダイレクト
-            window.location.href = 'goemon-index.html';
+            // 注文データがない場合は注文履歴ページへリダイレクト
+            window.location.href = 'goemon-orders.html';
             return;
         }
 
@@ -18,12 +27,15 @@
             // 注文情報を表示
             displayOrderInfo(order);
 
-            // セッションストレージをクリア（表示後）
+            // 表示済みフラグを立てる
+            sessionStorage.setItem('orderCompleteViewed', 'true');
+
+            // セッションストレージから注文データをクリア（表示後）
             sessionStorage.removeItem('completedOrder');
 
         } catch (error) {
             console.error('Error parsing order data:', error);
-            window.location.href = 'goemon-index.html';
+            window.location.href = 'goemon-orders.html';
         }
     });
 
