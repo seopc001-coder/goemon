@@ -128,7 +128,7 @@
             const order = {
                 orderId: orderId,
                 orderDate: new Date().toISOString(),
-                status: 'pending', // pending, confirmed, shipped, delivered, cancelled
+                status: '準備中', // 準備中, 配送中, 配送完了, キャンセル
                 customerId: currentUser ? currentUser.id : null,
                 customerEmail: currentUser ? currentUser.email : null,
                 items: orderData.items.map(item => ({

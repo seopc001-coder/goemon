@@ -131,7 +131,7 @@
                     <button class="btn-order-detail btn-cmn-01" data-order-id="${order.orderId}" style="flex: 1; min-width: 120px;">
                         <i class="fas fa-info-circle"></i> 詳細を見る
                     </button>
-                    ${order.status === 'delivered' ? `
+                    ${order.status === '配送完了' ? `
                         <button class="btn-reorder btn-cmn-02" data-order-id="${order.orderId}" style="flex: 1; min-width: 120px;">
                             <i class="fas fa-redo"></i> 再注文
                         </button>
@@ -144,11 +144,10 @@
     // ステータス情報を取得
     function getStatusInfo(status) {
         const statusMap = {
-            'pending': { label: '処理中', color: '#FFA726' },
-            'confirmed': { label: '確認済み', color: '#42A5F5' },
-            'shipped': { label: '配送中', color: '#66BB6A' },
-            'delivered': { label: '配送完了', color: '#4CAF50' },
-            'cancelled': { label: 'キャンセル', color: '#EF5350' }
+            '準備中': { label: '準備中', color: '#FFA726' },
+            '配送中': { label: '配送中', color: '#66BB6A' },
+            '配送完了': { label: '配送完了', color: '#4CAF50' },
+            'キャンセル': { label: 'キャンセル', color: '#EF5350' }
         };
         return statusMap[status] || { label: '不明', color: '#999' };
     }

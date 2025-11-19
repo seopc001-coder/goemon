@@ -281,8 +281,8 @@ function loadOrderHistory() {
 
         // 未発送の注文があるかチェック
         const unshippedOrders = orders.filter(order => {
-            // ステータスが「発送準備中」または「注文確認中」の場合は未発送
-            return order.status === '発送準備中' || order.status === '注文確認中' || order.status === '準備中';
+            // ステータスが「準備中」の場合は未発送
+            return order.status === '準備中';
         });
 
         if (unshippedOrders.length > 0) {
