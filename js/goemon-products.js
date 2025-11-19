@@ -26,43 +26,16 @@ function initializeProductsPage() {
 
 // 商品データを読み込み（実際の実装ではAPIから取得）
 function loadProducts() {
-    // デモ用の商品データ
-    allProducts = generateDemoProducts(100);
+    // 共通の商品データを使用
+    if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.getProductsArray === 'function') {
+        allProducts = window.GOEMON_PRODUCTS.getProductsArray(100);
+    } else {
+        allProducts = [];
+    }
+
     filteredProducts = [...allProducts];
     renderProducts();
     updateProductCount();
-}
-
-// デモ商品データを生成
-function generateDemoProducts(count) {
-    const products = [];
-    const names = [
-        'カジュアルコットンブラウス', 'ニットカーディガン', 'フローラルワンピース',
-        'ハイウエストデニムパンツ', 'レーストップス', 'オーバーサイズニット',
-        'マキシ丈スカート', 'ストライプシャツ', 'ワイドパンツ', 'デニムジャケット'
-    ];
-    const categories = ['アウター', 'トップス', 'ボトムス', 'ワンピース', '小物'];
-    const sizes = ['S', 'M', 'L', 'XL'];
-    const colors = ['white', 'black', 'pink', 'blue', 'beige'];
-
-    for (let i = 0; i < count; i++) {
-        const price = Math.floor(Math.random() * 8000) + 2000;
-        const originalPrice = Math.random() > 0.7 ? price + Math.floor(Math.random() * 2000) : null;
-
-        products.push({
-            id: String(i + 1),
-            name: names[i % names.length] + (i > 9 ? ` ${Math.floor(i / 10)}` : ''),
-            price: price,
-            originalPrice: originalPrice,
-            category: categories[Math.floor(Math.random() * categories.length)],
-            size: sizes[Math.floor(Math.random() * sizes.length)],
-            color: colors[Math.floor(Math.random() * colors.length)],
-            isNew: Math.random() > 0.5,
-            popularity: Math.floor(Math.random() * 1000)
-        });
-    }
-
-    return products;
 }
 
 // フィルター機能を初期化

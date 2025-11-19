@@ -1,10 +1,18 @@
 // 五右衛門 ECサイト - トップページ JavaScript
 
+// グローバル変数
+let allProducts = {};
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeIndexPage();
 });
 
 function initializeIndexPage() {
+    // 商品データを初期化
+    if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.generateProductsData === 'function') {
+        allProducts = window.GOEMON_PRODUCTS.generateProductsData(100);
+    }
+
     loadNewArrivals();
     loadRanking();
     loadSaleItems();
@@ -15,22 +23,15 @@ function loadNewArrivals() {
     const container = document.querySelector('.box-category-discount .list-products-01');
     if (!container) return;
 
-    const products = [
-        { id: '1', name: 'カジュアルコットンブラウス', price: 2990 },
-        { id: '2', name: 'ニットカーディガン', price: 3490, originalPrice: 4990 },
-        { id: '3', name: 'フローラルワンピース', price: 4990 },
-        { id: '4', name: 'ハイウエストデニムパンツ', price: 3990 },
-        { id: '5', name: 'レーストップス', price: 2490 },
-        { id: '6', name: 'オーバーサイズニット', price: 3990 },
-        { id: '7', name: 'マキシ丈スカート', price: 2990 },
-        { id: '8', name: 'ストライプシャツ', price: 2490 },
-        { id: '9', name: 'ワイドパンツ', price: 3490 },
-        { id: '10', name: 'デニムジャケット', price: 5990 }
-    ];
+    // ID 1-10の商品を表示
+    const productIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
 
-    products.forEach(product => {
-        const card = createProductCard(product);
-        container.appendChild(card);
+    productIds.forEach(id => {
+        const product = allProducts[id];
+        if (product) {
+            const card = createProductCard(product);
+            container.appendChild(card);
+        }
     });
 }
 
@@ -39,22 +40,16 @@ function loadRanking() {
     const container = document.querySelector('.box-category-ranking .list-products-01');
     if (!container) return;
 
-    const products = [
-        { id: '11', name: 'ベーシックTシャツ', price: 1990, rank: 1 },
-        { id: '12', name: 'スキニーデニム', price: 3490, rank: 2 },
-        { id: '13', name: 'ロングカーディガン', price: 4490, rank: 3 },
-        { id: '14', name: 'チェックシャツ', price: 2990, rank: 4 },
-        { id: '15', name: 'プリーツスカート', price: 3290, rank: 5 },
-        { id: '16', name: 'モックネックニット', price: 3990, rank: 6 },
-        { id: '17', name: 'テーパードパンツ', price: 3690, rank: 7 },
-        { id: '18', name: 'ボーダートップス', price: 2290, rank: 8 },
-        { id: '19', name: 'フレアスカート', price: 2890, rank: 9 },
-        { id: '20', name: 'MA-1ジャケット', price: 5490, rank: 10 }
-    ];
+    // ID 11-20の商品を表示
+    const productIds = ['11', '12', '13', '14', '15', '16', '17', '18', '19', '20'];
 
-    products.forEach(product => {
-        const card = createProductCard(product);
-        container.appendChild(card);
+    productIds.forEach((id, index) => {
+        const product = allProducts[id];
+        if (product) {
+            product.rank = index + 1;
+            const card = createProductCard(product);
+            container.appendChild(card);
+        }
     });
 }
 
@@ -107,22 +102,15 @@ function loadSaleItems() {
     const container = document.getElementById('saleProducts');
     if (!container) return;
 
-    const products = [
-        { id: '31', name: 'フリルブラウス', price: 1490, originalPrice: 2990 },
-        { id: '32', name: 'ワイドデニム', price: 1990, originalPrice: 3990 },
-        { id: '33', name: 'ノーカラージャケット', price: 2990, originalPrice: 5990 },
-        { id: '34', name: 'リブニット', price: 1790, originalPrice: 2990 },
-        { id: '35', name: 'プリントスカート', price: 1990, originalPrice: 3490 },
-        { id: '36', name: 'トレンチコート', price: 3990, originalPrice: 7990 },
-        { id: '37', name: 'ボリュームスリーブニット', price: 2490, originalPrice: 3990 },
-        { id: '38', name: 'チノパンツ', price: 1990, originalPrice: 3290 },
-        { id: '39', name: 'シフォンブラウス', price: 1490, originalPrice: 2490 },
-        { id: '40', name: 'ミディ丈スカート', price: 1790, originalPrice: 2990 }
-    ];
+    // ID 31-40の商品を表示
+    const productIds = ['31', '32', '33', '34', '35', '36', '37', '38', '39', '40'];
 
-    products.forEach(product => {
-        const card = createProductCard(product);
-        container.appendChild(card);
+    productIds.forEach(id => {
+        const product = allProducts[id];
+        if (product) {
+            const card = createProductCard(product);
+            container.appendChild(card);
+        }
     });
 }
 

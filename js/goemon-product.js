@@ -10,11 +10,32 @@ let productData = {
     price: 2990
 };
 
+// ページ読み込み時にURLパラメータから商品IDを取得
+function getProductIdFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('id') || '1';
+}
+
+// 商品データを読み込み
+function loadProductData() {
+    const productId = getProductIdFromURL();
+
+    if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.getProductById === 'function') {
+        const product = window.GOEMON_PRODUCTS.getProductById(productId);
+        if (product) {
+            productData = product;
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeProductPage();
 });
 
 function initializeProductPage() {
+    // 商品データを読み込み
+    loadProductData();
+
     initializeThumbnails();
     initializeColorSelection();
     initializeSizeSelection();
@@ -278,18 +299,18 @@ function loadRelatedProducts() {
     const container = document.getElementById('relatedProducts');
     if (!container) return;
 
-    // デモ用の関連商品データ
-    const relatedProducts = [
-        { id: '2', name: 'ニットカーディガン', price: 3490, originalPrice: 4990, tag: '30% OFF' },
-        { id: '3', name: 'フローラルワンピース', price: 4990, tag: 'NEW' },
-        { id: '4', name: 'ハイウエストデニムパンツ', price: 3990, tag: '' },
-        { id: '5', name: 'レーストップス', price: 2490, tag: '' }
-    ];
+    // 共通データから関連商品を取得
+    const relatedProductIds = ['2', '3', '4', '5'];
 
-    relatedProducts.forEach(product => {
-        const card = createProductCard(product);
-        container.appendChild(card);
-    });
+    if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.getProductById === 'function') {
+        relatedProductIds.forEach(id => {
+            const product = window.GOEMON_PRODUCTS.getProductById(id);
+            if (product) {
+                const card = createProductCard(product);
+                container.appendChild(card);
+            }
+        });
+    }
 }
 
 // 商品カードを生成
