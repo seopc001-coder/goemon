@@ -13,9 +13,15 @@ function initializeIndexPage() {
         allProducts = window.GOEMON_PRODUCTS.generateProductsData(100);
     }
 
-    // ヒーロー画像とカテゴリを読み込み
-    loadHeroImages();
+    // ヒーロー画像とカテゴリを読み込み（優先順位を変更）
     loadCategories();
+
+    // Swiperの初期化を待ってからヒーロー画像を読み込み
+    if (typeof Swiper !== 'undefined') {
+        loadHeroImages();
+    } else {
+        console.error('Swiper library not loaded');
+    }
 
     loadNewArrivals();
     loadRanking();
@@ -26,31 +32,31 @@ function initializeIndexPage() {
 function loadHeroImages() {
     try {
         const savedHeroImages = localStorage.getItem('goemonheroimages');
+
+        // localStorageにデータがない場合は、HTMLのデフォルトスライドを使用
         if (!savedHeroImages) {
-            console.log('No saved hero images found, initializing default Swiper');
+            console.log('No saved hero images, using HTML default slides');
             initializeDefaultSwiper();
             return;
         }
 
         const heroImages = JSON.parse(savedHeroImages);
         if (!heroImages || heroImages.length === 0) {
-            console.log('Hero images array is empty, initializing default Swiper');
+            console.log('Hero images array is empty, using HTML default slides');
             initializeDefaultSwiper();
             return;
         }
 
+        console.log('Loading hero images from localStorage:', heroImages.length);
+
         // 並び順でソート
         heroImages.sort((a, b) => a.order - b.order);
-
-        // 既存のSwiperを破棄
-        if (window.heroSwiper) {
-            window.heroSwiper.destroy(true, true);
-        }
 
         // Swiperのwrapperを取得
         const swiperWrapper = document.querySelector('.hero-swiper .swiper-wrapper');
         if (!swiperWrapper) {
             console.error('Swiper wrapper not found');
+            initializeDefaultSwiper();
             return;
         }
 
@@ -58,10 +64,9 @@ function loadHeroImages() {
         swiperWrapper.innerHTML = '';
 
         // ヒーロー画像を動的に生成
-        heroImages.forEach(image => {
+        heroImages.forEach((image, index) => {
             const slide = document.createElement('div');
             slide.className = 'swiper-slide';
-
             const link = image.link || 'goemon-products.html';
 
             slide.innerHTML = `
@@ -76,10 +81,15 @@ function loadHeroImages() {
             `;
 
             swiperWrapper.appendChild(slide);
+            console.log(`Added slide ${index + 1}:`, image.alt);
         });
 
-        // 新しいSwiperを初期化
+        // 短い遅延の後にSwiperを初期化
         setTimeout(() => {
+            if (window.heroSwiper) {
+                window.heroSwiper.destroy(true, true);
+            }
+
             window.heroSwiper = new Swiper('.hero-swiper', {
                 loop: true,
                 autoplay: {
@@ -91,9 +101,10 @@ function loadHeroImages() {
                     clickable: true,
                 },
                 speed: 800,
+                effect: 'slide',
             });
-            console.log('Hero images loaded and Swiper initialized:', heroImages.length);
-        }, 100);
+            console.log('Swiper initialized with', heroImages.length, 'slides');
+        }, 200);
 
     } catch (error) {
         console.error('Error loading hero images:', error);
@@ -103,21 +114,24 @@ function loadHeroImages() {
 
 // デフォルトのSwiper初期化（HTMLの既存スライドを使用）
 function initializeDefaultSwiper() {
-    if (!window.heroSwiper) {
-        window.heroSwiper = new Swiper('.hero-swiper', {
-            loop: true,
-            autoplay: {
-                delay: 5000,
-                disableOnInteraction: false,
-            },
-            pagination: {
-                el: '.swiper-pagination',
-                clickable: true,
-            },
-            speed: 800,
-        });
-        console.log('Default Swiper initialized');
-    }
+    setTimeout(() => {
+        if (!window.heroSwiper) {
+            window.heroSwiper = new Swiper('.hero-swiper', {
+                loop: true,
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                speed: 800,
+                effect: 'slide',
+            });
+            console.log('Default Swiper initialized with HTML slides');
+        }
+    }, 100);
 }
 
 // カテゴリをlocalStorageから読み込んで表示
