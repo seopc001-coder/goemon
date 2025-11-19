@@ -111,14 +111,9 @@ function renderOrders(orders) {
                     <span class="status-badge ${statusClass}">${order.status}</span>
                 </td>
                 <td>
-                    <div class="action-buttons">
-                        <button class="btn-small btn-view" onclick="viewOrderDetail('${order.orderId}')">
-                            <i class="fas fa-eye"></i> 詳細
-                        </button>
-                        <button class="btn-small btn-edit" onclick="editOrderStatus('${order.orderId}')">
-                            <i class="fas fa-edit"></i> 編集
-                        </button>
-                    </div>
+                    <button class="btn-small btn-view" onclick="viewOrderDetail('${order.orderId}')">
+                        <i class="fas fa-eye"></i> 詳細
+                    </button>
                 </td>
             </tr>
         `;
@@ -348,19 +343,6 @@ function viewOrderDetail(orderId) {
     `;
 
     modal.classList.add('active');
-}
-
-// 注文ステータスを編集（クイック編集）
-function editOrderStatus(orderId) {
-    const order = allOrders.find(o => o.orderId === orderId);
-
-    if (!order) {
-        showAlertModal('注文が見つかりません', 'error');
-        return;
-    }
-
-    // 詳細モーダルを表示
-    viewOrderDetail(orderId);
 }
 
 // 注文ステータスを更新
