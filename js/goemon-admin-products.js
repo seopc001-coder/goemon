@@ -236,6 +236,13 @@ function renderProducts(products) {
         return;
     }
 
+    // 新しい商品が上に来るように並び替え（IDの降順）
+    productsArray.sort((a, b) => {
+        const idA = parseInt(a.id) || 0;
+        const idB = parseInt(b.id) || 0;
+        return idB - idA; // 降順
+    });
+
     grid.innerHTML = productsArray.map(product => {
         // 在庫数を取得（初期データ作成時に設定済み）
         const stock = product.stock || 0;

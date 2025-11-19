@@ -365,17 +365,18 @@ function loadNewArrivals() {
         return;
     }
 
-    // ID 1-10の商品を表示
-    const productIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+    // 全商品を配列に変換してIDの降順（新しい順）にソート
+    const productsArray = Object.values(allProducts);
+    productsArray.sort((a, b) => {
+        const idA = parseInt(a.id) || 0;
+        const idB = parseInt(b.id) || 0;
+        return idB - idA; // 降順（新しい順）
+    });
 
-    productIds.forEach(id => {
-        const product = allProducts[id];
-        if (product) {
-            const card = createProductCard(product);
-            container.appendChild(card);
-        } else {
-            console.error(`Product ${id} not found`);
-        }
+    // 最新10件を表示
+    productsArray.slice(0, 10).forEach(product => {
+        const card = createProductCard(product);
+        container.appendChild(card);
     });
 }
 
@@ -384,16 +385,19 @@ function loadRanking() {
     const container = document.querySelector('.box-category-ranking .list-products-01');
     if (!container) return;
 
-    // ID 11-20の商品を表示
-    const productIds = ['11', '12', '13', '14', '15', '16', '17', '18', '19', '20'];
+    // 全商品を配列に変換してIDの降順（新しい順）にソート
+    const productsArray = Object.values(allProducts);
+    productsArray.sort((a, b) => {
+        const idA = parseInt(a.id) || 0;
+        const idB = parseInt(b.id) || 0;
+        return idB - idA; // 降順（新しい順）
+    });
 
-    productIds.forEach((id, index) => {
-        const product = allProducts[id];
-        if (product) {
-            product.rank = index + 1;
-            const card = createProductCard(product);
-            container.appendChild(card);
-        }
+    // 11件目から20件目を表示（新着の次に新しい商品）
+    productsArray.slice(10, 20).forEach((product, index) => {
+        product.rank = index + 1;
+        const card = createProductCard(product);
+        container.appendChild(card);
     });
 }
 
@@ -451,15 +455,18 @@ function loadSaleItems() {
     const container = document.getElementById('saleProducts');
     if (!container) return;
 
-    // ID 31-40の商品を表示
-    const productIds = ['31', '32', '33', '34', '35', '36', '37', '38', '39', '40'];
+    // 全商品を配列に変換してIDの降順（新しい順）にソート
+    const productsArray = Object.values(allProducts);
+    productsArray.sort((a, b) => {
+        const idA = parseInt(a.id) || 0;
+        const idB = parseInt(b.id) || 0;
+        return idB - idA; // 降順（新しい順）
+    });
 
-    productIds.forEach(id => {
-        const product = allProducts[id];
-        if (product) {
-            const card = createProductCard(product);
-            container.appendChild(card);
-        }
+    // 21件目から30件目を表示（ランキングの次に新しい商品）
+    productsArray.slice(20, 30).forEach(product => {
+        const card = createProductCard(product);
+        container.appendChild(card);
     });
 }
 

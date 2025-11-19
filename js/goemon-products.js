@@ -93,6 +93,10 @@ function loadProducts() {
     }
 
     filteredProducts = [...allProducts];
+
+    // 初期表示は新しい商品順にソート
+    applySorting();
+
     renderProducts();
     updateProductCount();
 }
