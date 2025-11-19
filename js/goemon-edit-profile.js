@@ -27,6 +27,10 @@ async function checkLoginAndLoadProfile() {
 
 // ユーザープロフィールを読み込み
 function loadUserProfile(user) {
+    // デバッグ: user_metadataを確認
+    console.log('Loading profile for:', user.email);
+    console.log('User metadata:', user.user_metadata);
+
     // メールアドレス
     document.getElementById('email').value = user.email || '';
 
@@ -38,6 +42,11 @@ function loadUserProfile(user) {
     document.getElementById('lastNameKana').value = metadata.lastNameKana || '';
     document.getElementById('firstNameKana').value = metadata.firstNameKana || '';
     document.getElementById('phone').value = metadata.phone || '';
+
+    // デバッグ: 読み込んだ値を確認
+    if (!metadata.lastName && !metadata.firstName) {
+        console.warn('Name data is missing in user_metadata');
+    }
 }
 
 // フォーム送信処理

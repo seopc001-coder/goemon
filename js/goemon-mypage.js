@@ -37,6 +37,10 @@ async function checkLoginStatus() {
 
 // ユーザー情報を読み込み（Supabase連携）
 function loadUserInfo(user) {
+    // デバッグ: user_metadataを確認
+    console.log('Loading user info:', user.email);
+    console.log('User metadata:', user.user_metadata);
+
     // メールアドレスを表示
     const emailElement = document.getElementById('userEmail');
     if (emailElement && user.email) {

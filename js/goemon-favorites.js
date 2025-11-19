@@ -3,25 +3,41 @@
 // グローバル変数
 let wishlist = JSON.parse(localStorage.getItem('goemonwishlist')) || [];
 
+// 商品データを生成（goemon-products.jsと同じロジック）
+function generateProductsData(count) {
+    const products = {};
+    const names = [
+        'カジュアルコットンブラウス', 'ニットカーディガン', 'フローラルワンピース',
+        'ハイウエストデニムパンツ', 'レーストップス', 'オーバーサイズニット',
+        'マキシ丈スカート', 'ストライプシャツ', 'ワイドパンツ', 'デニムジャケット'
+    ];
+
+    for (let i = 0; i < count; i++) {
+        const price = Math.floor(Math.random() * 8000) + 2000;
+        const originalPrice = Math.random() > 0.7 ? price + Math.floor(Math.random() * 2000) : null;
+
+        products[String(i + 1)] = {
+            id: String(i + 1),
+            name: names[i % names.length] + (i > 9 ? ` ${Math.floor(i / 10)}` : ''),
+            price: price,
+            originalPrice: originalPrice
+        };
+    }
+
+    return products;
+}
+
 // 商品データ（実際の実装ではAPIから取得）
-const productsData = {
-    '1': { id: '1', name: 'カジュアルコットンブラウス', price: 2990, image: '', colors: ['#fff', '#000', '#c691a5'] },
-    '2': { id: '2', name: 'ニットカーディガン', price: 3490, originalPrice: 4990, image: '', colors: ['#8B7355', '#F5F5DC'] },
-    '3': { id: '3', name: 'フローラルワンピース', price: 4990, image: '', colors: ['#FFB6C1', '#E6E6FA'] },
-    '4': { id: '4', name: 'ハイウエストデニムパンツ', price: 3990, image: '', colors: ['#4169E1', '#000'] },
-    '5': { id: '5', name: 'レーストップス', price: 2490, image: '', colors: ['#fff', '#000'] },
-    '6': { id: '6', name: 'オーバーサイズニット', price: 3990, image: '', colors: ['#8B7355', '#000'] },
-    '7': { id: '7', name: 'マキシ丈スカート', price: 2990, image: '', colors: ['#000', '#8B4513'] },
-    '8': { id: '8', name: 'ストライプシャツ', price: 2490, image: '', colors: ['#4169E1', '#fff'] },
-    '9': { id: '9', name: 'ワイドパンツ', price: 3490, image: '', colors: ['#8B7355', '#000'] },
-    '10': { id: '10', name: 'デニムジャケット', price: 5990, image: '', colors: ['#4169E1', '#000'] }
-};
+const productsData = generateProductsData(100);
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeFavoritesPage();
 });
 
 function initializeFavoritesPage() {
+    // デバッグ: お気に入りデータを確認
+    console.log('Wishlist data:', wishlist);
+    console.log('Wishlist length:', wishlist.length);
     renderFavoritesList();
 }
 

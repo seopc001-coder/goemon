@@ -83,6 +83,12 @@
                     // ログイン状態をローカルストレージに保存
                     localStorage.setItem('goemonloggedin', 'true');
                     console.log('User is authenticated:', user.email);
+                    console.log('User metadata:', user.user_metadata);
+
+                    // user_metadataが空の場合、再度確認
+                    if (!user.user_metadata || Object.keys(user.user_metadata).length === 0) {
+                        console.warn('User metadata is empty. This may be a timing issue.');
+                    }
                 } else {
                     console.log('No user session found');
                 }
