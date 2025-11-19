@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeProductPage();
 });
 
-function initializeProductPage() {
+async function initializeProductPage() {
     // 商品データを読み込み
     loadProductData();
 
@@ -40,7 +40,7 @@ function initializeProductPage() {
     initializeColorSelection();
     initializeSizeSelection();
     initializeQuantity();
-    initializeWishlistButton();
+    await initializeWishlistButton();
     initializeAddToCart();
     initializeTabs();
     loadRelatedProducts();
