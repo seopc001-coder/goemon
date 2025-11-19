@@ -26,17 +26,33 @@ function initializeIndexPage() {
 function loadHeroImages() {
     try {
         const savedHeroImages = localStorage.getItem('goemonheroimages');
-        if (!savedHeroImages) return;
+        if (!savedHeroImages) {
+            console.log('No saved hero images found, initializing default Swiper');
+            initializeDefaultSwiper();
+            return;
+        }
 
         const heroImages = JSON.parse(savedHeroImages);
-        if (!heroImages || heroImages.length === 0) return;
+        if (!heroImages || heroImages.length === 0) {
+            console.log('Hero images array is empty, initializing default Swiper');
+            initializeDefaultSwiper();
+            return;
+        }
 
         // 並び順でソート
         heroImages.sort((a, b) => a.order - b.order);
 
+        // 既存のSwiperを破棄
+        if (window.heroSwiper) {
+            window.heroSwiper.destroy(true, true);
+        }
+
         // Swiperのwrapperを取得
         const swiperWrapper = document.querySelector('.hero-swiper .swiper-wrapper');
-        if (!swiperWrapper) return;
+        if (!swiperWrapper) {
+            console.error('Swiper wrapper not found');
+            return;
+        }
 
         // 既存のスライドをクリア
         swiperWrapper.innerHTML = '';
@@ -62,10 +78,32 @@ function loadHeroImages() {
             swiperWrapper.appendChild(slide);
         });
 
-        // Swiperを再初期化
-        if (window.heroSwiper) {
-            window.heroSwiper.destroy(true, true);
-        }
+        // 新しいSwiperを初期化
+        setTimeout(() => {
+            window.heroSwiper = new Swiper('.hero-swiper', {
+                loop: true,
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                speed: 800,
+            });
+            console.log('Hero images loaded and Swiper initialized:', heroImages.length);
+        }, 100);
+
+    } catch (error) {
+        console.error('Error loading hero images:', error);
+        initializeDefaultSwiper();
+    }
+}
+
+// デフォルトのSwiper初期化（HTMLの既存スライドを使用）
+function initializeDefaultSwiper() {
+    if (!window.heroSwiper) {
         window.heroSwiper = new Swiper('.hero-swiper', {
             loop: true,
             autoplay: {
@@ -76,10 +114,9 @@ function loadHeroImages() {
                 el: '.swiper-pagination',
                 clickable: true,
             },
+            speed: 800,
         });
-
-    } catch (error) {
-        console.error('Error loading hero images:', error);
+        console.log('Default Swiper initialized');
     }
 }
 
