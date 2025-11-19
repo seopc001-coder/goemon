@@ -49,93 +49,8 @@
 
             <div class="cart-layout">
                 <!-- カート商品リスト -->
-                <div class="cart-items-section">
-                    <!-- カートアイテム1 -->
-                    <div class="cart-item" data-item-id="1">
-                        <div class="cart-item-select">
-                            <label class="checkbox-label">
-                                <input type="checkbox" class="item-checkbox" checked>
-                                <span class="checkbox-custom"></span>
-                            </label>
-                        </div>
-                        <div class="cart-item-image">
-                            <div class="product-placeholder">
-                                <i class="fas fa-tshirt fa-2x"></i>
-                            </div>
-                        </div>
-                        <div class="cart-item-details">
-                            <h3 class="cart-item-name">カジュアルコットンブラウス</h3>
-                            <div class="cart-item-options">
-                                <p>カラー: ホワイト</p>
-                                <p>サイズ: M</p>
-                            </div>
-                            <div class="cart-item-stock">在庫あり</div>
-                        </div>
-                        <div class="cart-item-quantity">
-                            <button class="qty-btn qty-minus" aria-label="数量を減らす">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <input type="number" class="qty-input" value="1" min="1" max="10">
-                            <button class="qty-btn qty-plus" aria-label="数量を増やす">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <div class="cart-item-price">
-                            <span class="item-total-price">¥2,990</span>
-                        </div>
-                        <div class="cart-item-remove">
-                            <button class="btn-remove-item" aria-label="削除">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- カートアイテム2 -->
-                    <div class="cart-item" data-item-id="2">
-                        <div class="cart-item-select">
-                            <label class="checkbox-label">
-                                <input type="checkbox" class="item-checkbox" checked>
-                                <span class="checkbox-custom"></span>
-                            </label>
-                        </div>
-                        <div class="cart-item-image">
-                            <div class="product-placeholder">
-                                <i class="fas fa-socks fa-2x"></i>
-                            </div>
-                        </div>
-                        <div class="cart-item-details">
-                            <h3 class="cart-item-name">ハイウエストデニムパンツ</h3>
-                            <div class="cart-item-options">
-                                <p>カラー: ブルー</p>
-                                <p>サイズ: L</p>
-                            </div>
-                            <div class="cart-item-stock">在庫あり</div>
-                        </div>
-                        <div class="cart-item-quantity">
-                            <button class="qty-btn qty-minus" aria-label="数量を減らす">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <input type="number" class="qty-input" value="1" min="1" max="10">
-                            <button class="qty-btn qty-plus" aria-label="数量を増やす">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <div class="cart-item-price">
-                            <span class="item-total-price">¥3,990</span>
-                        </div>
-                        <div class="cart-item-remove">
-                            <button class="btn-remove-item" aria-label="削除">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 空のカート（初期は非表示） -->
-                    <div class="empty-cart" style="display: none;">
-                        <i class="fas fa-shopping-cart fa-4x"></i>
-                        <p>カートに商品がありません</p>
-                        <a href="goemon-index.html" class="btn-cmn-02">ショッピングを続ける</a>
-                    </div>
+                <div class="cart-items-section" id="cartItemsContainer">
+                    <!-- カートアイテムは JavaScript で動的に生成されます -->
                 </div>
 
                 <!-- カートサマリー -->
@@ -305,6 +220,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./js/supabase-config.js"></script>
+    <script src="./js/goemon-products-data.js"></script>
     <script src="./js/goemon-auto-logout.js"></script>
     <script src="./js/goemon-cart.js"></script>
 </body>
