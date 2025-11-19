@@ -87,17 +87,35 @@ function loadHeroImages() {
 function loadCategories() {
     try {
         const savedCategories = localStorage.getItem('goemoncategories');
-        if (!savedCategories) return;
+        if (!savedCategories) {
+            console.log('No saved categories found');
+            return;
+        }
 
         const categories = JSON.parse(savedCategories);
-        if (!categories || categories.length === 0) return;
+        if (!categories || categories.length === 0) {
+            console.log('Categories array is empty');
+            return;
+        }
 
         // 並び順でソート
         categories.sort((a, b) => a.order - b.order);
 
-        // カテゴリリストを取得
-        const categoryList = document.querySelector('.sidebar-widget:nth-of-type(2) .category-list-sidebar');
-        if (!categoryList) return;
+        // カテゴリリストを取得（タイトルが「カテゴリー」のwidgetを探す）
+        const widgets = document.querySelectorAll('.sidebar-widget');
+        let categoryList = null;
+
+        widgets.forEach(widget => {
+            const title = widget.querySelector('.widget-title');
+            if (title && title.textContent.includes('カテゴリー')) {
+                categoryList = widget.querySelector('.category-list-sidebar');
+            }
+        });
+
+        if (!categoryList) {
+            console.error('Category list not found');
+            return;
+        }
 
         // 既存のカテゴリをクリア
         categoryList.innerHTML = '';
@@ -108,6 +126,8 @@ function loadCategories() {
             li.innerHTML = `<a href="goemon-products.html?category=${category.slug}">${category.name}</a>`;
             categoryList.appendChild(li);
         });
+
+        console.log('Categories loaded:', categories.length);
 
     } catch (error) {
         console.error('Error loading categories:', error);
