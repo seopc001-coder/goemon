@@ -194,26 +194,6 @@ function markItemAsDeleted(cartItem) {
     cartItem.style.position = 'relative';
     cartItem.style.textDecoration = 'line-through';
 
-    // 削除済みオーバーレイを追加
-    const overlay = document.createElement('div');
-    overlay.className = 'deleted-overlay';
-    overlay.style.cssText = `
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(255, 68, 68, 0.95);
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        font-size: 16px;
-        font-weight: bold;
-        pointer-events: none;
-        z-index: 5;
-    `;
-    overlay.innerHTML = '削除済み';
-    cartItem.appendChild(overlay);
-
     // ゴミ箱アイコンを戻すアイコンに変更
     const removeBtn = cartItem.querySelector('.btn-remove-item');
     if (removeBtn) {
@@ -248,12 +228,6 @@ function restoreDeletedItem(cartItem) {
     // スタイルをリセット
     cartItem.style.opacity = '1';
     cartItem.style.textDecoration = 'none';
-
-    // オーバーレイを削除
-    const overlay = cartItem.querySelector('.deleted-overlay');
-    if (overlay) {
-        overlay.remove();
-    }
 
     // ゴミ箱アイコンを元に戻す
     const removeBtn = cartItem.querySelector('.btn-remove-item');
