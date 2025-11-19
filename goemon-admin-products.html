@@ -340,18 +340,43 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="productPrice">価格（円） <span style="color: #f44336;">*</span></label>
+                        <label for="productPrice">通常価格（円） <span style="color: #f44336;">*</span></label>
                         <input type="number" id="productPrice" min="0" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="productCategory">カテゴリー</label>
-                        <select id="productCategory">
-                            <option value="食品">食品</option>
-                            <option value="飲料">飲料</option>
-                            <option value="日用品">日用品</option>
-                            <option value="その他">その他</option>
+                        <label for="productDiscount">割引率（%）</label>
+                        <input type="number" id="productDiscount" min="0" max="100" value="0" placeholder="0〜100">
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            割引率を入力すると、販売価格が自動計算されます
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productDiscountPrice">販売価格（円）</label>
+                        <input type="number" id="productDiscountPrice" min="0" readonly style="background: #f5f5f5;">
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            通常価格と割引率から自動計算されます
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productCategory">カテゴリー <span style="color: #f44336;">*</span></label>
+                        <select id="productCategory" required>
+                            <option value="">カテゴリーを選択してください</option>
+                            <!-- カテゴリーはlocalStorageから動的に読み込まれます -->
                         </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productType">商品タイプ</label>
+                        <select id="productType">
+                            <option value="">商品タイプを選択してください（任意）</option>
+                            <!-- 商品タイプはlocalStorageから動的に読み込まれます -->
+                        </select>
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            新着アイテム、予約アイテムなどの分類（任意）
+                        </small>
                     </div>
 
                     <div class="form-group">

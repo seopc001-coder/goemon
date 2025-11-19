@@ -12,6 +12,10 @@ async function initializeProductManagement() {
     // 管理者権限チェック
     await checkAdminAccess();
 
+    // カテゴリーと商品タイプをlocalStorageから読み込み
+    loadCategoriesToSelect();
+    loadProductTypesToSelect();
+
     // 商品データを読み込み
     loadProducts();
 
@@ -33,6 +37,9 @@ async function initializeProductManagement() {
             searchProducts();
         }
     });
+
+    // 割引計算の自動更新
+    setupDiscountCalculation();
 }
 
 // 管理者権限チェック
@@ -46,6 +53,97 @@ async function checkAdminAccess() {
 
     const adminId = sessionStorage.getItem('adminId');
     console.log('Admin access granted for:', adminId);
+}
+
+// カテゴリーをlocalStorageから読み込んでセレクトボックスに設定
+function loadCategoriesToSelect() {
+    try {
+        const savedCategories = localStorage.getItem('goemoncategories');
+        const selectElement = document.getElementById('productCategory');
+
+        if (!selectElement) return;
+
+        // 既存のオプションをクリア（最初の「選択してください」以外）
+        selectElement.innerHTML = '<option value="">カテゴリーを選択してください</option>';
+
+        if (savedCategories) {
+            const categories = JSON.parse(savedCategories);
+
+            // orderでソート
+            categories.sort((a, b) => a.order - b.order);
+
+            // カテゴリーをオプションとして追加
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.slug;
+                option.textContent = category.name;
+                selectElement.appendChild(option);
+            });
+
+            console.log('Categories loaded to select:', categories.length);
+        } else {
+            console.log('No categories found in localStorage');
+        }
+    } catch (error) {
+        console.error('Error loading categories:', error);
+    }
+}
+
+// 商品タイプをlocalStorageから読み込んでセレクトボックスに設定
+function loadProductTypesToSelect() {
+    try {
+        const savedProductTypes = localStorage.getItem('goemonproducttypes');
+        const selectElement = document.getElementById('productType');
+
+        if (!selectElement) return;
+
+        // 既存のオプションをクリア（最初の「選択してください」以外）
+        selectElement.innerHTML = '<option value="">商品タイプを選択してください（任意）</option>';
+
+        if (savedProductTypes) {
+            const productTypes = JSON.parse(savedProductTypes);
+
+            // orderでソート
+            productTypes.sort((a, b) => a.order - b.order);
+
+            // 商品タイプをオプションとして追加
+            productTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type.slug;
+                option.textContent = type.name;
+                selectElement.appendChild(option);
+            });
+
+            console.log('Product types loaded to select:', productTypes.length);
+        } else {
+            console.log('No product types found in localStorage');
+        }
+    } catch (error) {
+        console.error('Error loading product types:', error);
+    }
+}
+
+// 割引計算の自動更新を設定
+function setupDiscountCalculation() {
+    const priceInput = document.getElementById('productPrice');
+    const discountInput = document.getElementById('productDiscount');
+    const discountPriceInput = document.getElementById('productDiscountPrice');
+
+    function calculateDiscountPrice() {
+        const price = parseFloat(priceInput.value) || 0;
+        const discount = parseFloat(discountInput.value) || 0;
+
+        if (price > 0 && discount > 0 && discount <= 100) {
+            const discountedPrice = Math.round(price * (1 - discount / 100));
+            discountPriceInput.value = discountedPrice;
+        } else {
+            discountPriceInput.value = price;
+        }
+    }
+
+    // 価格または割引率が変更されたら自動計算
+    priceInput.addEventListener('input', calculateDiscountPrice);
+    discountInput.addEventListener('input', calculateDiscountPrice);
 }
 
 // 商品データを読み込み
@@ -208,8 +306,20 @@ function editProduct(productId) {
     document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> 商品を編集';
     document.getElementById('productId').value = productId;
     document.getElementById('productName').value = product.name;
-    document.getElementById('productPrice').value = product.price;
-    document.getElementById('productCategory').value = product.category || '食品';
+
+    // 元の価格（originalPrice）がある場合はそれを使用、なければ現在の価格
+    const originalPrice = product.originalPrice || product.price;
+    document.getElementById('productPrice').value = originalPrice;
+
+    // 割引率を計算して設定
+    const discountPercent = product.originalPrice && product.price < product.originalPrice
+        ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+        : 0;
+    document.getElementById('productDiscount').value = discountPercent;
+    document.getElementById('productDiscountPrice').value = product.price;
+
+    document.getElementById('productCategory').value = product.category || '';
+    document.getElementById('productType').value = product.productType || '';
     document.getElementById('productStock').value = product.stock || 0;
     document.getElementById('productDescription').value = product.description || '';
     document.getElementById('productImage').value = product.image || '';
@@ -225,7 +335,10 @@ function handleProductFormSubmit(e) {
     const productId = document.getElementById('productId').value;
     const productName = document.getElementById('productName').value.trim();
     const productPrice = parseInt(document.getElementById('productPrice').value);
+    const productDiscount = parseInt(document.getElementById('productDiscount').value) || 0;
+    const productDiscountPrice = parseInt(document.getElementById('productDiscountPrice').value) || productPrice;
     const productCategory = document.getElementById('productCategory').value;
+    const productType = document.getElementById('productType').value;
     const productStock = parseInt(document.getElementById('productStock').value);
     const productDescription = document.getElementById('productDescription').value.trim();
     const productImage = document.getElementById('productImage').value.trim();
@@ -241,21 +354,33 @@ function handleProductFormSubmit(e) {
         return;
     }
 
+    if (!productCategory) {
+        showAlertModal('カテゴリーを選択してください', 'warning');
+        return;
+    }
+
     if (productStock < 0) {
         showAlertModal('在庫数は0以上で入力してください', 'warning');
         return;
     }
 
+    // 商品データを構築
+    const productData = {
+        name: productName,
+        price: productDiscountPrice, // 販売価格
+        originalPrice: productDiscount > 0 ? productPrice : null, // 割引がある場合のみ元の価格を保存
+        category: productCategory,
+        productType: productType || null, // 商品タイプ（任意）
+        stock: productStock,
+        description: productDescription,
+        image: productImage
+    };
+
     if (editingProductId) {
         // 編集モード
         allProducts[editingProductId] = {
             ...allProducts[editingProductId],
-            name: productName,
-            price: productPrice,
-            category: productCategory,
-            stock: productStock,
-            description: productDescription,
-            image: productImage
+            ...productData
         };
 
         showAlertModal('商品を更新しました', 'success');
@@ -265,12 +390,7 @@ function handleProductFormSubmit(e) {
 
         allProducts[newId] = {
             id: newId,
-            name: productName,
-            price: productPrice,
-            category: productCategory,
-            stock: productStock,
-            description: productDescription,
-            image: productImage
+            ...productData
         };
 
         showAlertModal('商品を追加しました', 'success');
