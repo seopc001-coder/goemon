@@ -216,19 +216,8 @@ function loadProducts() {
 
 // フィルター機能を初期化
 function initializeFilters() {
-    // カテゴリーフィルター
-    const categoryLinks = document.querySelectorAll('.category-list a');
-    categoryLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            categoryLinks.forEach(l => l.classList.remove('active'));
-            this.classList.add('active');
-
-            const category = this.textContent.trim().split(' ')[0];
-            filters.category = category === 'すべて' ? 'all' : category;
-            applyFilters();
-        });
-    });
+    // カテゴリーフィルターは削除
+    // loadCategories()で生成されたリンクがそのまま機能するため、イベントハンドラーは不要
 
     // 価格フィルター
     const priceCheckboxes = document.querySelectorAll('input[name="price"]');
@@ -278,25 +267,8 @@ function initializeFilters() {
 
 // フィルターをリセット
 function resetFilters() {
-    filters = {
-        category: 'all',
-        productType: 'all',
-        price: [],
-        size: [],
-        color: []
-    };
-
-    // すべてのチェックボックスをリセット
-    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-        checkbox.checked = false;
-    });
-
-    // カテゴリーをリセット
-    const categoryLinks = document.querySelectorAll('.category-list a');
-    categoryLinks.forEach(link => link.classList.remove('active'));
-    categoryLinks[0]?.classList.add('active');
-
-    applyFilters();
+    // URLパラメータをすべてクリアしてページをリロード
+    window.location.href = 'goemon-products.html';
 }
 
 // フィルターを適用
