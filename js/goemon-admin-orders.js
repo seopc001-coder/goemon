@@ -13,6 +13,16 @@ async function initializeOrderManagement() {
 
     // 注文データを読み込み
     loadOrders();
+
+    // ダッシュボードから遷移してきた場合、該当注文の詳細を表示
+    const viewOrderId = sessionStorage.getItem('viewOrderId');
+    if (viewOrderId) {
+        sessionStorage.removeItem('viewOrderId');
+        // データ読み込み後に詳細を表示
+        setTimeout(() => {
+            viewOrderDetail(viewOrderId);
+        }, 100);
+    }
 }
 
 // 管理者権限チェック

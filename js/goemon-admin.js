@@ -310,9 +310,9 @@ function formatDateTime(date) {
 
 // 注文詳細を表示
 function viewOrderDetail(orderId) {
-    // 注文管理ページへ遷移（実装予定）
-    showAlertModal(`注文 #${orderId} の詳細表示機能は実装中です`, 'info');
-    console.log('View order detail:', orderId);
+    // 注文IDをセッションストレージに保存して注文管理ページへ遷移
+    sessionStorage.setItem('viewOrderId', orderId);
+    window.location.href = 'goemon-admin-orders.html';
 }
 
 // 在庫アラート商品を表示
