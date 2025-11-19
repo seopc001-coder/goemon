@@ -48,18 +48,61 @@ function applyURLFilters() {
             }
         });
 
+        // ページタイトルを更新
+        updatePageTitle(categoryParam, 'category');
+
         console.log('Applied category filter from URL:', categoryParam);
     }
 
     if (typeParam) {
         // 商品タイプでフィルター（カテゴリーと同じロジックで処理）
         filters.productType = typeParam;
+
+        // ページタイトルを更新
+        updatePageTitle(typeParam, 'type');
+
         console.log('Applied product type filter from URL:', typeParam);
     }
 
     // フィルターを適用して再表示
     if (categoryParam || typeParam) {
         applyFilters();
+    }
+}
+
+// ページタイトルを更新
+function updatePageTitle(slug, filterType) {
+    const titleElement = document.getElementById('pageTitle');
+    const descriptionElement = document.getElementById('pageDescription');
+
+    if (!titleElement) return;
+
+    if (filterType === 'category') {
+        // カテゴリー名を取得
+        const savedCategories = localStorage.getItem('goemoncategories');
+        if (savedCategories) {
+            const categories = JSON.parse(savedCategories);
+            const category = categories.find(c => c.slug === slug);
+            if (category) {
+                titleElement.textContent = category.name;
+                if (descriptionElement && category.description) {
+                    descriptionElement.textContent = category.description;
+                }
+            }
+        }
+    } else if (filterType === 'type') {
+        // 商品タイプ名を取得
+        const savedProductTypes = localStorage.getItem('goemonproducttypes');
+        if (savedProductTypes) {
+            const productTypes = JSON.parse(savedProductTypes);
+            const productType = productTypes.find(t => t.slug === slug);
+            if (productType) {
+                titleElement.textContent = productType.name;
+                if (descriptionElement && productType.description) {
+                    descriptionElement.textContent = productType.description;
+                }
+            }
+        }
     }
 }
 
@@ -74,9 +117,12 @@ function loadCategories() {
             return;
         }
 
-        // 「すべて」を最初に追加
+        // 商品総数を取得
+        const totalProducts = allProducts.length;
+
+        // 「すべて」を最初に追加（商品数を動的に表示）
         const allCategory = document.createElement('li');
-        allCategory.innerHTML = '<a href="#" class="active" data-category="all">すべて (100)</a>';
+        allCategory.innerHTML = `<a href="goemon-products.html" class="active" data-category="all">すべて (${totalProducts})</a>`;
         categoryList.appendChild(allCategory);
 
         // localStorageからカテゴリを読み込み
@@ -89,7 +135,7 @@ function loadCategories() {
             // 各カテゴリを追加
             categories.forEach(category => {
                 const li = document.createElement('li');
-                li.innerHTML = `<a href="#" data-category="${category.slug}">${category.name}</a>`;
+                li.innerHTML = `<a href="goemon-products.html?category=${category.slug}" data-category="${category.slug}">${category.name}</a>`;
                 categoryList.appendChild(li);
             });
 
@@ -339,8 +385,27 @@ function createProductCard(product) {
     // 画像URLを確認
     const imageUrl = product.image || '';
 
+    // 商品タイプに応じたタグを取得
+    let tagHTML = '';
+    if (product.productType) {
+        const savedProductTypes = localStorage.getItem('goemonproducttypes');
+        if (savedProductTypes) {
+            try {
+                const productTypes = JSON.parse(savedProductTypes);
+                const productType = productTypes.find(t => t.slug === product.productType);
+                if (productType && productType.tag) {
+                    const tagColor = productType.tagColor || 'blue';
+                    tagHTML = `<span class="tag-${tagColor}">${productType.tag}</span>`;
+                }
+            } catch (error) {
+                console.error('Error loading product type tag:', error);
+            }
+        }
+    }
+
     card.innerHTML = `
         <div class="product-image">
+            ${tagHTML ? `<div class="product-tags">${tagHTML}</div>` : ''}
             <div class="product-img-wrapper">
                 ${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">` : `
                 <div class="product-placeholder">

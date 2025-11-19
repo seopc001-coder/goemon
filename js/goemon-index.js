@@ -110,9 +110,9 @@ function initializeDefaultDataIfNeeded() {
 
     if (!productTypesExist) {
         const defaultProductTypes = [
-            { id: 'new-arrivals', name: '新着アイテム', slug: 'new-arrivals', description: '最新の入荷商品', order: 0 },
-            { id: 'pre-order', name: '予約アイテム', slug: 'pre-order', description: '予約受付中の商品', order: 1 },
-            { id: 'restock', name: '再入荷', slug: 'restock', description: '人気商品が再入荷', order: 2 }
+            { id: 'new-arrivals', name: '新着アイテム', slug: 'new-arrivals', description: '最新の入荷商品', tag: 'NEW', tagColor: 'green', order: 0 },
+            { id: 'pre-order', name: '予約アイテム', slug: 'pre-order', description: '予約受付中の商品', tag: '予約', tagColor: 'orange', order: 1 },
+            { id: 'restock', name: '再入荷', slug: 'restock', description: '人気商品が再入荷', tag: '再入荷', tagColor: 'purple', order: 2 }
         ];
         localStorage.setItem('goemonproducttypes', JSON.stringify(defaultProductTypes));
         console.log('Default product types initialized on index page');
@@ -420,8 +420,27 @@ function createProductCard(product) {
     // 画像URLを確認
     const imageUrl = product.image || '';
 
+    // 商品タイプに応じたタグを取得
+    let tagHTML = '';
+    if (product.productType) {
+        const savedProductTypes = localStorage.getItem('goemonproducttypes');
+        if (savedProductTypes) {
+            try {
+                const productTypes = JSON.parse(savedProductTypes);
+                const productType = productTypes.find(t => t.slug === product.productType);
+                if (productType && productType.tag) {
+                    const tagColor = productType.tagColor || 'blue';
+                    tagHTML = `<span class="tag-${tagColor}">${productType.tag}</span>`;
+                }
+            } catch (error) {
+                console.error('Error loading product type tag:', error);
+            }
+        }
+    }
+
     card.innerHTML = `
         <div class="product-image">
+            ${tagHTML ? `<div class="product-tags">${tagHTML}</div>` : ''}
             <div class="product-img-wrapper">
                 ${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">` : `
                 <div class="product-placeholder">

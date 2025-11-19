@@ -82,6 +82,9 @@ function updateProductDisplay() {
     // 商品画像を更新
     updateProductImages();
 
+    // 商品タグを更新
+    updateProductTags();
+
     // パンくずリストの商品名を更新
     const breadcrumbElement = document.querySelector('.breadcrumb li:last-child');
     if (breadcrumbElement) {
@@ -95,6 +98,36 @@ function updateProductDisplay() {
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
         metaDescription.setAttribute('content', `${productData.name} - 五右衛門`);
+    }
+}
+
+// 商品タグを更新（商品タイプに応じて）
+function updateProductTags() {
+    const tagsContainer = document.getElementById('productTags');
+    if (!tagsContainer) return;
+
+    // タグをクリア
+    tagsContainer.innerHTML = '';
+
+    // 商品タイプが設定されている場合
+    if (productData.productType) {
+        const savedProductTypes = localStorage.getItem('goemonproducttypes');
+        if (savedProductTypes) {
+            try {
+                const productTypes = JSON.parse(savedProductTypes);
+                const productType = productTypes.find(t => t.slug === productData.productType);
+
+                if (productType && productType.tag) {
+                    const tagColor = productType.tagColor || 'blue';
+                    const tagElement = document.createElement('span');
+                    tagElement.className = `tag-${tagColor}`;
+                    tagElement.textContent = productType.tag;
+                    tagsContainer.appendChild(tagElement);
+                }
+            } catch (error) {
+                console.error('Error loading product types for tags:', error);
+            }
+        }
     }
 }
 

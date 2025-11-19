@@ -69,9 +69,9 @@ function initializeDefaultData() {
 
         // デフォルト商品タイプをセット
         const defaultProductTypes = [
-            { id: 'new-arrivals', name: '新着アイテム', slug: 'new-arrivals', description: '最新の入荷商品', order: 0 },
-            { id: 'pre-order', name: '予約アイテム', slug: 'pre-order', description: '予約受付中の商品', order: 1 },
-            { id: 'restock', name: '再入荷', slug: 'restock', description: '人気商品が再入荷', order: 2 }
+            { id: 'new-arrivals', name: '新着アイテム', slug: 'new-arrivals', description: '最新の入荷商品', tag: 'NEW', tagColor: 'green', order: 0 },
+            { id: 'pre-order', name: '予約アイテム', slug: 'pre-order', description: '予約受付中の商品', tag: '予約', tagColor: 'orange', order: 1 },
+            { id: 'restock', name: '再入荷', slug: 'restock', description: '人気商品が再入荷', tag: '再入荷', tagColor: 'purple', order: 2 }
         ];
         localStorage.setItem('goemonproducttypes', JSON.stringify(defaultProductTypes));
 
@@ -518,6 +518,8 @@ window.editProductType = function(id) {
     document.getElementById('productTypeName').value = type.name;
     document.getElementById('productTypeSlug').value = type.slug;
     document.getElementById('productTypeDescription').value = type.description || '';
+    document.getElementById('productTypeTag').value = type.tag || '';
+    document.getElementById('productTypeTagColor').value = type.tagColor || 'blue';
 
     const modal = document.getElementById('productTypeModal');
     if (modal) {
@@ -539,6 +541,8 @@ function handleProductTypeFormSubmit(e) {
     const name = document.getElementById('productTypeName').value.trim();
     const slug = document.getElementById('productTypeSlug').value.trim();
     const description = document.getElementById('productTypeDescription').value.trim();
+    const tag = document.getElementById('productTypeTag').value.trim();
+    const tagColor = document.getElementById('productTypeTagColor').value;
 
     // バリデーション
     if (!name || !slug) {
@@ -560,6 +564,8 @@ function handleProductTypeFormSubmit(e) {
             type.name = name;
             type.slug = slug;
             type.description = description;
+            type.tag = tag;
+            type.tagColor = tagColor;
         }
         showAlertModal('商品タイプを更新しました', 'success');
     } else {
@@ -569,6 +575,8 @@ function handleProductTypeFormSubmit(e) {
             name: name,
             slug: slug,
             description: description,
+            tag: tag,
+            tagColor: tagColor,
             order: productTypes.length
         };
         productTypes.push(newType);

@@ -696,7 +696,13 @@ input, select, textarea {
 }
 
 .tag-new,
-.tag-sale {
+.tag-sale,
+.tag-blue,
+.tag-red,
+.tag-green,
+.tag-orange,
+.tag-purple,
+.tag-gray {
     padding: 5px 10px;
     font-size: 11px;
     font-weight: bold;
@@ -710,6 +716,30 @@ input, select, textarea {
 
 .tag-sale {
     background-color: var(--error-color);
+}
+
+.tag-blue {
+    background-color: #3498db;
+}
+
+.tag-red {
+    background-color: #e74c3c;
+}
+
+.tag-green {
+    background-color: #27ae60;
+}
+
+.tag-orange {
+    background-color: #f39c12;
+}
+
+.tag-purple {
+    background-color: #9b59b6;
+}
+
+.tag-gray {
+    background-color: #95a5a6;
 }
 
 /* ランキングバッジは画像外のテキストとして表示 */
@@ -3295,6 +3325,26 @@ input, select, textarea {
     padding: 25px;
 }
 
+/* ページヘッダー */
+.products-page-header {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.products-page-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 8px;
+}
+
+.products-page-description {
+    font-size: 14px;
+    color: var(--text-light);
+    margin: 0;
+}
+
 .products-toolbar {
     display: flex;
     justify-content: space-between;
@@ -3409,6 +3459,14 @@ input, select, textarea {
 
     .products-sidebar {
         position: static;
+    }
+
+    .products-page-title {
+        font-size: 22px;
+    }
+
+    .products-page-description {
+        font-size: 13px;
     }
 
     .products-toolbar {
