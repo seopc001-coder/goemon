@@ -13,6 +13,9 @@ async function initializeSettings() {
     // 管理者権限チェック
     await checkAdminAccess();
 
+    // 初回訪問時にデフォルトデータをセット
+    initializeDefaultData();
+
     // データを読み込み
     loadCategories();
     loadHeroImages();
@@ -20,6 +23,59 @@ async function initializeSettings() {
     // フォーム送信イベント
     document.getElementById('categoryForm').addEventListener('submit', handleCategoryFormSubmit);
     document.getElementById('heroImageForm').addEventListener('submit', handleHeroImageFormSubmit);
+}
+
+// 初回訪問時にデフォルトデータをセット
+function initializeDefaultData() {
+    const initialized = localStorage.getItem('goemonSettingsInitialized');
+
+    if (!initialized) {
+        // デフォルトカテゴリをセット
+        const defaultCategories = [
+            { id: 'outer', name: 'アウター', slug: 'outer', description: 'ジャケット、コートなど', order: 0 },
+            { id: 'tops', name: 'トップス', slug: 'tops', description: 'シャツ、カットソーなど', order: 1 },
+            { id: 'bottoms', name: 'ボトムス', slug: 'bottoms', description: 'パンツ、スカートなど', order: 2 },
+            { id: 'onepiece', name: 'ワンピース', slug: 'onepiece', description: 'ワンピース・ドレス', order: 3 },
+            { id: 'shoes', name: 'シューズ', slug: 'shoes', description: '靴・スニーカー', order: 4 },
+            { id: 'bags', name: 'バッグ', slug: 'bags', description: 'バッグ・小物', order: 5 },
+            { id: 'accessories', name: 'アクセサリー', slug: 'accessories', description: 'アクセサリー・小物', order: 6 }
+        ];
+        localStorage.setItem('goemoncategories', JSON.stringify(defaultCategories));
+
+        // デフォルトヒーロー画像をセット
+        const defaultHeroImages = [
+            {
+                id: 'hero1',
+                url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200',
+                link: 'goemon-products.html',
+                alt: '2025 SPRING COLLECTION',
+                title: '春の新作コレクション入荷',
+                order: 0
+            },
+            {
+                id: 'hero2',
+                url: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200',
+                link: 'goemon-products.html',
+                alt: 'SALE MAX 70% OFF',
+                title: '春夏アイテムがお買い得',
+                order: 1
+            },
+            {
+                id: 'hero3',
+                url: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200',
+                link: 'goemon-register.html',
+                alt: 'NEW MEMBER CAMPAIGN',
+                title: '新規登録で500円クーポン',
+                order: 2
+            }
+        ];
+        localStorage.setItem('goemonheroimages', JSON.stringify(defaultHeroImages));
+
+        // 初期化完了フラグをセット
+        localStorage.setItem('goemonSettingsInitialized', 'true');
+
+        console.log('Default data initialized');
+    }
 }
 
 // 管理者権限チェック

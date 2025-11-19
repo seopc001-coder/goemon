@@ -13,9 +13,105 @@ function initializeIndexPage() {
         allProducts = window.GOEMON_PRODUCTS.generateProductsData(100);
     }
 
+    // ヒーロー画像とカテゴリを読み込み
+    loadHeroImages();
+    loadCategories();
+
     loadNewArrivals();
     loadRanking();
     loadSaleItems();
+}
+
+// ヒーロー画像をlocalStorageから読み込んで表示
+function loadHeroImages() {
+    try {
+        const savedHeroImages = localStorage.getItem('goemonheroimages');
+        if (!savedHeroImages) return;
+
+        const heroImages = JSON.parse(savedHeroImages);
+        if (!heroImages || heroImages.length === 0) return;
+
+        // 並び順でソート
+        heroImages.sort((a, b) => a.order - b.order);
+
+        // Swiperのwrapperを取得
+        const swiperWrapper = document.querySelector('.hero-swiper .swiper-wrapper');
+        if (!swiperWrapper) return;
+
+        // 既存のスライドをクリア
+        swiperWrapper.innerHTML = '';
+
+        // ヒーロー画像を動的に生成
+        heroImages.forEach(image => {
+            const slide = document.createElement('div');
+            slide.className = 'swiper-slide';
+
+            const link = image.link || 'goemon-products.html';
+
+            slide.innerHTML = `
+                <a href="${link}" class="hero-slide-link">
+                    <div class="hero-slide" style="background-image: url('${image.url}'); background-size: cover; background-position: center;">
+                        <div class="hero-content">
+                            <h2>${image.alt}</h2>
+                            <p>${image.title}</p>
+                        </div>
+                    </div>
+                </a>
+            `;
+
+            swiperWrapper.appendChild(slide);
+        });
+
+        // Swiperを再初期化
+        if (window.heroSwiper) {
+            window.heroSwiper.destroy(true, true);
+        }
+        window.heroSwiper = new Swiper('.hero-swiper', {
+            loop: true,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+        });
+
+    } catch (error) {
+        console.error('Error loading hero images:', error);
+    }
+}
+
+// カテゴリをlocalStorageから読み込んで表示
+function loadCategories() {
+    try {
+        const savedCategories = localStorage.getItem('goemoncategories');
+        if (!savedCategories) return;
+
+        const categories = JSON.parse(savedCategories);
+        if (!categories || categories.length === 0) return;
+
+        // 並び順でソート
+        categories.sort((a, b) => a.order - b.order);
+
+        // カテゴリリストを取得
+        const categoryList = document.querySelector('.sidebar-widget:nth-of-type(2) .category-list-sidebar');
+        if (!categoryList) return;
+
+        // 既存のカテゴリをクリア
+        categoryList.innerHTML = '';
+
+        // カテゴリを動的に生成
+        categories.forEach(category => {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="goemon-products.html?category=${category.slug}">${category.name}</a>`;
+            categoryList.appendChild(li);
+        });
+
+    } catch (error) {
+        console.error('Error loading categories:', error);
+    }
 }
 
 // 新着商品を読み込み
