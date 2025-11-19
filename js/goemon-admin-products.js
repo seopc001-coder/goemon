@@ -46,6 +46,9 @@ async function initializeProductManagement() {
 
     // 割引計算の自動更新
     setupDiscountCalculation();
+
+    // ランキング表示チェックボックスの動作
+    setupRankingCheckbox();
 }
 
 // 管理者権限チェック
@@ -366,6 +369,20 @@ function editProduct(productId) {
     document.getElementById('productStock').value = product.stock || 0;
     document.getElementById('productDescription').value = product.description || '';
 
+    // ランキング設定
+    const showInRankingCheckbox = document.getElementById('showInRanking');
+    const rankingPositionGroup = document.getElementById('rankingPositionGroup');
+    const rankingPositionInput = document.getElementById('rankingPosition');
+
+    showInRankingCheckbox.checked = product.showInRanking || false;
+    rankingPositionInput.value = product.rankingPosition || '';
+
+    if (product.showInRanking) {
+        rankingPositionGroup.style.display = 'block';
+    } else {
+        rankingPositionGroup.style.display = 'none';
+    }
+
     // メイン画像とサブ画像を設定
     document.getElementById('productImage').value = product.image || '';
     document.getElementById('productImage2').value = product.image2 || '';
@@ -393,6 +410,8 @@ function handleProductFormSubmit(e) {
     const productImage2 = document.getElementById('productImage2').value.trim();
     const productImage3 = document.getElementById('productImage3').value.trim();
     const productImage4 = document.getElementById('productImage4').value.trim();
+    const showInRanking = document.getElementById('showInRanking').checked;
+    const rankingPosition = document.getElementById('rankingPosition').value ? parseInt(document.getElementById('rankingPosition').value) : null;
 
     // バリデーション
     if (!productName) {
@@ -432,14 +451,18 @@ function handleProductFormSubmit(e) {
         image: productImage,
         image2: productImage2 || null,
         image3: productImage3 || null,
-        image4: productImage4 || null
+        image4: productImage4 || null,
+        showInRanking: showInRanking,
+        rankingPosition: showInRanking ? rankingPosition : null
     };
 
     if (editingProductId) {
-        // 編集モード
+        // 編集モード - 既存のviewCountを保持
+        const existingProduct = allProducts[editingProductId];
         allProducts[editingProductId] = {
-            ...allProducts[editingProductId],
-            ...productData
+            ...existingProduct,
+            ...productData,
+            viewCount: existingProduct.viewCount || 0 // 既存のviewCountを保持
         };
 
         showAlertModal('商品を更新しました', 'success');
@@ -449,7 +472,8 @@ function handleProductFormSubmit(e) {
 
         allProducts[newId] = {
             id: newId,
-            ...productData
+            ...productData,
+            viewCount: 0 // 新規商品は閲覧数0
         };
 
         showAlertModal('商品を追加しました', 'success');
@@ -524,4 +548,21 @@ function initializeImageUploads() {
     setupFileInput('productImage4File', 'productImage4Preview', 'productImage4');
 
     console.log('Image upload functionality initialized');
+}
+
+// ランキングチェックボックスの動作を設定
+function setupRankingCheckbox() {
+    const showInRankingCheckbox = document.getElementById('showInRanking');
+    const rankingPositionGroup = document.getElementById('rankingPositionGroup');
+
+    if (showInRankingCheckbox && rankingPositionGroup) {
+        showInRankingCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                rankingPositionGroup.style.display = 'block';
+            } else {
+                rankingPositionGroup.style.display = 'none';
+                document.getElementById('rankingPosition').value = '';
+            }
+        });
+    }
 }

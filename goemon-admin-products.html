@@ -380,6 +380,24 @@
                     </div>
 
                     <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="showInRanking" style="width: auto; margin: 0;">
+                            <span>人気ランキングに表示</span>
+                        </label>
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            チェックすると、TOPページの人気ランキングセクションに優先表示されます
+                        </small>
+                    </div>
+
+                    <div class="form-group" id="rankingPositionGroup" style="display: none;">
+                        <label for="rankingPosition">ランキング順位（1-10）</label>
+                        <input type="number" id="rankingPosition" min="1" max="10" placeholder="例: 3">
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            指定した順位に固定表示されます。未指定の場合は閲覧数順で表示されます。
+                        </small>
+                    </div>
+
+                    <div class="form-group">
                         <label for="productStock">在庫数 <span style="color: #f44336;">*</span></label>
                         <input type="number" id="productStock" min="0" value="0" required>
                     </div>

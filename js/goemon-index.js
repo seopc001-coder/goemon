@@ -393,20 +393,59 @@ function loadRanking() {
     const container = document.querySelector('.box-category-ranking .list-products-01');
     if (!container) return;
 
-    // 全商品を配列に変換してIDの降順（新しい順）にソート
+    // 全商品を配列に変換
     const productsArray = Object.values(allProducts);
-    productsArray.sort((a, b) => {
-        const idA = parseInt(a.id) || 0;
-        const idB = parseInt(b.id) || 0;
-        return idB - idA; // 降順（新しい順）
+
+    // 手動設定の商品と自動の商品を分離
+    const manualRankingProducts = productsArray.filter(p => p.showInRanking && p.rankingPosition);
+    const autoRankingProducts = productsArray.filter(p => !p.showInRanking || !p.rankingPosition);
+
+    // 手動設定商品を順位でソート
+    manualRankingProducts.sort((a, b) => {
+        const posA = a.rankingPosition || 999;
+        const posB = b.rankingPosition || 999;
+        return posA - posB;
     });
 
-    // 11件目から20件目を表示（新着の次に新しい商品）
-    productsArray.slice(10, 20).forEach((product, index) => {
+    // 自動商品を閲覧数順でソート（閲覧数が同じ場合はIDの降順）
+    autoRankingProducts.sort((a, b) => {
+        const viewCountA = a.viewCount || 0;
+        const viewCountB = b.viewCount || 0;
+        if (viewCountB !== viewCountA) {
+            return viewCountB - viewCountA; // 閲覧数降順
+        }
+        const idA = parseInt(a.id) || 0;
+        const idB = parseInt(b.id) || 0;
+        return idB - idA; // ID降順（新しい順）
+    });
+
+    // ランキング配列を構築（最大10件）
+    const rankingProducts = [];
+    const maxRanking = 10;
+
+    // 1-10の順位を埋める
+    for (let position = 1; position <= maxRanking; position++) {
+        // この順位に手動設定された商品があるか確認
+        const manualProduct = manualRankingProducts.find(p => p.rankingPosition === position);
+
+        if (manualProduct) {
+            rankingProducts.push(manualProduct);
+        } else {
+            // 手動設定がない場合、自動商品から追加
+            if (autoRankingProducts.length > 0) {
+                rankingProducts.push(autoRankingProducts.shift());
+            }
+        }
+    }
+
+    // ランキングを表示
+    rankingProducts.forEach((product, index) => {
         product.rank = index + 1;
         const card = createProductCard(product);
         container.appendChild(card);
     });
+
+    console.log('Ranking loaded:', rankingProducts.length, 'products');
 }
 
 // 商品カードを生成

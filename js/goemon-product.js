@@ -48,6 +48,41 @@ function loadProductData() {
     if (product) {
         productData = product;
         updateProductDisplay();
+
+        // 閲覧数をカウント（localStorageに保存）
+        incrementViewCount(productId, savedProducts);
+    }
+}
+
+// 閲覧数をカウント
+function incrementViewCount(productId, savedProductsString) {
+    if (!savedProductsString) return;
+
+    try {
+        const productsData = JSON.parse(savedProductsString);
+        let updated = false;
+
+        if (Array.isArray(productsData)) {
+            // 配列形式の場合
+            const product = productsData.find(p => p.id === productId);
+            if (product) {
+                product.viewCount = (product.viewCount || 0) + 1;
+                updated = true;
+            }
+        } else {
+            // オブジェクト形式の場合
+            if (productsData[productId]) {
+                productsData[productId].viewCount = (productsData[productId].viewCount || 0) + 1;
+                updated = true;
+            }
+        }
+
+        if (updated) {
+            localStorage.setItem('goemonproducts', JSON.stringify(productsData));
+            console.log('View count incremented for product:', productId);
+        }
+    } catch (error) {
+        console.error('Error incrementing view count:', error);
     }
 }
 
