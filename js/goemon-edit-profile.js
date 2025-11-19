@@ -76,12 +76,29 @@ async function saveProfile() {
         }
 
         // パスワード変更のバリデーション
+        const currentPassword = document.getElementById('currentPassword').value;
         const newPassword = document.getElementById('newPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
-        if (newPassword || confirmPassword) {
+        // パスワード変更がリクエストされている場合
+        if (newPassword || confirmPassword || currentPassword) {
+            // すべてのパスワードフィールドが入力されているかチェック
+            if (!currentPassword) {
+                alert('パスワードを変更する場合は、現在のパスワードを入力してください');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+
+            if (!newPassword || !confirmPassword) {
+                alert('新しいパスワードと確認用パスワードを入力してください');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+
             if (newPassword !== confirmPassword) {
-                alert('パスワードが一致しません');
+                alert('新しいパスワードが一致しません');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
                 return;
@@ -89,6 +106,19 @@ async function saveProfile() {
 
             if (newPassword.length < 8) {
                 alert('パスワードは8文字以上で設定してください');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
+
+            // 現在のパスワードが正しいか確認
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+                email: user.email,
+                password: currentPassword
+            });
+
+            if (signInError) {
+                alert('現在のパスワードが正しくありません');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
                 return;
