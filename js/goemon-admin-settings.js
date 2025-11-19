@@ -1,15 +1,20 @@
 // 五右衛門 ECサイト - 設定管理 JavaScript
 
+console.log('goemon-admin-settings.js loaded');
+
 let categories = [];
 let heroImages = [];
 let editingCategoryId = null;
 let editingHeroImageId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded event fired');
     initializeSettings();
 });
 
 async function initializeSettings() {
+    console.log('initializeSettings called');
+
     // 管理者権限チェック
     await checkAdminAccess();
 
@@ -23,6 +28,13 @@ async function initializeSettings() {
     // フォーム送信イベント
     document.getElementById('categoryForm').addEventListener('submit', handleCategoryFormSubmit);
     document.getElementById('heroImageForm').addEventListener('submit', handleHeroImageFormSubmit);
+
+    console.log('initializeSettings completed - Global functions available:', {
+        openAddCategoryModal: typeof window.openAddCategoryModal,
+        editCategory: typeof window.editCategory,
+        openAddHeroImageModal: typeof window.openAddHeroImageModal,
+        editHeroImage: typeof window.editHeroImage
+    });
 }
 
 // 初回訪問時にデフォルトデータをセット
@@ -217,20 +229,28 @@ function updateCategoryOrder() {
 
 // カテゴリ追加モーダルを開く
 window.openAddCategoryModal = function() {
+    console.log('openAddCategoryModal called');
     editingCategoryId = null;
     document.getElementById('categoryModalTitle').innerHTML = '<i class="fas fa-plus"></i> カテゴリを追加';
     document.getElementById('categoryForm').reset();
     document.getElementById('categoryId').value = '';
 
     const modal = document.getElementById('categoryModal');
-    modal.classList.add('active');
+    if (modal) {
+        modal.classList.add('active');
+        console.log('Category modal opened');
+    } else {
+        console.error('Category modal not found');
+    }
 }
 
 // カテゴリ編集モーダルを開く
 window.editCategory = function(id) {
+    console.log('editCategory called with id:', id);
     const category = categories.find(c => c.id === id);
 
     if (!category) {
+        console.error('Category not found:', id);
         showAlertModal('カテゴリが見つかりません', 'error');
         return;
     }
@@ -244,7 +264,12 @@ window.editCategory = function(id) {
     document.getElementById('categoryDescription').value = category.description || '';
 
     const modal = document.getElementById('categoryModal');
-    modal.classList.add('active');
+    if (modal) {
+        modal.classList.add('active');
+        console.log('Category edit modal opened');
+    } else {
+        console.error('Category modal not found');
+    }
 }
 
 // カテゴリフォーム送信処理
@@ -459,20 +484,28 @@ function updateHeroImageOrder() {
 
 // ヒーロー画像追加モーダルを開く
 window.openAddHeroImageModal = function() {
+    console.log('openAddHeroImageModal called');
     editingHeroImageId = null;
     document.getElementById('heroImageModalTitle').innerHTML = '<i class="fas fa-plus"></i> ヒーロー画像を追加';
     document.getElementById('heroImageForm').reset();
     document.getElementById('heroImageId').value = '';
 
     const modal = document.getElementById('heroImageModal');
-    modal.classList.add('active');
+    if (modal) {
+        modal.classList.add('active');
+        console.log('Hero image modal opened');
+    } else {
+        console.error('Hero image modal not found');
+    }
 }
 
 // ヒーロー画像編集モーダルを開く
 window.editHeroImage = function(id) {
+    console.log('editHeroImage called with id:', id);
     const image = heroImages.find(img => img.id === id);
 
     if (!image) {
+        console.error('Hero image not found:', id);
         showAlertModal('画像が見つかりません', 'error');
         return;
     }
@@ -487,7 +520,12 @@ window.editHeroImage = function(id) {
     document.getElementById('heroImageTitle').value = image.title || '';
 
     const modal = document.getElementById('heroImageModal');
-    modal.classList.add('active');
+    if (modal) {
+        modal.classList.add('active');
+        console.log('Hero image edit modal opened');
+    } else {
+        console.error('Hero image modal not found');
+    }
 }
 
 // ヒーロー画像フォーム送信処理
