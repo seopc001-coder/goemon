@@ -64,11 +64,32 @@ function loadCategories() {
 
 // 商品データを読み込み（実際の実装ではAPIから取得）
 function loadProducts() {
-    // 共通の商品データを使用
-    if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.getProductsArray === 'function') {
-        allProducts = window.GOEMON_PRODUCTS.getProductsArray(100);
+    // localStorageから商品データを読み込み
+    const savedProducts = localStorage.getItem('goemonproducts');
+
+    if (savedProducts) {
+        // 保存されている商品データを使用
+        try {
+            const productsData = JSON.parse(savedProducts);
+            // オブジェクト形式の場合は配列に変換
+            if (Array.isArray(productsData)) {
+                allProducts = productsData;
+            } else {
+                allProducts = Object.values(productsData);
+            }
+            console.log('Loaded products from localStorage:', allProducts.length);
+        } catch (error) {
+            console.error('Error parsing saved products:', error);
+            allProducts = [];
+        }
     } else {
-        allProducts = [];
+        // localStorageにデータがない場合は、デモデータを使用
+        if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.getProductsArray === 'function') {
+            allProducts = window.GOEMON_PRODUCTS.getProductsArray(100);
+            console.log('Using demo products data');
+        } else {
+            allProducts = [];
+        }
     }
 
     filteredProducts = [...allProducts];
@@ -267,12 +288,17 @@ function createProductCard(product) {
         discountPercent = `${discount}%OFF`;
     }
 
+    // 画像URLを確認
+    const imageUrl = product.image || '';
+
     card.innerHTML = `
         <div class="product-image">
             <div class="product-img-wrapper">
+                ${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">` : `
                 <div class="product-placeholder">
                     <i class="fas fa-tshirt fa-3x"></i>
                 </div>
+                `}
             </div>
         </div>
         <div class="product-info">

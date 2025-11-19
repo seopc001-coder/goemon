@@ -9,8 +9,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeIndexPage() {
     // 商品データを初期化
-    if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.generateProductsData === 'function') {
-        allProducts = window.GOEMON_PRODUCTS.generateProductsData(100);
+    const savedProducts = localStorage.getItem('goemonproducts');
+
+    if (savedProducts) {
+        // 保存されている商品データを使用
+        try {
+            const productsData = JSON.parse(savedProducts);
+            // オブジェクト形式の場合は配列形式に変換
+            if (Array.isArray(productsData)) {
+                // 配列の場合は、IDをキーとするオブジェクトに変換
+                allProducts = {};
+                productsData.forEach(product => {
+                    allProducts[product.id] = product;
+                });
+            } else {
+                allProducts = productsData;
+            }
+            console.log('Loaded products from localStorage:', Object.keys(allProducts).length);
+        } catch (error) {
+            console.error('Error parsing saved products:', error);
+            allProducts = {};
+        }
+    } else {
+        // localStorageにデータがない場合は、デモデータを使用
+        if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.generateProductsData === 'function') {
+            allProducts = window.GOEMON_PRODUCTS.generateProductsData(100);
+            console.log('Using demo products data');
+        }
     }
 
     // デフォルトデータを初期化（localStorageにない場合）
@@ -388,12 +413,17 @@ function createProductCard(product) {
         discountPercent = `${discount}%OFF`;
     }
 
+    // 画像URLを確認
+    const imageUrl = product.image || '';
+
     card.innerHTML = `
         <div class="product-image">
             <div class="product-img-wrapper">
+                ${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">` : `
                 <div class="product-placeholder">
                     <i class="fas fa-tshirt fa-3x"></i>
                 </div>
+                `}
             </div>
         </div>
         <div class="product-info">

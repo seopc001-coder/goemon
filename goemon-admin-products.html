@@ -395,7 +395,9 @@
                             <div style="flex: 1;">
                                 <input type="file" id="productImageFile" accept="image/jpeg,image/jpg,image/png,image/webp" style="margin-bottom: 8px;">
                                 <input type="text" id="productImage" placeholder="画像URLまたは上記からファイルを選択" required>
-                                <small style="color: #666; font-size: 12px; display: block; margin-top: 4px;">ファイルをアップロード、またはURLを直接入力</small>
+                                <small style="color: #666; font-size: 12px; display: block; margin-top: 4px;">
+                                    推奨サイズ: 800×800px（正方形） / 形式: JPG, PNG, WebP / 最大5MB
+                                </small>
                             </div>
                             <div id="productImagePreview" style="display: none; min-width: 100px;"></div>
                         </div>
@@ -431,7 +433,7 @@
                             <div id="productImage4Preview" style="display: none; min-width: 100px;"></div>
                         </div>
 
-                        <small style="color: #666; font-size: 12px;">最大3枚のサブ画像を追加できます（合計4枚）。形式: JPG, PNG, WebP / 最大5MB</small>
+                        <small style="color: #666; font-size: 12px;">最大3枚のサブ画像を追加できます（合計4枚）。推奨サイズ: 800×800px（正方形） / 形式: JPG, PNG, WebP / 最大5MB</small>
                     </div>
 
                     <div class="form-actions">

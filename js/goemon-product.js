@@ -20,12 +20,34 @@ function getProductIdFromURL() {
 function loadProductData() {
     const productId = getProductIdFromURL();
 
-    if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.getProductById === 'function') {
-        const product = window.GOEMON_PRODUCTS.getProductById(productId);
-        if (product) {
-            productData = product;
-            updateProductDisplay();
+    // localStorageから商品データを取得
+    const savedProducts = localStorage.getItem('goemonproducts');
+    let product = null;
+
+    if (savedProducts) {
+        try {
+            const productsData = JSON.parse(savedProducts);
+            // 配列形式かオブジェクト形式か判定して商品を検索
+            if (Array.isArray(productsData)) {
+                product = productsData.find(p => p.id === productId);
+            } else {
+                product = productsData[productId];
+            }
+            console.log('Loaded product from localStorage:', productId);
+        } catch (error) {
+            console.error('Error parsing saved products:', error);
         }
+    }
+
+    // localStorageにない場合はデモデータから取得
+    if (!product && window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.getProductById === 'function') {
+        product = window.GOEMON_PRODUCTS.getProductById(productId);
+        console.log('Using demo product data');
+    }
+
+    if (product) {
+        productData = product;
+        updateProductDisplay();
     }
 }
 
@@ -483,15 +505,40 @@ function loadRelatedProducts() {
     // 共通データから関連商品を取得
     const relatedProductIds = ['2', '3', '4', '5'];
 
-    if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.getProductById === 'function') {
-        relatedProductIds.forEach(id => {
-            const product = window.GOEMON_PRODUCTS.getProductById(id);
-            if (product) {
-                const card = createProductCard(product);
-                container.appendChild(card);
-            }
-        });
+    // localStorageから商品データを取得
+    const savedProducts = localStorage.getItem('goemonproducts');
+    let productsData = null;
+
+    if (savedProducts) {
+        try {
+            productsData = JSON.parse(savedProducts);
+        } catch (error) {
+            console.error('Error parsing saved products:', error);
+        }
     }
+
+    relatedProductIds.forEach(id => {
+        let product = null;
+
+        // localStorageから商品を検索
+        if (productsData) {
+            if (Array.isArray(productsData)) {
+                product = productsData.find(p => p.id === id);
+            } else {
+                product = productsData[id];
+            }
+        }
+
+        // localStorageにない場合はデモデータから取得
+        if (!product && window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.getProductById === 'function') {
+            product = window.GOEMON_PRODUCTS.getProductById(id);
+        }
+
+        if (product) {
+            const card = createProductCard(product);
+            container.appendChild(card);
+        }
+    });
 }
 
 // 商品カードを生成
