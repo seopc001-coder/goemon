@@ -21,10 +21,8 @@ async function checkAdminAccess() {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
-            showAlertModal('管理者としてログインしてください', 'warning');
-            setTimeout(() => {
-                window.location.href = 'goemon-login.html';
-            }, 1500);
+            sessionStorage.setItem('adminAccess', 'true');
+            window.location.href = 'goemon-login.html';
             return;
         }
 
@@ -32,6 +30,7 @@ async function checkAdminAccess() {
         console.log('Admin access granted for:', user.email);
     } catch (error) {
         console.error('Admin check error:', error);
+        sessionStorage.setItem('adminAccess', 'true');
         window.location.href = 'goemon-login.html';
     }
 }

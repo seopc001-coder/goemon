@@ -5,9 +5,23 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeLoginPage() {
+    // 管理者アクセスチェック
+    checkAdminAccess();
+
     initializePasswordToggle();
     initializeLoginForm();
     initializeSNSLogin();
+}
+
+// 管理者アクセスチェック
+function checkAdminAccess() {
+    const isAdminAccess = sessionStorage.getItem('adminAccess');
+    if (isAdminAccess === 'true') {
+        const adminNotice = document.getElementById('adminNotice');
+        if (adminNotice) {
+            adminNotice.style.display = 'block';
+        }
+    }
 }
 
 // パスワード表示切替
@@ -179,10 +193,20 @@ async function submitLogin(email, password) {
 
         localStorage.setItem('goemonloggedin', 'true');
 
-        showAlertModal('ログインしました！', 'success');
-        setTimeout(() => {
-            window.location.href = 'goemon-index.html';
-        }, 1500);
+        // 管理者アクセスの場合は管理画面へリダイレクト
+        const isAdminAccess = sessionStorage.getItem('adminAccess');
+        if (isAdminAccess === 'true') {
+            sessionStorage.removeItem('adminAccess');
+            showAlertModal('管理画面へログインしました！', 'success');
+            setTimeout(() => {
+                window.location.href = 'goemon-admin.html';
+            }, 1500);
+        } else {
+            showAlertModal('ログインしました！', 'success');
+            setTimeout(() => {
+                window.location.href = 'goemon-index.html';
+            }, 1500);
+        }
 
     } catch (error) {
         console.error('Login error:', error);
