@@ -413,9 +413,20 @@ async function submitRegistration() {
             options: {
                 emailRedirectTo: window.location.origin + '/goemon-email-confirmed.html',
                 data: {
-                    last_name: lastName,
-                    first_name: firstName,
+                    lastName: lastName,
+                    firstName: firstName,
+                    lastNameKana: document.getElementById('lastNameKana').value,
+                    firstNameKana: document.getElementById('firstNameKana').value,
+                    postalCode: document.getElementById('postalCode').value,
+                    prefecture: document.getElementById('prefecture').value,
+                    city: document.getElementById('city').value,
+                    address1: document.getElementById('address1').value,
+                    address2: document.getElementById('address2').value,
                     phone: phone,
+                    birthYear: document.getElementById('birthYear').value,
+                    birthMonth: document.getElementById('birthMonth').value,
+                    birthDay: document.getElementById('birthDay').value,
+                    gender: document.querySelector('input[name="gender"]:checked')?.value || ''
                 }
             }
         });
@@ -447,11 +458,8 @@ async function submitRegistration() {
             }
         }
 
-        // 登録成功
-        alert('会員登録が完了しました！\n確認メールを送信しました。メール内のリンクをクリックして登録を完了してください。');
-
-        // トップページにリダイレクト
-        window.location.href = 'goemon-index.html';
+        // 登録成功 - 完了ページにリダイレクト
+        window.location.href = 'goemon-register-complete.html';
 
     } catch (error) {
         console.error('Registration error:', error);

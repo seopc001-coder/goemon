@@ -92,7 +92,12 @@ function initializeEditLinks() {
                 const section = this.closest('.mypage-section');
                 const sectionTitle = section.querySelector('h2').textContent.trim();
 
-                alert(`${sectionTitle}の編集機能は実装予定です`);
+                // 会員情報セクションの場合は編集ページへ遷移
+                if (sectionTitle.includes('会員情報')) {
+                    window.location.href = 'goemon-edit-profile.html';
+                } else {
+                    alert(`${sectionTitle}の編集機能は実装予定です`);
+                }
             });
         } else if (linkText.includes('詳細') || linkText.includes('すべて見る')) {
             link.addEventListener('click', function(e) {
@@ -100,7 +105,12 @@ function initializeEditLinks() {
                 const section = this.closest('.mypage-section');
                 const sectionTitle = section.querySelector('h2').textContent.trim();
 
-                alert(`${sectionTitle}の詳細機能は実装予定です`);
+                // お気に入りセクションの場合はお気に入りページへ遷移
+                if (sectionTitle.includes('お気に入り')) {
+                    window.location.href = 'goemon-wishlist.html';
+                } else {
+                    alert(`${sectionTitle}の詳細機能は実装予定です`);
+                }
             });
         }
     });
