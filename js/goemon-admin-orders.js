@@ -28,10 +28,33 @@ async function checkAdminAccess() {
     console.log('Admin access granted for:', adminId);
 }
 
+// ステータスを日本語に変換
+function normalizeOrderStatus(order) {
+    const statusMap = {
+        'pending': '準備中',
+        'shipping': '配送中',
+        'completed': '配送完了',
+        'cancelled': 'キャンセル'
+    };
+
+    // 英語のステータスを日本語に変換
+    if (statusMap[order.status]) {
+        order.status = statusMap[order.status];
+    }
+
+    return order;
+}
+
 // 注文データを読み込み
 function loadOrders() {
     try {
         const orders = JSON.parse(localStorage.getItem('goemonorders')) || [];
+
+        // ステータスを日本語に正規化
+        orders.forEach(order => normalizeOrderStatus(order));
+
+        // localStorageに正規化されたデータを保存
+        localStorage.setItem('goemonorders', JSON.stringify(orders));
 
         // 注文を日付順にソート（新しい順）
         allOrders = orders.sort((a, b) => {

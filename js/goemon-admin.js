@@ -191,10 +191,30 @@ function calculateLowStockCount() {
     }
 }
 
+// ステータスを日本語に変換
+function normalizeOrderStatus(order) {
+    const statusMap = {
+        'pending': '準備中',
+        'shipping': '配送中',
+        'completed': '配送完了',
+        'cancelled': 'キャンセル'
+    };
+
+    // 英語のステータスを日本語に変換
+    if (statusMap[order.status]) {
+        order.status = statusMap[order.status];
+    }
+
+    return order;
+}
+
 // 最近の注文を表示
 function loadRecentOrders() {
     try {
         const orders = JSON.parse(localStorage.getItem('goemonorders')) || [];
+
+        // ステータスを日本語に正規化
+        orders.forEach(order => normalizeOrderStatus(order));
 
         // 注文を日付順にソート（新しい順）
         const sortedOrders = orders.sort((a, b) => {
