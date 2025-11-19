@@ -180,32 +180,55 @@ function initializeRemoveButtons() {
 
 // 商品を削除済みとしてマーク
 function markItemAsDeleted(cartItem) {
-    // 打ち消し線を追加
-    cartItem.style.opacity = '0.5';
+    // すでに削除済みの場合は戻す
+    if (cartItem.classList.contains('deleted')) {
+        restoreDeletedItem(cartItem);
+        return;
+    }
+
+    // 削除済みフラグを追加
+    cartItem.classList.add('deleted');
+
+    // 打ち消し線スタイルを追加
+    cartItem.style.opacity = '0.6';
     cartItem.style.position = 'relative';
+    cartItem.style.textDecoration = 'line-through';
 
     // 削除済みオーバーレイを追加
     const overlay = document.createElement('div');
+    overlay.className = 'deleted-overlay';
     overlay.style.cssText = `
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        color: #ff4444;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 68, 68, 0.95);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 16px;
         font-weight: bold;
-        border: 2px dashed #ff4444;
-        border-radius: 8px;
         pointer-events: none;
-        z-index: 10;
+        z-index: 5;
     `;
-    overlay.innerHTML = '<span>削除済み</span>';
+    overlay.innerHTML = '削除済み';
     cartItem.appendChild(overlay);
+
+    // ゴミ箱アイコンを戻すアイコンに変更
+    const removeBtn = cartItem.querySelector('.btn-remove-item');
+    if (removeBtn) {
+        const icon = removeBtn.querySelector('i');
+        if (icon) {
+            icon.className = 'fas fa-undo';
+        }
+        removeBtn.setAttribute('aria-label', '元に戻す');
+    }
+
+    // カートアイテムを無効化（数量変更ボタンを無効に）
+    const qtyButtons = cartItem.querySelectorAll('.qty-btn');
+    const qtyInput = cartItem.querySelector('.qty-input');
+    qtyButtons.forEach(btn => btn.disabled = true);
+    if (qtyInput) qtyInput.disabled = true;
 
     // localStorageから削除
     const itemId = cartItem.dataset.itemId;
@@ -215,13 +238,60 @@ function markItemAsDeleted(cartItem) {
 
     // サマリーを更新
     renderCartSummary();
+}
 
-    // 全て削除された場合は空のカート表示
-    if (cartItems.length === 0) {
-        setTimeout(() => {
-            renderCartItems();
-        }, 500);
+// 削除済み商品を元に戻す
+function restoreDeletedItem(cartItem) {
+    // 削除済みフラグを削除
+    cartItem.classList.remove('deleted');
+
+    // スタイルをリセット
+    cartItem.style.opacity = '1';
+    cartItem.style.textDecoration = 'none';
+
+    // オーバーレイを削除
+    const overlay = cartItem.querySelector('.deleted-overlay');
+    if (overlay) {
+        overlay.remove();
     }
+
+    // ゴミ箱アイコンを元に戻す
+    const removeBtn = cartItem.querySelector('.btn-remove-item');
+    if (removeBtn) {
+        const icon = removeBtn.querySelector('i');
+        if (icon) {
+            icon.className = 'fas fa-trash-alt';
+        }
+        removeBtn.setAttribute('aria-label', '削除');
+    }
+
+    // 数量変更ボタンを有効に戻す
+    const qtyButtons = cartItem.querySelectorAll('.qty-btn');
+    const qtyInput = cartItem.querySelector('.qty-input');
+    qtyButtons.forEach(btn => btn.disabled = false);
+    if (qtyInput) qtyInput.disabled = false;
+
+    // localStorageに追加し直す
+    const itemId = cartItem.dataset.itemId;
+    const color = cartItem.dataset.color;
+    const size = cartItem.dataset.size;
+    const quantity = parseInt(qtyInput.value) || 1;
+
+    const product = productsData[itemId] || {};
+    const itemData = {
+        id: itemId,
+        name: product.name || cartItem.querySelector('.cart-item-name').textContent,
+        price: product.price || 0,
+        quantity: quantity,
+        color: color || null,
+        size: size || null
+    };
+
+    cartItems.push(itemData);
+    saveCart();
+
+    // サマリーを更新
+    renderCartSummary();
 }
 
 // カートアイテムの数量更新
