@@ -84,7 +84,11 @@ function renderProducts(products) {
     }
 
     grid.innerHTML = productsArray.map(product => {
-        const stock = product.stock || Math.floor(Math.random() * 100);
+        // 在庫数がない場合は初期化
+        if (!product.hasOwnProperty('stock')) {
+            product.stock = Math.floor(Math.random() * 100);
+        }
+        const stock = product.stock;
         const isLowStock = stock < 10;
 
         return `
@@ -142,10 +146,19 @@ function searchProducts() {
 // 在庫が少ない商品をフィルタリング
 function filterLowStockProducts() {
     filteredProducts = {};
+
+    // 各商品に在庫数を設定（まだない場合）
     Object.keys(allProducts).forEach(key => {
         const product = allProducts[key];
-        const stock = product.stock || Math.floor(Math.random() * 100);
-        if (stock < 10) {
+        if (!product.hasOwnProperty('stock')) {
+            product.stock = Math.floor(Math.random() * 100);
+        }
+    });
+
+    // 在庫が10未満の商品のみ抽出
+    Object.keys(allProducts).forEach(key => {
+        const product = allProducts[key];
+        if (product.stock < 10) {
             filteredProducts[key] = product;
         }
     });
@@ -155,7 +168,7 @@ function filterLowStockProducts() {
     // 検索ボックスにヒントを表示
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
-        searchInput.placeholder = '在庫が少ない商品を表示中...';
+        searchInput.placeholder = '在庫が少ない商品を表示中（在庫10未満）';
         searchInput.style.borderColor = '#ff9800';
     }
 }
