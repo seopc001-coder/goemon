@@ -448,8 +448,13 @@ function renderProductTypes() {
         list.appendChild(item);
     });
 
+    // 既存のSortableインスタンスを破棄してから再作成
+    if (list.sortableInstance) {
+        list.sortableInstance.destroy();
+    }
+
     // Sortable.jsを適用
-    new Sortable(list, {
+    list.sortableInstance = new Sortable(list, {
         animation: 150,
         handle: '.category-drag-handle',
         onEnd: updateProductTypeOrder
