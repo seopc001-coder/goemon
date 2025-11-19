@@ -27,9 +27,13 @@ async function initializeSettings() {
 
 // 初回訪問時にデフォルトデータをセット
 function initializeDefaultData() {
-    const initialized = localStorage.getItem('goemonSettingsInitialized');
+    // バージョン管理で強制更新
+    const currentVersion = '1.0.1';
+    const savedVersion = localStorage.getItem('goemonSettingsVersion');
 
-    if (!initialized) {
+    if (savedVersion !== currentVersion) {
+        console.log('Initializing default data (version update)');
+
         // デフォルトカテゴリをセット
         const defaultCategories = [
             { id: 'outer', name: 'アウター', slug: 'outer', description: 'ジャケット、コートなど', order: 0 },
@@ -71,10 +75,10 @@ function initializeDefaultData() {
         ];
         localStorage.setItem('goemonheroimages', JSON.stringify(defaultHeroImages));
 
-        // 初期化完了フラグをセット
-        localStorage.setItem('goemonSettingsInitialized', 'true');
+        // バージョンフラグをセット
+        localStorage.setItem('goemonSettingsVersion', currentVersion);
 
-        console.log('Default data initialized');
+        console.log('Default data initialized - Version:', currentVersion);
     }
 }
 
