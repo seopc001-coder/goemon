@@ -75,8 +75,10 @@
 
         // カートが空の場合はカートページにリダイレクト
         if (cartItems.length === 0) {
-            alert('カートが空です');
-            window.location.href = 'goemon-cart.html';
+            showAlertModal('カートが空です', 'warning');
+            setTimeout(() => {
+                window.location.href = 'goemon-cart.html';
+            }, 1500);
         }
     }
 
@@ -128,19 +130,19 @@
 
         // 必須項目のチェック
         if (!lastName || !firstName || !postalCode || !prefecture || !city || !address1 || !phone) {
-            alert('必須項目をすべて入力してください');
+            showAlertModal('必須項目をすべて入力してください', 'warning');
             return;
         }
 
         // 郵便番号のバリデーション
         if (!/^[0-9]{7}$/.test(postalCode)) {
-            alert('郵便番号は7桁の数字で入力してください');
+            showAlertModal('郵便番号は7桁の数字で入力してください', 'warning');
             return;
         }
 
         // 電話番号のバリデーション
         if (!/^[0-9]{10,11}$/.test(phone)) {
-            alert('電話番号は10桁または11桁の数字で入力してください');
+            showAlertModal('電話番号は10桁または11桁の数字で入力してください', 'warning');
             return;
         }
 

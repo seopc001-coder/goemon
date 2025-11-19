@@ -11,8 +11,10 @@ async function checkLoginAndLoadAddresses() {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
-            alert('ログインが必要です');
-            window.location.href = 'goemon-login.html';
+            showAlertModal('ログインが必要です', 'warning');
+            setTimeout(() => {
+                window.location.href = 'goemon-login.html';
+            }, 1500);
             return;
         }
 
@@ -20,8 +22,10 @@ async function checkLoginAndLoadAddresses() {
         loadAddresses(user);
     } catch (error) {
         console.error('Login check error:', error);
-        alert('ログイン状態の確認に失敗しました');
-        window.location.href = 'goemon-login.html';
+        showAlertModal('ログイン状態の確認に失敗しました', 'error');
+        setTimeout(() => {
+            window.location.href = 'goemon-login.html';
+        }, 1500);
     }
 }
 
@@ -178,7 +182,7 @@ function initializeAddressManagement() {
             const postalCode = document.getElementById('newPostalCode').value.replace(/[^0-9]/g, '');
 
             if (postalCode.length !== 7) {
-                alert('7桁の郵便番号を入力してください');
+                showAlertModal('7桁の郵便番号を入力してください', 'warning');
                 return;
             }
 
@@ -191,11 +195,11 @@ function initializeAddressManagement() {
                     document.getElementById('newPrefecture').value = result.address1;
                     document.getElementById('newCity').value = result.address2 + result.address3;
                 } else {
-                    alert('住所が見つかりませんでした');
+                    showAlertModal('住所が見つかりませんでした', 'warning');
                 }
             } catch (error) {
                 console.error('Address search error:', error);
-                alert('住所の検索に失敗しました');
+                showAlertModal('住所の検索に失敗しました', 'error');
             }
         });
     }
@@ -228,10 +232,10 @@ function initializeAddressManagement() {
 
                 // 住所リストを再読み込み
                 checkLoginAndLoadAddresses();
-                alert('住所を追加しました');
+                showAlertModal('住所を追加しました', 'success');
             } catch (error) {
                 console.error('Error saving address:', error);
-                alert('住所の保存に失敗しました');
+                showAlertModal('住所の保存に失敗しました', 'error');
             }
         });
     }
@@ -239,18 +243,18 @@ function initializeAddressManagement() {
 
 // 住所を削除
 function deleteAddress(addressId) {
-    if (!confirm('この住所を削除しますか?')) return;
+    showConfirmModal('この住所を削除しますか?', () => {
+        try {
+            const addresses = JSON.parse(localStorage.getItem('goemonaddresses')) || [];
+            const updatedAddresses = addresses.filter(addr => addr.id !== addressId);
+            localStorage.setItem('goemonaddresses', JSON.stringify(updatedAddresses));
 
-    try {
-        const addresses = JSON.parse(localStorage.getItem('goemonaddresses')) || [];
-        const updatedAddresses = addresses.filter(addr => addr.id !== addressId);
-        localStorage.setItem('goemonaddresses', JSON.stringify(updatedAddresses));
-
-        // 再読み込み
-        checkLoginAndLoadAddresses();
-        alert('住所を削除しました');
-    } catch (error) {
-        console.error('Error deleting address:', error);
-        alert('住所の削除に失敗しました');
-    }
+            // 再読み込み
+            checkLoginAndLoadAddresses();
+            showAlertModal('住所を削除しました', 'success');
+        } catch (error) {
+            console.error('Error deleting address:', error);
+            showAlertModal('住所の削除に失敗しました', 'error');
+        }
+    });
 }
