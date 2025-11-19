@@ -128,45 +128,140 @@ function initializeQuantity() {
 }
 
 // お気に入りボタン
-function initializeWishlistButton() {
+async function initializeWishlistButton() {
     const wishlistBtn = document.getElementById('productWishlistBtn');
     if (!wishlistBtn) return;
 
-    // ローカルストレージから状態を復元
-    let wishlist = JSON.parse(localStorage.getItem('goemonwishlist')) || [];
-    if (wishlist.includes(productData.id)) {
-        wishlistBtn.classList.add('active');
-        const icon = wishlistBtn.querySelector('i');
-        if (icon) {
-            icon.classList.remove('far');
-            icon.classList.add('fas');
-        }
-    }
+    // Supabaseからお気に入り状態を取得
+    await loadWishlistState(wishlistBtn);
 
-    wishlistBtn.addEventListener('click', function() {
-        const icon = this.querySelector('i');
+    wishlistBtn.addEventListener('click', async function() {
+        await toggleWishlist(this);
+    });
+}
 
-        if (wishlist.includes(productData.id)) {
-            // お気に入りから削除
-            wishlist = wishlist.filter(id => id !== productData.id);
-            this.classList.remove('active');
-            if (icon) {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
+// お気に入り状態を読み込み
+async function loadWishlistState(wishlistBtn) {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        let wishlist = [];
+
+        if (user) {
+            // ログイン中：Supabaseから取得
+            const { data, error } = await supabase
+                .from('user_favorites')
+                .select('product_id')
+                .eq('user_id', user.id);
+
+            if (!error && data) {
+                wishlist = data.map(item => item.product_id);
             }
         } else {
-            // お気に入りに追加
-            wishlist.push(productData.id);
-            this.classList.add('active');
+            // 未ログイン：localStorageから取得
+            wishlist = JSON.parse(localStorage.getItem('goemonwishlist')) || [];
+        }
+
+        // ボタンの状態を更新
+        if (wishlist.includes(productData.id)) {
+            wishlistBtn.classList.add('active');
+            const icon = wishlistBtn.querySelector('i');
             if (icon) {
                 icon.classList.remove('far');
                 icon.classList.add('fas');
             }
         }
 
-        localStorage.setItem('goemonwishlist', JSON.stringify(wishlist));
         updateWishlistCount();
-    });
+    } catch (error) {
+        console.error('Error loading wishlist state:', error);
+    }
+}
+
+// お気に入りの追加/削除を切り替え
+async function toggleWishlist(button) {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        const icon = button.querySelector('i');
+        const isCurrentlyFavorite = button.classList.contains('active');
+
+        if (user) {
+            // ログイン中：Supabaseで管理
+            if (isCurrentlyFavorite) {
+                // お気に入りから削除
+                const { error } = await supabase
+                    .from('user_favorites')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('product_id', productData.id);
+
+                if (error) {
+                    console.error('Error removing from favorites:', error);
+                    return;
+                }
+
+                button.classList.remove('active');
+                if (icon) {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                }
+            } else {
+                // お気に入りに追加
+                const { error } = await supabase
+                    .from('user_favorites')
+                    .insert([
+                        { user_id: user.id, product_id: productData.id }
+                    ]);
+
+                if (error) {
+                    console.error('Error adding to favorites:', error);
+                    return;
+                }
+
+                button.classList.add('active');
+                if (icon) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                }
+            }
+
+            // localStorageも同期
+            const { data, error } = await supabase
+                .from('user_favorites')
+                .select('product_id')
+                .eq('user_id', user.id);
+
+            if (!error && data) {
+                const wishlist = data.map(item => item.product_id);
+                localStorage.setItem('goemonwishlist', JSON.stringify(wishlist));
+            }
+        } else {
+            // 未ログイン：localStorageのみ
+            let wishlist = JSON.parse(localStorage.getItem('goemonwishlist')) || [];
+
+            if (isCurrentlyFavorite) {
+                wishlist = wishlist.filter(id => id !== productData.id);
+                button.classList.remove('active');
+                if (icon) {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                }
+            } else {
+                wishlist.push(productData.id);
+                button.classList.add('active');
+                if (icon) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                }
+            }
+
+            localStorage.setItem('goemonwishlist', JSON.stringify(wishlist));
+        }
+
+        updateWishlistCount();
+    } catch (error) {
+        console.error('Error toggling wishlist:', error);
+    }
 }
 
 // カートに追加
