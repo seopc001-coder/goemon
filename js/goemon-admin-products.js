@@ -51,12 +51,31 @@ async function checkAdminAccess() {
 // 商品データを読み込み
 function loadProducts() {
     try {
-        // 商品データを生成（goemon-products-data.jsから）
-        if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.generateProductsData === 'function') {
-            allProducts = window.GOEMON_PRODUCTS.generateProductsData(100);
+        // localStorageから商品データを取得
+        let savedProducts = localStorage.getItem('goemonproducts');
+
+        if (savedProducts) {
+            // 保存済みデータを使用
+            allProducts = JSON.parse(savedProducts);
         } else {
-            console.error('GOEMON_PRODUCTS not loaded');
-            allProducts = {};
+            // データがない場合は生成
+            if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.generateProductsData === 'function') {
+                allProducts = window.GOEMON_PRODUCTS.generateProductsData(100);
+
+                // 各商品に在庫数を設定
+                Object.keys(allProducts).forEach(key => {
+                    const product = allProducts[key];
+                    if (!product.hasOwnProperty('stock')) {
+                        product.stock = Math.floor(Math.random() * 100);
+                    }
+                });
+
+                // localStorageに保存
+                localStorage.setItem('goemonproducts', JSON.stringify(allProducts));
+            } else {
+                console.error('GOEMON_PRODUCTS not loaded');
+                allProducts = {};
+            }
         }
 
         filteredProducts = { ...allProducts };
@@ -84,11 +103,8 @@ function renderProducts(products) {
     }
 
     grid.innerHTML = productsArray.map(product => {
-        // 在庫数がない場合は初期化
-        if (!product.hasOwnProperty('stock')) {
-            product.stock = Math.floor(Math.random() * 100);
-        }
-        const stock = product.stock;
+        // 在庫数を取得（初期データ作成時に設定済み）
+        const stock = product.stock || 0;
         const isLowStock = stock < 10;
 
         return `
@@ -147,18 +163,11 @@ function searchProducts() {
 function filterLowStockProducts() {
     filteredProducts = {};
 
-    // 各商品に在庫数を設定（まだない場合）
-    Object.keys(allProducts).forEach(key => {
-        const product = allProducts[key];
-        if (!product.hasOwnProperty('stock')) {
-            product.stock = Math.floor(Math.random() * 100);
-        }
-    });
-
     // 在庫が10未満の商品のみ抽出
     Object.keys(allProducts).forEach(key => {
         const product = allProducts[key];
-        if (product.stock < 10) {
+        const stock = product.stock || 0;
+        if (stock < 10) {
             filteredProducts[key] = product;
         }
     });
@@ -267,6 +276,9 @@ function handleProductFormSubmit(e) {
         showAlertModal('商品を追加しました', 'success');
     }
 
+    // localStorageに保存
+    localStorage.setItem('goemonproducts', JSON.stringify(allProducts));
+
     // モーダルを閉じる
     closeProductModal();
 
@@ -287,6 +299,10 @@ function deleteProduct(productId) {
         `「${product.name}」を削除してもよろしいですか？\n\nこの操作は取り消せません。`,
         () => {
             delete allProducts[productId];
+
+            // localStorageに保存
+            localStorage.setItem('goemonproducts', JSON.stringify(allProducts));
+
             showAlertModal('商品を削除しました', 'success');
             searchProducts();
         }

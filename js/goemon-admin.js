@@ -146,11 +146,49 @@ function calculateTotalUsers() {
     return uniqueEmails.size + withdrawnUsers.length;
 }
 
-// 在庫アラート数を計算（デモ実装）
+// 在庫アラート数を計算
 function calculateLowStockCount() {
-    // 実際の実装では商品データベースから在庫数を確認
-    // この実装では、ランダムな数値を返す（デモ用）
-    return Math.floor(Math.random() * 5);
+    try {
+        // localStorageから商品データを取得（商品管理ページと同じデータ）
+        let products = localStorage.getItem('goemonproducts');
+
+        // データがない場合は生成して保存
+        if (!products) {
+            if (!window.GOEMON_PRODUCTS || typeof window.GOEMON_PRODUCTS.generateProductsData !== 'function') {
+                return 0;
+            }
+
+            const generatedProducts = window.GOEMON_PRODUCTS.generateProductsData(100);
+
+            // 各商品に在庫数を設定
+            Object.keys(generatedProducts).forEach(key => {
+                const product = generatedProducts[key];
+                if (!product.hasOwnProperty('stock')) {
+                    product.stock = Math.floor(Math.random() * 100);
+                }
+            });
+
+            localStorage.setItem('goemonproducts', JSON.stringify(generatedProducts));
+            products = generatedProducts;
+        } else {
+            products = JSON.parse(products);
+        }
+
+        let lowStockCount = 0;
+
+        // 在庫が10未満の商品をカウント
+        Object.keys(products).forEach(key => {
+            const product = products[key];
+            if (product.stock < 10) {
+                lowStockCount++;
+            }
+        });
+
+        return lowStockCount;
+    } catch (error) {
+        console.error('Error calculating low stock count:', error);
+        return 0;
+    }
 }
 
 // 最近の注文を表示
