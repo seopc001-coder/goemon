@@ -3,8 +3,10 @@
 console.log('goemon-admin-settings.js loaded');
 
 let categories = [];
+let productTypes = [];
 let heroImages = [];
 let editingCategoryId = null;
+let editingProductTypeId = null;
 let editingHeroImageId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -23,15 +25,19 @@ async function initializeSettings() {
 
     // データを読み込み
     loadCategories();
+    loadProductTypes();
     loadHeroImages();
 
     // フォーム送信イベント
     document.getElementById('categoryForm').addEventListener('submit', handleCategoryFormSubmit);
+    document.getElementById('productTypeForm').addEventListener('submit', handleProductTypeFormSubmit);
     document.getElementById('heroImageForm').addEventListener('submit', handleHeroImageFormSubmit);
 
     console.log('initializeSettings completed - Global functions available:', {
         openAddCategoryModal: typeof window.openAddCategoryModal,
         editCategory: typeof window.editCategory,
+        openAddProductTypeModal: typeof window.openAddProductTypeModal,
+        editProductType: typeof window.editProductType,
         openAddHeroImageModal: typeof window.openAddHeroImageModal,
         editHeroImage: typeof window.editHeroImage
     });
@@ -40,7 +46,7 @@ async function initializeSettings() {
 // 初回訪問時にデフォルトデータをセット
 function initializeDefaultData() {
     // バージョン管理で強制更新
-    const currentVersion = '1.0.1';
+    const currentVersion = '1.0.2';
     const savedVersion = localStorage.getItem('goemonSettingsVersion');
 
     if (savedVersion !== currentVersion) {
@@ -57,6 +63,14 @@ function initializeDefaultData() {
             { id: 'accessories', name: 'アクセサリー', slug: 'accessories', description: 'アクセサリー・小物', order: 6 }
         ];
         localStorage.setItem('goemoncategories', JSON.stringify(defaultCategories));
+
+        // デフォルト商品タイプをセット
+        const defaultProductTypes = [
+            { id: 'new-arrivals', name: '新着アイテム', slug: 'new-arrivals', description: '最新の入荷商品', order: 0 },
+            { id: 'pre-order', name: '予約アイテム', slug: 'pre-order', description: '予約受付中の商品', order: 1 },
+            { id: 'restock', name: '再入荷', slug: 'restock', description: '人気商品が再入荷', order: 2 }
+        ];
+        localStorage.setItem('goemonproducttypes', JSON.stringify(defaultProductTypes));
 
         // デフォルトヒーロー画像をセット
         const defaultHeroImages = [
@@ -128,8 +142,11 @@ window.switchTab = function(tabName) {
     if (tabName === 'categories') {
         document.querySelectorAll('.settings-tab')[0].classList.add('active');
         document.getElementById('categoriesTab').classList.add('active');
-    } else if (tabName === 'hero') {
+    } else if (tabName === 'productTypes') {
         document.querySelectorAll('.settings-tab')[1].classList.add('active');
+        document.getElementById('productTypesTab').classList.add('active');
+    } else if (tabName === 'hero') {
+        document.querySelectorAll('.settings-tab')[2].classList.add('active');
         document.getElementById('heroTab').classList.add('active');
     }
 }
@@ -377,6 +394,220 @@ window.closeCategoryModal = function() {
     }
     document.getElementById('categoryForm').reset();
     editingCategoryId = null;
+}
+
+// ========================================
+// 商品タイプ管理
+// ========================================
+
+// 商品タイプを読み込み
+function loadProductTypes() {
+    const savedProductTypes = localStorage.getItem('goemonproducttypes');
+    if (savedProductTypes) {
+        productTypes = JSON.parse(savedProductTypes);
+    }
+    renderProductTypes();
+}
+
+// 商品タイプを表示
+function renderProductTypes() {
+    const list = document.getElementById('productTypesList');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    if (productTypes.length === 0) {
+        list.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">商品タイプがありません</p>';
+        return;
+    }
+
+    // 並び順でソート
+    productTypes.sort((a, b) => a.order - b.order);
+
+    productTypes.forEach(type => {
+        const item = document.createElement('div');
+        item.className = 'category-item';
+        item.dataset.id = type.id;
+
+        item.innerHTML = `
+            <i class="fas fa-grip-vertical category-drag-handle"></i>
+            <div style="flex: 1;">
+                <h4 style="font-size: 16px; margin-bottom: 5px;">${type.name}</h4>
+                <p style="color: #666; font-size: 14px; margin: 0;">${type.description || 'スラッグ: ' + type.slug}</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-icon" onclick="editProductType('${type.id}')" title="編集">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-icon btn-icon-delete" onclick="deleteProductType('${type.id}')" title="削除">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+
+        list.appendChild(item);
+    });
+
+    // Sortable.jsを適用
+    new Sortable(list, {
+        animation: 150,
+        handle: '.category-drag-handle',
+        onEnd: updateProductTypeOrder
+    });
+}
+
+// 商品タイプ順序を更新
+function updateProductTypeOrder() {
+    const items = document.querySelectorAll('#productTypesList .category-item');
+    items.forEach((item, index) => {
+        const id = item.dataset.id;
+        const type = productTypes.find(t => t.id === id);
+        if (type) {
+            type.order = index;
+        }
+    });
+
+    localStorage.setItem('goemonproducttypes', JSON.stringify(productTypes));
+    showAlertModal('並び順を更新しました', 'success');
+}
+
+// 商品タイプ追加モーダルを開く
+window.openAddProductTypeModal = function() {
+    console.log('openAddProductTypeModal called');
+    editingProductTypeId = null;
+    document.getElementById('productTypeModalTitle').innerHTML = '<i class="fas fa-plus"></i> 商品タイプを追加';
+    document.getElementById('productTypeForm').reset();
+    document.getElementById('productTypeId').value = '';
+
+    const modal = document.getElementById('productTypeModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        const container = modal.querySelector('.modal-cmn-container');
+        if (container) {
+            container.classList.add('active');
+        }
+        console.log('Product type modal opened');
+    } else {
+        console.error('Product type modal not found');
+    }
+}
+
+// 商品タイプ編集モーダルを開く
+window.editProductType = function(id) {
+    console.log('editProductType called with id:', id);
+    const type = productTypes.find(t => t.id === id);
+
+    if (!type) {
+        console.error('Product type not found:', id);
+        showAlertModal('商品タイプが見つかりません', 'error');
+        return;
+    }
+
+    editingProductTypeId = id;
+
+    document.getElementById('productTypeModalTitle').innerHTML = '<i class="fas fa-edit"></i> 商品タイプを編集';
+    document.getElementById('productTypeId').value = id;
+    document.getElementById('productTypeName').value = type.name;
+    document.getElementById('productTypeSlug').value = type.slug;
+    document.getElementById('productTypeDescription').value = type.description || '';
+
+    const modal = document.getElementById('productTypeModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        const container = modal.querySelector('.modal-cmn-container');
+        if (container) {
+            container.classList.add('active');
+        }
+        console.log('Product type edit modal opened');
+    } else {
+        console.error('Product type modal not found');
+    }
+}
+
+// 商品タイプフォーム送信処理
+function handleProductTypeFormSubmit(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('productTypeName').value.trim();
+    const slug = document.getElementById('productTypeSlug').value.trim();
+    const description = document.getElementById('productTypeDescription').value.trim();
+
+    // バリデーション
+    if (!name || !slug) {
+        showAlertModal('必須項目を入力してください', 'warning');
+        return;
+    }
+
+    // スラッグの重複チェック
+    const existingType = productTypes.find(t => t.slug === slug && t.id !== editingProductTypeId);
+    if (existingType) {
+        showAlertModal('このスラッグは既に使用されています', 'warning');
+        return;
+    }
+
+    if (editingProductTypeId) {
+        // 編集
+        const type = productTypes.find(t => t.id === editingProductTypeId);
+        if (type) {
+            type.name = name;
+            type.slug = slug;
+            type.description = description;
+        }
+        showAlertModal('商品タイプを更新しました', 'success');
+    } else {
+        // 新規追加
+        const newType = {
+            id: slug,
+            name: name,
+            slug: slug,
+            description: description,
+            order: productTypes.length
+        };
+        productTypes.push(newType);
+        showAlertModal('商品タイプを追加しました', 'success');
+    }
+
+    // localStorageに保存
+    localStorage.setItem('goemonproducttypes', JSON.stringify(productTypes));
+
+    // モーダルを閉じる
+    closeProductTypeModal();
+
+    // 商品タイプリストを再表示
+    renderProductTypes();
+}
+
+// 商品タイプを削除
+window.deleteProductType = function(id) {
+    const type = productTypes.find(t => t.id === id);
+
+    if (!type) {
+        showAlertModal('商品タイプが見つかりません', 'error');
+        return;
+    }
+
+    showConfirmModal(
+        `「${type.name}」を削除してもよろしいですか？`,
+        function() {
+            productTypes = productTypes.filter(t => t.id !== id);
+            localStorage.setItem('goemonproducttypes', JSON.stringify(productTypes));
+
+            showAlertModal('商品タイプを削除しました', 'success');
+            renderProductTypes();
+        }
+    );
+}
+
+// 商品タイプモーダルを閉じる
+window.closeProductTypeModal = function() {
+    const modal = document.getElementById('productTypeModal');
+    modal.style.display = 'none';
+    const container = modal.querySelector('.modal-cmn-container');
+    if (container) {
+        container.classList.remove('active');
+    }
+    document.getElementById('productTypeForm').reset();
+    editingProductTypeId = null;
 }
 
 // ========================================

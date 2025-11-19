@@ -16,8 +16,9 @@ function initializeIndexPage() {
     // デフォルトデータを初期化（localStorageにない場合）
     initializeDefaultDataIfNeeded();
 
-    // ヒーロー画像とカテゴリを読み込み
+    // ヒーロー画像、カテゴリ、商品タイプを読み込み
     loadCategories();
+    loadProductTypes();
 
     // Swiperの初期化を待ってからヒーロー画像を読み込み
     if (typeof Swiper !== 'undefined') {
@@ -35,6 +36,7 @@ function initializeIndexPage() {
 function initializeDefaultDataIfNeeded() {
     const categoriesExist = localStorage.getItem('goemoncategories');
     const heroImagesExist = localStorage.getItem('goemonheroimages');
+    const productTypesExist = localStorage.getItem('goemonproducttypes');
 
     if (!categoriesExist) {
         const defaultCategories = [
@@ -79,6 +81,16 @@ function initializeDefaultDataIfNeeded() {
         ];
         localStorage.setItem('goemonheroimages', JSON.stringify(defaultHeroImages));
         console.log('Default hero images initialized on index page');
+    }
+
+    if (!productTypesExist) {
+        const defaultProductTypes = [
+            { id: 'new-arrivals', name: '新着アイテム', slug: 'new-arrivals', description: '最新の入荷商品', order: 0 },
+            { id: 'pre-order', name: '予約アイテム', slug: 'pre-order', description: '予約受付中の商品', order: 1 },
+            { id: 'restock', name: '再入荷', slug: 'restock', description: '人気商品が再入荷', order: 2 }
+        ];
+        localStorage.setItem('goemonproducttypes', JSON.stringify(defaultProductTypes));
+        console.log('Default product types initialized on index page');
     }
 }
 
@@ -266,6 +278,57 @@ function loadCategories() {
 
     } catch (error) {
         console.error('Error loading categories:', error);
+    }
+}
+
+// 商品タイプをlocalStorageから読み込んで表示
+function loadProductTypes() {
+    try {
+        const savedProductTypes = localStorage.getItem('goemonproducttypes');
+        if (!savedProductTypes) {
+            console.log('No saved product types found');
+            return;
+        }
+
+        const productTypes = JSON.parse(savedProductTypes);
+        if (!productTypes || productTypes.length === 0) {
+            console.log('Product types array is empty');
+            return;
+        }
+
+        // 並び順でソート
+        productTypes.sort((a, b) => a.order - b.order);
+
+        // 商品タイプリストを取得（タイトルが「商品タイプから探す」のwidgetを探す）
+        const widgets = document.querySelectorAll('.sidebar-widget');
+        let productTypeList = null;
+
+        widgets.forEach(widget => {
+            const title = widget.querySelector('.widget-title');
+            if (title && title.textContent.includes('商品タイプから探す')) {
+                productTypeList = widget.querySelector('.category-list-sidebar');
+            }
+        });
+
+        if (!productTypeList) {
+            console.error('Product type list not found');
+            return;
+        }
+
+        // 既存の商品タイプをクリア
+        productTypeList.innerHTML = '';
+
+        // 商品タイプを動的に生成
+        productTypes.forEach(type => {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="goemon-products.html?type=${type.slug}">${type.name}</a>`;
+            productTypeList.appendChild(li);
+        });
+
+        console.log('Product types loaded:', productTypes.length);
+
+    } catch (error) {
+        console.error('Error loading product types:', error);
     }
 }
 
