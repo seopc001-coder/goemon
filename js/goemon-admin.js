@@ -17,30 +17,23 @@ async function initializeAdminDashboard() {
 
 // 管理者権限チェック
 async function checkAdminAccess() {
-    try {
-        const { data: { user } } = await supabase.auth.getUser();
+    // 管理者認証チェック
+    const adminAuthenticated = sessionStorage.getItem('adminAuthenticated');
 
-        if (!user) {
-            // 管理画面アクセスであることをマーク
-            sessionStorage.setItem('adminAccess', 'true');
-            window.location.href = 'goemon-login.html';
-            return;
-        }
-
-        // 管理者名を表示
-        const adminNameElem = document.getElementById('adminName');
-        if (adminNameElem && user.email) {
-            adminNameElem.textContent = user.email.split('@')[0];
-        }
-
-        // 実際の実装では管理者ロールをチェック
-        // 例: if (user.user_metadata.role !== 'admin') { ... }
-        console.log('Admin access granted for:', user.email);
-    } catch (error) {
-        console.error('Admin check error:', error);
-        sessionStorage.setItem('adminAccess', 'true');
-        window.location.href = 'goemon-login.html';
+    if (adminAuthenticated !== 'true') {
+        // 管理者認証されていない場合は管理者ログインページへ
+        window.location.href = 'goemon-admin-login.html';
+        return;
     }
+
+    // 管理者IDを表示
+    const adminNameElem = document.getElementById('adminName');
+    const adminId = sessionStorage.getItem('adminId');
+    if (adminNameElem && adminId) {
+        adminNameElem.textContent = adminId;
+    }
+
+    console.log('Admin access granted for:', adminId);
 }
 
 // 統計データを読み込み
@@ -242,4 +235,20 @@ function viewOrderDetail(orderId) {
     // 注文管理ページへ遷移（実装予定）
     showAlertModal(`注文 #${orderId} の詳細表示機能は実装中です`, 'info');
     console.log('View order detail:', orderId);
+}
+
+// 管理者ログアウト
+function adminLogout() {
+    showConfirmModal('ログアウトしますか？', () => {
+        // セッション情報をクリア
+        sessionStorage.removeItem('adminAuthenticated');
+        sessionStorage.removeItem('adminId');
+        sessionStorage.removeItem('adminLoginTime');
+
+        showAlertModal('ログアウトしました', 'success');
+
+        setTimeout(() => {
+            window.location.href = 'goemon-admin-login.html';
+        }, 1500);
+    });
 }

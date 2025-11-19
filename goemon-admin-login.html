@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理者ログイン | 五右衛門</title>
+    <link rel="stylesheet" href="./css/goemon-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        .admin-login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .admin-login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .admin-login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .admin-login-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .admin-login-icon i {
+            font-size: 36px;
+            color: white;
+        }
+
+        .admin-login-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .admin-login-subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .admin-form-group {
+            margin-bottom: 25px;
+        }
+
+        .admin-form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .admin-form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .admin-form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .admin-password-input {
+            position: relative;
+        }
+
+        .admin-password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+
+        .admin-password-toggle:hover {
+            color: #667eea;
+        }
+
+        .admin-login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .admin-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .admin-login-btn:active {
+            transform: translateY(0);
+        }
+
+        .admin-login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .admin-back-link {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .admin-back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .admin-back-link a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .admin-error-message {
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            color: #c33;
+            font-size: 14px;
+            display: none;
+        }
+
+        .admin-error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-login-page">
+        <div class="admin-login-container">
+            <div class="admin-login-header">
+                <div class="admin-login-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h1 class="admin-login-title">管理者ログイン</h1>
+                <p class="admin-login-subtitle">管理画面へアクセスするには認証が必要です</p>
+            </div>
+
+            <div id="errorMessage" class="admin-error-message"></div>
+
+            <form id="adminLoginForm">
+                <div class="admin-form-group">
+                    <label for="adminId" class="admin-form-label">
+                        <i class="fas fa-user"></i> 管理者ID
+                    </label>
+                    <input
+                        type="text"
+                        id="adminId"
+                        class="admin-form-input"
+                        placeholder="管理者IDを入力"
+                        required
+                        autocomplete="username"
+                    >
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="adminPassword" class="admin-form-label">
+                        <i class="fas fa-lock"></i> パスワード
+                    </label>
+                    <div class="admin-password-input">
+                        <input
+                            type="password"
+                            id="adminPassword"
+                            class="admin-form-input"
+                            placeholder="パスワードを入力"
+                            required
+                            autocomplete="current-password"
+                        >
+                        <button type="button" class="admin-password-toggle" id="passwordToggle">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="admin-login-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> ログイン
+                </button>
+            </form>
+
+            <div class="admin-back-link">
+                <a href="goemon-index.html">
+                    <i class="fas fa-arrow-left"></i> トップページへ戻る
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/goemon-modal.js"></script>
+    <script src="./js/goemon-admin-login.js"></script>
+</body>
+</html>

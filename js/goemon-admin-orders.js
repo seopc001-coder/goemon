@@ -17,22 +17,15 @@ async function initializeOrderManagement() {
 
 // 管理者権限チェック
 async function checkAdminAccess() {
-    try {
-        const { data: { user } } = await supabase.auth.getUser();
+    const adminAuthenticated = sessionStorage.getItem('adminAuthenticated');
 
-        if (!user) {
-            sessionStorage.setItem('adminAccess', 'true');
-            window.location.href = 'goemon-login.html';
-            return;
-        }
-
-        // 実際の実装では管理者ロールをチェック
-        console.log('Admin access granted for:', user.email);
-    } catch (error) {
-        console.error('Admin check error:', error);
-        sessionStorage.setItem('adminAccess', 'true');
-        window.location.href = 'goemon-login.html';
+    if (adminAuthenticated !== 'true') {
+        window.location.href = 'goemon-admin-login.html';
+        return;
     }
+
+    const adminId = sessionStorage.getItem('adminId');
+    console.log('Admin access granted for:', adminId);
 }
 
 // 注文データを読み込み
