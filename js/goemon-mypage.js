@@ -150,8 +150,10 @@ function initializeEditLinks() {
                 const section = this.closest('.mypage-section');
                 const sectionTitle = section.querySelector('h2').textContent.trim();
 
-                // お気に入りセクションの場合はお気に入りページへ遷移
-                if (sectionTitle.includes('お気に入り')) {
+                // 各セクションごとのページへ遷移
+                if (sectionTitle.includes('注文履歴')) {
+                    window.location.href = 'goemon-orders.html';
+                } else if (sectionTitle.includes('お気に入り')) {
                     window.location.href = 'goemon-favorites.html';
                 } else if (sectionTitle.includes('お届け先住所')) {
                     window.location.href = 'goemon-addresses.html';

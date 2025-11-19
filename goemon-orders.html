@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="五右衛門 - 注文履歴">
+    <title>注文履歴 | 五右衛門</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./assets/goemon/favicon.png">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="./css/goemon-style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <!-- ハンバーガーメニュー（モバイル） -->
+            <button class="btn-menu-sp" id="mobileMenuBtn" aria-label="メニュー">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <!-- ロゴ -->
+            <div class="header-logo">
+                <a href="goemon-index.html">
+                    <h1>五右衛門</h1>
+                </a>
+            </div>
+
+            <!-- 検索とユーティリティのラッパー -->
+            <div class="header-right">
+                <!-- 検索バー（PCのみ） -->
+                <div class="header-search">
+                    <input type="search" placeholder="商品を検索" aria-label="商品検索">
+                    <button type="submit" aria-label="検索実行">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+
+                <!-- ユーティリティナビ -->
+                <nav class="header-utility">
+                    <ul>
+                        <!-- 検索アイコン（モバイルのみ） -->
+                        <li class="mobile-only">
+                            <button class="btn-search-sp" id="searchBtnSp" aria-label="検索">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </li>
+                        <!-- マイページ（常に表示） -->
+                        <li>
+                            <a href="goemon-mypage.html" aria-label="マイページ">
+                                <i class="far fa-user"></i>
+                            </a>
+                        </li>
+                        <!-- お気に入り（常に表示） -->
+                        <li>
+                            <a href="goemon-favorites.html" aria-label="お気に入り">
+                                <i class="far fa-heart"></i>
+                                <span class="txt-noti" style="display: none;">0</span>
+                            </a>
+                        </li>
+                        <!-- カート（常に表示） -->
+                        <li>
+                            <a href="goemon-cart.html" aria-label="カート">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="txt-noti">0</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- パンくずナビ -->
+    <nav class="breadcrumb-nav">
+        <div class="container">
+            <ol class="breadcrumb">
+                <li><a href="goemon-index.html">ホーム</a></li>
+                <li><a href="goemon-mypage.html">マイページ</a></li>
+                <li>注文履歴</li>
+            </ol>
+        </div>
+    </nav>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+        <div class="container">
+            <!-- ページヘッダー -->
+            <div class="page-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px;">
+                <div>
+                    <a href="goemon-mypage.html" class="btn-back" style="display: inline-block; margin-bottom: 10px; color: #666; text-decoration: none;">
+                        <i class="fas fa-arrow-left"></i> マイページに戻る
+                    </a>
+                    <h1 class="page-title">注文履歴</h1>
+                </div>
+            </div>
+
+            <!-- 注文履歴コンテンツ -->
+            <div id="ordersContent">
+                <!-- 注文履歴リスト -->
+                <div id="ordersList" class="orders-list">
+                    <!-- JavaScriptで動的に生成 -->
+                </div>
+
+                <!-- 注文がない場合 -->
+                <div id="emptyOrders" class="empty-state" style="display: none; text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-box-open fa-4x" style="color: #ddd; margin-bottom: 20px;"></i>
+                    <h2 style="color: #666; margin-bottom: 10px;">注文履歴がありません</h2>
+                    <p style="color: #999; margin-bottom: 30px;">まだ商品を注文していません</p>
+                    <a href="goemon-products.html" class="btn-cmn-02">商品を見る</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>カスタマーサービス</h3>
+                    <ul>
+                        <li><a href="#">お問い合わせ</a></li>
+                        <li><a href="#">配送について</a></li>
+                        <li><a href="#">返品・交換</a></li>
+                        <li><a href="#">よくある質問</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>ショップ情報</h3>
+                    <ul>
+                        <li><a href="#">会社概要</a></li>
+                        <li><a href="#">採用情報</a></li>
+                        <li><a href="#">店舗一覧</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>ポリシー</h3>
+                    <ul>
+                        <li><a href="#">利用規約</a></li>
+                        <li><a href="#">プライバシーポリシー</a></li>
+                        <li><a href="#">特定商取引法に基づく表記</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>フォローする</h3>
+                    <div class="social-links">
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="LINE"><i class="fab fa-line"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 五右衛門. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- スクロールトップボタン -->
+    <button class="scroll-to-top" id="scrollToTop" aria-label="トップへ戻る">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- 注文詳細モーダル -->
+    <div class="modal-overlay" id="orderDetailModal">
+        <div class="modal-cmn-container" style="max-width: 600px;">
+            <button class="modal-close" id="closeOrderDetailModal" aria-label="閉じる">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-content" id="orderDetailContent">
+                <!-- JavaScriptで動的に生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/goemon-auto-logout.js"></script>
+    <script src="./js/goemon-products-data.js"></script>
+    <script src="./js/goemon-main.js"></script>
+    <script src="./js/goemon-orders.js"></script>
+</body>
+</html>
