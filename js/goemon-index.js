@@ -420,27 +420,8 @@ function createProductCard(product) {
     // 画像URLを確認
     const imageUrl = product.image || '';
 
-    // 商品タイプに応じたタグを取得
-    let tagHTML = '';
-    if (product.productType) {
-        const savedProductTypes = localStorage.getItem('goemonproducttypes');
-        if (savedProductTypes) {
-            try {
-                const productTypes = JSON.parse(savedProductTypes);
-                const productType = productTypes.find(t => t.slug === product.productType);
-                if (productType && productType.tag) {
-                    const tagColor = productType.tagColor || 'blue';
-                    tagHTML = `<span class="tag-${tagColor}">${productType.tag}</span>`;
-                }
-            } catch (error) {
-                console.error('Error loading product type tag:', error);
-            }
-        }
-    }
-
     card.innerHTML = `
         <div class="product-image">
-            ${tagHTML ? `<div class="product-tags">${tagHTML}</div>` : ''}
             <div class="product-img-wrapper">
                 ${imageUrl ? `<img src="${imageUrl}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">` : `
                 <div class="product-placeholder">
