@@ -9,7 +9,9 @@ function generateProductsData(count) {
         'ハイウエストデニムパンツ', 'レーストップス', 'オーバーサイズニット',
         'マキシ丈スカート', 'ストライプシャツ', 'ワイドパンツ', 'デニムジャケット'
     ];
-    const categories = ['アウター', 'トップス', 'ボトムス', 'ワンピース', '小物'];
+    // slugを使用（設定画面のカテゴリと一致）
+    const categories = ['outer', 'tops', 'bottoms', 'onepiece', 'shoes', 'bags', 'accessories'];
+    const productTypes = ['new-arrivals', 'pre-order', 'restock'];
     const sizes = ['S', 'M', 'L', 'XL'];
     const colors = ['white', 'black', 'pink', 'blue', 'beige'];
 
@@ -33,6 +35,7 @@ function generateProductsData(count) {
             price: price,
             originalPrice: originalPrice,
             category: categories[Math.floor(seededRandom(i * 1000 + 4) * categories.length)],
+            productType: productTypes[Math.floor(seededRandom(i * 1000 + 9) * productTypes.length)],
             size: sizes[Math.floor(seededRandom(i * 1000 + 5) * sizes.length)],
             color: colors[Math.floor(seededRandom(i * 1000 + 6) * colors.length)],
             isNew: seededRandom(i * 1000 + 7) > 0.5,

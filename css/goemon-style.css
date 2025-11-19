@@ -2558,6 +2558,11 @@ input, select, textarea {
     margin-bottom: 20px;
 }
 
+/* 商品詳細ページの画像エリア内のタグは非表示 */
+.main-image-container .product-tags {
+    display: none;
+}
+
 .main-image {
     width: 100%;
     aspect-ratio: 1;

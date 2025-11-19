@@ -117,12 +117,9 @@ function loadCategories() {
             return;
         }
 
-        // 商品総数を取得
-        const totalProducts = allProducts.length;
-
-        // 「すべて」を最初に追加（商品数を動的に表示）
+        // 「すべて」を最初に追加
         const allCategory = document.createElement('li');
-        allCategory.innerHTML = `<a href="goemon-products.html" class="active" data-category="all">すべて (${totalProducts})</a>`;
+        allCategory.innerHTML = `<a href="goemon-products.html" class="active" data-category="all">すべて</a>`;
         categoryList.appendChild(allCategory);
 
         // localStorageからカテゴリを読み込み
