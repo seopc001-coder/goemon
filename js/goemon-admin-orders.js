@@ -94,7 +94,7 @@ function renderOrders(orders) {
             <tr>
                 <td><strong>#${order.orderId}</strong></td>
                 <td>${formatDateTime(orderDate)}</td>
-                <td>${order.customerName || 'ゲスト'}</td>
+                <td>${getCustomerName(order)}</td>
                 <td>${order.customerEmail || 'N/A'}</td>
                 <td><strong>¥${(order.totalAmount || 0).toLocaleString()}</strong></td>
                 <td>
@@ -124,6 +124,26 @@ function getStatusClass(status) {
         'キャンセル': 'cancelled'
     };
     return statusMap[status] || 'pending';
+}
+
+// 顧客名を取得（姓名形式）
+function getCustomerName(order) {
+    // shippingAddressにlastNameとfirstNameがある場合
+    if (order.shippingAddress && order.shippingAddress.lastName && order.shippingAddress.firstName) {
+        return `${order.shippingAddress.lastName} ${order.shippingAddress.firstName}`;
+    }
+
+    // customerNameがある場合
+    if (order.customerName) {
+        return order.customerName;
+    }
+
+    // shippingAddress.nameがある場合
+    if (order.shippingAddress && order.shippingAddress.name) {
+        return order.shippingAddress.name;
+    }
+
+    return 'ゲスト';
 }
 
 // 日時をフォーマット
@@ -239,7 +259,7 @@ function viewOrderDetail(orderId) {
             <h3><i class="fas fa-user"></i> 顧客情報</h3>
             <div class="detail-grid">
                 <div class="detail-label">氏名:</div>
-                <div>${order.customerName || 'ゲスト'}</div>
+                <div>${getCustomerName(order)}</div>
 
                 <div class="detail-label">メールアドレス:</div>
                 <div>${order.customerEmail || 'N/A'}</div>

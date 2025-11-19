@@ -131,6 +131,7 @@
                 status: '準備中', // 準備中, 配送中, 配送完了, キャンセル
                 customerId: currentUser ? currentUser.id : null,
                 customerEmail: currentUser ? currentUser.email : null,
+                customerName: orderData.shippingAddress.name || null,
                 items: orderData.items.map(item => ({
                     productId: String(item.id),
                     quantity: item.quantity,

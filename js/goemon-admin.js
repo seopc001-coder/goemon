@@ -245,7 +245,7 @@ function loadRecentOrders() {
             return `
                 <tr>
                     <td><strong>#${order.orderId}</strong></td>
-                    <td>${order.customerName || 'ゲスト'}</td>
+                    <td>${getCustomerName(order)}</td>
                     <td>${formatDateTime(orderDate)}</td>
                     <td><strong>¥${(order.totalAmount || 0).toLocaleString()}</strong></td>
                     <td>
@@ -275,6 +275,26 @@ function getStatusInfo(status) {
     };
 
     return statusMap[status] || { class: 'pending', icon: 'fa-question-circle' };
+}
+
+// 顧客名を取得（姓名形式）
+function getCustomerName(order) {
+    // shippingAddressにlastNameとfirstNameがある場合
+    if (order.shippingAddress && order.shippingAddress.lastName && order.shippingAddress.firstName) {
+        return `${order.shippingAddress.lastName} ${order.shippingAddress.firstName}`;
+    }
+
+    // customerNameがある場合
+    if (order.customerName) {
+        return order.customerName;
+    }
+
+    // shippingAddress.nameがある場合
+    if (order.shippingAddress && order.shippingAddress.name) {
+        return order.shippingAddress.name;
+    }
+
+    return 'ゲスト';
 }
 
 // 日時をフォーマット
