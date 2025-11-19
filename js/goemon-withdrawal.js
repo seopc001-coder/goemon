@@ -99,22 +99,22 @@ function validateForm() {
     const agreeCheckbox = document.getElementById('agreeCheckbox');
 
     if (!email) {
-        alert('メールアドレスを入力してください');
+        showAlertModal('メールアドレスを入力してください', 'warning');
         return false;
     }
 
     if (!phone) {
-        alert('電話番号を入力してください');
+        showAlertModal('電話番号を入力してください', 'warning');
         return false;
     }
 
     if (!password) {
-        alert('パスワードを入力してください');
+        showAlertModal('パスワードを入力してください', 'warning');
         return false;
     }
 
     if (!agreeCheckbox.checked) {
-        alert('注意事項に同意してください');
+        showAlertModal('注意事項に同意してください', 'warning');
         return false;
     }
 
@@ -136,7 +136,7 @@ async function processWithdrawal() {
         });
 
         if (signInError) {
-            alert('メールアドレスまたはパスワードが正しくありません');
+            showAlertModal('メールアドレスまたはパスワードが正しくありません', 'error');
             hideModal(confirmModal);
             return;
         }
@@ -146,7 +146,7 @@ async function processWithdrawal() {
         const activeOrders = orders.filter(order => order.status === '準備中' || order.status === '配送中');
 
         if (activeOrders.length > 0) {
-            alert('配送中の商品があるため、退会できません。\n商品の受け取り後に再度お試しください。');
+            showAlertModal('配送中の商品があるため、退会できません。\n商品の受け取り後に再度お試しください。', 'warning');
             hideModal(confirmModal);
             return;
         }
@@ -178,7 +178,7 @@ async function processWithdrawal() {
 
     } catch (error) {
         console.error('Withdrawal error:', error);
-        alert('退会処理中にエラーが発生しました。時間をおいて再度お試しください。');
+        showAlertModal('退会処理中にエラーが発生しました。時間をおいて再度お試しください。', 'error');
         hideModal(confirmModal);
     }
 }

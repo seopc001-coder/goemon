@@ -11,8 +11,10 @@ async function checkLoginAndLoadProfile() {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
-            alert('ログインが必要です');
-            window.location.href = 'goemon-login.html';
+            showAlertModal('ログインが必要です', 'warning');
+            setTimeout(() => {
+                window.location.href = 'goemon-login.html';
+            }, 1500);
             return;
         }
 
@@ -20,8 +22,10 @@ async function checkLoginAndLoadProfile() {
         loadUserProfile(user);
     } catch (error) {
         console.error('Login check error:', error);
-        alert('ログイン状態の確認に失敗しました');
-        window.location.href = 'goemon-login.html';
+        showAlertModal('ログイン状態の確認に失敗しました', 'error');
+        setTimeout(() => {
+            window.location.href = 'goemon-login.html';
+        }, 1500);
     }
 }
 
@@ -84,28 +88,28 @@ async function saveProfile() {
         if (newPassword || confirmPassword || currentPassword) {
             // すべてのパスワードフィールドが入力されているかチェック
             if (!currentPassword) {
-                alert('パスワードを変更する場合は、現在のパスワードを入力してください');
+                showAlertModal('パスワードを変更する場合は、現在のパスワードを入力してください', 'warning');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
                 return;
             }
 
             if (!newPassword || !confirmPassword) {
-                alert('新しいパスワードと確認用パスワードを入力してください');
+                showAlertModal('新しいパスワードと確認用パスワードを入力してください', 'warning');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
                 return;
             }
 
             if (newPassword !== confirmPassword) {
-                alert('新しいパスワードが一致しません');
+                showAlertModal('新しいパスワードが一致しません', 'error');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
                 return;
             }
 
             if (newPassword.length < 8) {
-                alert('パスワードは8文字以上で設定してください');
+                showAlertModal('パスワードは8文字以上で設定してください', 'warning');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
                 return;
@@ -118,7 +122,7 @@ async function saveProfile() {
             });
 
             if (signInError) {
-                alert('現在のパスワードが正しくありません');
+                showAlertModal('現在のパスワードが正しくありません', 'error');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
                 return;
@@ -150,12 +154,14 @@ async function saveProfile() {
             throw error;
         }
 
-        alert('会員情報を更新しました');
-        window.location.href = 'goemon-mypage.html';
+        showAlertModal('会員情報を更新しました', 'success');
+        setTimeout(() => {
+            window.location.href = 'goemon-mypage.html';
+        }, 1500);
 
     } catch (error) {
         console.error('Save error:', error);
-        alert('会員情報の更新に失敗しました: ' + error.message);
+        showAlertModal('会員情報の更新に失敗しました: ' + error.message, 'error');
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     }

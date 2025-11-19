@@ -75,13 +75,13 @@ function initializeSNSLogin() {
 
     if (googleBtn) {
         googleBtn.addEventListener('click', function() {
-            alert('Googleログイン（デモ版）\n実装時はGoogle OAuth APIと連携します');
+            showAlertModal('Googleログイン（デモ版）\n実装時はGoogle OAuth APIと連携します', 'info');
         });
     }
 
     if (lineBtn) {
         lineBtn.addEventListener('click', function() {
-            alert('LINEログイン（デモ版）\n実装時はLINE Login APIと連携します');
+            showAlertModal('LINEログイン（デモ版）\n実装時はLINE Login APIと連携します', 'info');
         });
     }
 }
@@ -138,7 +138,7 @@ async function submitLogin(email, password) {
             if (error.message.includes('Invalid login credentials')) {
                 showError('loginPasswordError', 'メールアドレスまたはパスワードが正しくありません');
             } else {
-                alert('ログインに失敗しました: ' + error.message);
+                showAlertModal('ログインに失敗しました: ' + error.message, 'error');
             }
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
@@ -148,7 +148,7 @@ async function submitLogin(email, password) {
         // メール認証チェック
         if (data?.user && !data.user.email_confirmed_at) {
             // メール未認証の場合はログイン拒否
-            alert('メールアドレスが認証されていません。\n\n登録時に送信された確認メール内のリンクをクリックして、メール認証を完了してください。');
+            showAlertModal('メールアドレスが認証されていません。\n\n登録時に送信された確認メール内のリンクをクリックして、メール認証を完了してください。', 'warning');
 
             // ログアウト処理
             await supabase.auth.signOut();
@@ -167,12 +167,14 @@ async function submitLogin(email, password) {
 
         localStorage.setItem('goemonloggedin', 'true');
 
-        alert('ログインしました！');
-        window.location.href = 'goemon-index.html';
+        showAlertModal('ログインしました！', 'success');
+        setTimeout(() => {
+            window.location.href = 'goemon-index.html';
+        }, 1500);
 
     } catch (error) {
         console.error('Login error:', error);
-        alert('ログイン処理中にエラーが発生しました。もう一度お試しください。');
+        showAlertModal('ログイン処理中にエラーが発生しました。もう一度お試しください。', 'error');
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
     }
