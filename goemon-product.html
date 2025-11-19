@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="カジュアルコットンブラウス - 五右衛門">
+    <title>商品詳細 | 五右衛門</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./assets/goemon/favicon.png">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="./css/goemon-style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <!-- ハンバーガーメニュー（モバイルのみ） -->
+            <button class="btn-menu-sp" id="mobileMenuBtn" aria-label="メニュー">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <!-- ロゴ -->
+            <div class="header-logo">
+                <a href="goemon-index.html">
+                    <h1>五右衛門</h1>
+                </a>
+            </div>
+
+            <!-- 検索とユーティリティのラッパー -->
+            <div class="header-right">
+                <!-- 検索バー（PCのみ） -->
+                <div class="header-search">
+                    <input type="search" placeholder="SEARCH" aria-label="商品検索">
+                    <button type="submit" aria-label="検索実行">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+
+                <!-- ユーティリティナビ -->
+                <nav class="header-utility">
+                    <ul>
+                        <!-- 検索アイコン（モバイルのみ） -->
+                        <li class="mobile-only">
+                            <button class="btn-search-sp" id="searchBtnSp" aria-label="検索">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </li>
+                        <!-- PC表示用 -->
+                        <li class="pc-only">
+                            <a href="goemon-mypage.html" aria-label="マイページ">
+                                <i class="far fa-user"></i>
+                            </a>
+                        </li>
+                        <li class="pc-only">
+                            <a href="goemon-favorites.html" aria-label="お気に入り">
+                                <i class="far fa-heart"></i>
+                            </a>
+                        </li>
+                        <!-- カート（常に表示） -->
+                        <li>
+                            <a href="goemon-cart.html" aria-label="カート">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="txt-noti">0</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- パンくずリスト -->
+    <nav class="breadcrumb" style="display: none;">
+        <div class="container">
+            <ul>
+                <li><a href="goemon-index.html">ホーム</a></li>
+                <li>カジュアルコットンブラウス</li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 商品詳細 -->
+    <main class="product-detail-page">
+        <div class="container">
+            <div class="product-detail-layout">
+                <!-- 商品画像エリア -->
+                <div class="product-images">
+                    <div class="main-image-container">
+                        <div class="main-image" id="mainProductImage">
+                            <i class="fas fa-tshirt fa-5x"></i>
+                        </div>
+                        <button class="btn-wishlist-large" id="productWishlistBtn" aria-label="お気に入りに追加">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="thumbnail-images">
+                        <div class="thumbnail active">
+                            <i class="fas fa-tshirt fa-2x"></i>
+                        </div>
+                        <div class="thumbnail">
+                            <i class="fas fa-tshirt fa-2x"></i>
+                        </div>
+                        <div class="thumbnail">
+                            <i class="fas fa-tshirt fa-2x"></i>
+                        </div>
+                        <div class="thumbnail">
+                            <i class="fas fa-tshirt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 商品情報エリア -->
+                <div class="product-info-area">
+                    <div class="product-tags-detail">
+                        <span class="tag-new">NEW</span>
+                    </div>
+
+                    <h1 class="product-title">カジュアルコットンブラウス</h1>
+
+                    <div class="product-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="rating-count">(128件のレビュー)</span>
+                    </div>
+
+                    <div class="product-price-detail">
+                        <span class="price-detail-current">¥2,990</span>
+                        <span class="price-detail-tax">（税込）</span>
+                    </div>
+
+                    <div class="product-description">
+                        <p>軽やかなコットン素材を使用したカジュアルブラウス。ゆったりとしたシルエットで、リラックス感のある着心地が魅力です。オフィスカジュアルからデイリーまで幅広く活躍します。</p>
+                    </div>
+
+                    <!-- カラー選択 -->
+                    <div class="product-option">
+                        <label class="option-label">カラー</label>
+                        <div class="color-options">
+                            <label class="color-option">
+                                <input type="radio" name="color" value="white" checked>
+                                <span class="color-swatch" style="background-color: #fff; border: 1px solid #ddd;"></span>
+                                <span class="color-name">ホワイト</span>
+                            </label>
+                            <label class="color-option">
+                                <input type="radio" name="color" value="black">
+                                <span class="color-swatch" style="background-color: #000;"></span>
+                                <span class="color-name">ブラック</span>
+                            </label>
+                            <label class="color-option">
+                                <input type="radio" name="color" value="pink">
+                                <span class="color-swatch" style="background-color: #c691a5;"></span>
+                                <span class="color-name">ピンク</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- サイズ選択 -->
+                    <div class="product-option">
+                        <label class="option-label">サイズ</label>
+                        <div class="size-options">
+                            <label class="size-option">
+                                <input type="radio" name="size" value="S">
+                                <span class="size-label">S</span>
+                            </label>
+                            <label class="size-option">
+                                <input type="radio" name="size" value="M" checked>
+                                <span class="size-label">M</span>
+                            </label>
+                            <label class="size-option">
+                                <input type="radio" name="size" value="L">
+                                <span class="size-label">L</span>
+                            </label>
+                            <label class="size-option">
+                                <input type="radio" name="size" value="XL">
+                                <span class="size-label">XL</span>
+                            </label>
+                        </div>
+                        <a href="#" class="size-guide-link">サイズガイド</a>
+                    </div>
+
+                    <!-- 数量選択 -->
+                    <div class="product-option">
+                        <label class="option-label">数量</label>
+                        <div class="quantity-selector">
+                            <button class="qty-btn" id="qtyMinus">-</button>
+                            <input type="number" class="qty-input-detail" id="quantity" value="1" min="1" max="10">
+                            <button class="qty-btn" id="qtyPlus">+</button>
+                        </div>
+                    </div>
+
+                    <!-- 在庫状況 -->
+                    <div class="stock-status in-stock">
+                        <i class="fas fa-check-circle"></i> 在庫あり
+                    </div>
+
+                    <!-- アクションボタン -->
+                    <div class="product-actions">
+                        <button class="btn-add-to-cart-large" id="addToCartBtn">
+                            <i class="fas fa-shopping-cart"></i> カートに追加
+                        </button>
+                    </div>
+
+                    <!-- SNSシェアボタン -->
+                    <div class="product-share">
+                        <p class="share-label">シェアする</p>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn share-instagram" aria-label="Instagramでシェア">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="share-btn share-twitter" aria-label="Xでシェア">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="share-btn share-line" aria-label="LINEでシェア">
+                                <i class="fab fa-line"></i>
+                            </a>
+                            <a href="#" class="share-btn share-tiktok" aria-label="TikTokでシェア">
+                                <i class="fab fa-tiktok"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 配送・返品情報 -->
+                    <div class="product-features">
+                        <div class="feature-item">
+                            <i class="fas fa-truck"></i>
+                            <div>
+                                <strong>送料無料</strong>
+                                <p>5,000円以上のご購入で送料無料</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-undo"></i>
+                            <div>
+                                <strong>返品・交換可能</strong>
+                                <p>商品到着後14日以内</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <div>
+                                <strong>安心の品質保証</strong>
+                                <p>厳選された高品質素材を使用</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品詳細タブ -->
+            <div class="product-tabs">
+                <div class="tab-headers">
+                    <button class="tab-header active" data-tab="description">商品詳細</button>
+                    <button class="tab-header" data-tab="size">サイズ</button>
+                    <button class="tab-header" data-tab="reviews">レビュー</button>
+                </div>
+
+                <div class="tab-contents">
+                    <div class="tab-content active" id="tab-description">
+                        <h3>商品説明</h3>
+                        <p>軽やかなコットン素材を使用したカジュアルブラウス。ゆったりとしたシルエットで、リラックス感のある着心地が魅力です。</p>
+                        <h4>素材・品質</h4>
+                        <ul>
+                            <li>素材: コットン100%</li>
+                            <li>原産国: 中国</li>
+                            <li>洗濯: 洗濯機可（ネット使用）</li>
+                        </ul>
+                        <h4>特徴</h4>
+                        <ul>
+                            <li>通気性に優れたコットン素材</li>
+                            <li>ゆったりとしたリラックスフィット</li>
+                            <li>シンプルなデザインで着回し自在</li>
+                        </ul>
+                    </div>
+
+                    <div class="tab-content" id="tab-size">
+                        <h3>サイズ表</h3>
+                        <table class="size-table">
+                            <thead>
+                                <tr>
+                                    <th>サイズ</th>
+                                    <th>着丈(cm)</th>
+                                    <th>肩幅(cm)</th>
+                                    <th>身幅(cm)</th>
+                                    <th>袖丈(cm)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>S</td>
+                                    <td>60</td>
+                                    <td>38</td>
+                                    <td>48</td>
+                                    <td>58</td>
+                                </tr>
+                                <tr>
+                                    <td>M</td>
+                                    <td>62</td>
+                                    <td>40</td>
+                                    <td>50</td>
+                                    <td>60</td>
+                                </tr>
+                                <tr>
+                                    <td>L</td>
+                                    <td>64</td>
+                                    <td>42</td>
+                                    <td>52</td>
+                                    <td>62</td>
+                                </tr>
+                                <tr>
+                                    <td>XL</td>
+                                    <td>66</td>
+                                    <td>44</td>
+                                    <td>54</td>
+                                    <td>64</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="tab-content" id="tab-reviews">
+                        <h3>カスタマーレビュー</h3>
+                        <div class="reviews-summary">
+                            <div class="average-rating">
+                                <span class="rating-number">4.5</span>
+                                <div class="stars-large">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <p>128件のレビュー</p>
+                            </div>
+                        </div>
+
+                        <div class="review-list">
+                            <div class="review-item">
+                                <div class="review-header">
+                                    <div class="reviewer-name">A.T様</div>
+                                    <div class="review-stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                </div>
+                                <div class="review-body">
+                                    <p>とても着心地が良く、デザインもシンプルで使いやすいです。色違いでも購入したいと思います。</p>
+                                </div>
+                                <div class="review-date">2024年1月15日</div>
+                            </div>
+
+                            <div class="review-item">
+                                <div class="review-header">
+                                    <div class="reviewer-name">M.K様</div>
+                                    <div class="review-stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                    </div>
+                                </div>
+                                <div class="review-body">
+                                    <p>生地がしっかりしていて、洗濯しても型崩れしません。普段使いに最適です。</p>
+                                </div>
+                                <div class="review-date">2024年1月10日</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 関連商品 -->
+            <section class="related-products">
+                <h2 class="section-title">関連商品</h2>
+                <div class="list-products-01" id="relatedProducts">
+                    <!-- JavaScript で動的に生成 -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h3>ショッピングガイド</h3>
+                    <ul>
+                        <li><a href="#">ご利用ガイド</a></li>
+                        <li><a href="#">配送・送料について</a></li>
+                        <li><a href="#">返品・交換について</a></li>
+                        <li><a href="#">お支払い方法</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>サポート</h3>
+                    <ul>
+                        <li><a href="#">よくある質問</a></li>
+                        <li><a href="#">お問い合わせ</a></li>
+                        <li><a href="#">サイズガイド</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>会社情報</h3>
+                    <ul>
+                        <li><a href="#">会社概要</a></li>
+                        <li><a href="#">採用情報</a></li>
+                        <li><a href="#">プライバシーポリシー</a></li>
+                        <li><a href="#">利用規約</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>SNS</h3>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="LINE"><i class="fab fa-line"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 五右衛門. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- モーダルオーバーレイ -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+    <!-- カート追加確認モーダル -->
+    <div class="modal-cmn-container modal-addcart-confirm" id="addToCartModal">
+        <button class="modal-close" aria-label="閉じる">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-content">
+            <h3>カートに追加しました</h3>
+            <div class="modal-product-info">
+                <div class="modal-product-image">
+                    <i class="fas fa-tshirt fa-2x"></i>
+                </div>
+                <div class="modal-product-details">
+                    <p class="modal-product-name">商品名</p>
+                    <p class="modal-product-price">¥2,990</p>
+                    <p class="modal-product-options">カラー: ホワイト / サイズ: M</p>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-cmn-01 modal-continue-shopping">買い物を続ける</button>
+                <a href="goemon-cart.html" class="btn-cmn-02">カートを見る</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- スクロールトップボタン -->
+    <button class="scroll-to-top" id="scrollToTop" aria-label="トップへ戻る">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/goemon-auto-logout.js"></script>
+    <script src="./js/goemon-products-data.js"></script>
+    <script src="./js/goemon-main.js"></script>
+    <script src="./js/goemon-product.js"></script>
+</body>
+</html>

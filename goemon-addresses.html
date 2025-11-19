@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お届け先住所 | 五右衛門</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./assets/goemon/favicon.png">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="./css/goemon-style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- ヘッダー(シンプル版) -->
+    <header class="header-simple">
+        <div class="container">
+            <div class="header-logo">
+                <a href="goemon-index.html">
+                    <h1>五右衛門</h1>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content" style="padding: 40px 0; min-height: 60vh;">
+        <div class="container" style="max-width: 900px;">
+            <!-- ページタイトル -->
+            <div style="margin-bottom: 30px;">
+                <a href="goemon-mypage.html" class="link-text" style="display: inline-block; margin-bottom: 15px;">
+                    <i class="fas fa-arrow-left"></i> マイページに戻る
+                </a>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h1 style="font-size: 28px;">
+                        <i class="fas fa-map-marker-alt"></i> お届け先住所
+                    </h1>
+                    <button id="addAddressBtn" class="btn-cmn-02" style="padding: 10px 20px;">
+                        <i class="fas fa-plus"></i> 新規追加
+                    </button>
+                </div>
+                <p id="addressCount" style="color: #666; font-size: 14px;">0件の住所</p>
+            </div>
+
+            <!-- 住所がない場合 -->
+            <div id="emptyAddress" style="display: none; text-align: center; padding: 60px 20px; background: #f5f5f5; border-radius: 8px;">
+                <i class="fas fa-map-marker-alt" style="font-size: 80px; color: #ddd; margin-bottom: 20px;"></i>
+                <h2 style="font-size: 20px; color: #666; margin-bottom: 15px;">登録された住所がありません</h2>
+                <p style="color: #999; margin-bottom: 30px;">新しい配送先住所を追加してください</p>
+                <button id="addAddressBtnEmpty" class="btn-cmn-02" style="padding: 12px 30px;">
+                    <i class="fas fa-plus"></i> 住所を追加
+                </button>
+            </div>
+
+            <!-- 住所リスト -->
+            <div id="addressListContainer">
+                <!-- JavaScriptで動的に生成 -->
+            </div>
+        </div>
+    </main>
+
+    <!-- 住所追加モーダル -->
+    <div class="modal-overlay" id="addressModalOverlay" style="display: none;"></div>
+    <div class="modal-cmn-container" id="addressModal" style="display: none; max-width: 600px;">
+        <button class="modal-close" id="closeAddressModal" aria-label="閉じる">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-content">
+            <h3 style="margin-bottom: 20px;">新しい配送先住所を追加</h3>
+            <form id="addAddressForm">
+                <!-- 宛名 -->
+                <div class="form-group">
+                    <label for="newAddressName" class="form-label">宛名</label>
+                    <input type="text" id="newAddressName" class="form-input" placeholder="例: 自宅" required>
+                </div>
+
+                <!-- 郵便番号 -->
+                <div class="form-group">
+                    <label for="newPostalCode" class="form-label">郵便番号</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="newPostalCode" class="form-input" placeholder="例: 1234567" required>
+                        <button type="button" id="searchAddressBtn" class="btn-cmn-02" style="white-space: nowrap; padding: 0 20px;">
+                            <i class="fas fa-search"></i> 住所検索
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 都道府県 -->
+                <div class="form-group">
+                    <label for="newPrefecture" class="form-label">都道府県</label>
+                    <select id="newPrefecture" class="form-input" required>
+                        <option value="">選択してください</option>
+                        <option value="北海道">北海道</option>
+                        <option value="青森県">青森県</option>
+                        <option value="岩手県">岩手県</option>
+                        <option value="宮城県">宮城県</option>
+                        <option value="秋田県">秋田県</option>
+                        <option value="山形県">山形県</option>
+                        <option value="福島県">福島県</option>
+                        <option value="茨城県">茨城県</option>
+                        <option value="栃木県">栃木県</option>
+                        <option value="群馬県">群馬県</option>
+                        <option value="埼玉県">埼玉県</option>
+                        <option value="千葉県">千葉県</option>
+                        <option value="東京都">東京都</option>
+                        <option value="神奈川県">神奈川県</option>
+                        <option value="新潟県">新潟県</option>
+                        <option value="富山県">富山県</option>
+                        <option value="石川県">石川県</option>
+                        <option value="福井県">福井県</option>
+                        <option value="山梨県">山梨県</option>
+                        <option value="長野県">長野県</option>
+                        <option value="岐阜県">岐阜県</option>
+                        <option value="静岡県">静岡県</option>
+                        <option value="愛知県">愛知県</option>
+                        <option value="三重県">三重県</option>
+                        <option value="滋賀県">滋賀県</option>
+                        <option value="京都府">京都府</option>
+                        <option value="大阪府">大阪府</option>
+                        <option value="兵庫県">兵庫県</option>
+                        <option value="奈良県">奈良県</option>
+                        <option value="和歌山県">和歌山県</option>
+                        <option value="鳥取県">鳥取県</option>
+                        <option value="島根県">島根県</option>
+                        <option value="岡山県">岡山県</option>
+                        <option value="広島県">広島県</option>
+                        <option value="山口県">山口県</option>
+                        <option value="徳島県">徳島県</option>
+                        <option value="香川県">香川県</option>
+                        <option value="愛媛県">愛媛県</option>
+                        <option value="高知県">高知県</option>
+                        <option value="福岡県">福岡県</option>
+                        <option value="佐賀県">佐賀県</option>
+                        <option value="長崎県">長崎県</option>
+                        <option value="熊本県">熊本県</option>
+                        <option value="大分県">大分県</option>
+                        <option value="宮崎県">宮崎県</option>
+                        <option value="鹿児島県">鹿児島県</option>
+                        <option value="沖縄県">沖縄県</option>
+                    </select>
+                </div>
+
+                <!-- 市区町村 -->
+                <div class="form-group">
+                    <label for="newCity" class="form-label">市区町村</label>
+                    <input type="text" id="newCity" class="form-input" placeholder="例: 渋谷区" required>
+                </div>
+
+                <!-- 番地 -->
+                <div class="form-group">
+                    <label for="newAddress1" class="form-label">番地</label>
+                    <input type="text" id="newAddress1" class="form-input" placeholder="例: 道玄坂1-2-3" required>
+                </div>
+
+                <!-- 建物名・部屋番号 -->
+                <div class="form-group">
+                    <label for="newAddress2" class="form-label">建物名・部屋番号（任意）</label>
+                    <input type="text" id="newAddress2" class="form-input" placeholder="例: 〇〇ビル 101号室">
+                </div>
+
+                <!-- 電話番号 -->
+                <div class="form-group">
+                    <label for="newPhone" class="form-label">電話番号</label>
+                    <input type="tel" id="newPhone" class="form-input" placeholder="例: 090-1234-5678" required>
+                </div>
+
+                <!-- ボタン -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px;">
+                    <button type="button" id="cancelAddressBtn" class="btn-cmn-01">
+                        キャンセル
+                    </button>
+                    <button type="submit" class="btn-cmn-02">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- フッター(シンプル版) -->
+    <footer class="footer-simple">
+        <div class="container">
+            <p>&copy; 2025 五右衛門 All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/goemon-auto-logout.js"></script>
+    <script src="./js/goemon-addresses.js"></script>
+</body>
+</html>

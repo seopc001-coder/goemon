@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ショッピングカート | 五右衛門</title>
+    <link rel="stylesheet" href="./css/goemon-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- シンプルヘッダー -->
+    <header class="header-simple">
+        <div class="container">
+            <div class="header-logo">
+                <a href="goemon-index.html">
+                    <h1>五右衛門</h1>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- カートページ -->
+    <main class="cart-page">
+        <div class="container">
+            <!-- 購入手順インジケーター -->
+            <div class="checkout-steps">
+                <div class="step active">
+                    <div class="step-number">1</div>
+                    <div class="step-label">カート</div>
+                </div>
+                <div class="step-line"></div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-label">配送情報</div>
+                </div>
+                <div class="step-line"></div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-label">お支払い</div>
+                </div>
+                <div class="step-line"></div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-label">完了</div>
+                </div>
+            </div>
+
+            <h1 class="page-title">ショッピングカート</h1>
+
+            <div class="cart-layout">
+                <!-- カート商品リスト -->
+                <div class="cart-items-section">
+                    <!-- カートアイテム1 -->
+                    <div class="cart-item" data-item-id="1">
+                        <div class="cart-item-select">
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="item-checkbox" checked>
+                                <span class="checkbox-custom"></span>
+                            </label>
+                        </div>
+                        <div class="cart-item-image">
+                            <div class="product-placeholder">
+                                <i class="fas fa-tshirt fa-2x"></i>
+                            </div>
+                        </div>
+                        <div class="cart-item-details">
+                            <h3 class="cart-item-name">カジュアルコットンブラウス</h3>
+                            <div class="cart-item-options">
+                                <p>カラー: ホワイト</p>
+                                <p>サイズ: M</p>
+                            </div>
+                            <div class="cart-item-stock">在庫あり</div>
+                        </div>
+                        <div class="cart-item-quantity">
+                            <button class="qty-btn qty-minus" aria-label="数量を減らす">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" class="qty-input" value="1" min="1" max="10">
+                            <button class="qty-btn qty-plus" aria-label="数量を増やす">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="cart-item-price">
+                            <span class="item-total-price">¥2,990</span>
+                        </div>
+                        <div class="cart-item-remove">
+                            <button class="btn-remove-item" aria-label="削除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- カートアイテム2 -->
+                    <div class="cart-item" data-item-id="2">
+                        <div class="cart-item-select">
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="item-checkbox" checked>
+                                <span class="checkbox-custom"></span>
+                            </label>
+                        </div>
+                        <div class="cart-item-image">
+                            <div class="product-placeholder">
+                                <i class="fas fa-socks fa-2x"></i>
+                            </div>
+                        </div>
+                        <div class="cart-item-details">
+                            <h3 class="cart-item-name">ハイウエストデニムパンツ</h3>
+                            <div class="cart-item-options">
+                                <p>カラー: ブルー</p>
+                                <p>サイズ: L</p>
+                            </div>
+                            <div class="cart-item-stock">在庫あり</div>
+                        </div>
+                        <div class="cart-item-quantity">
+                            <button class="qty-btn qty-minus" aria-label="数量を減らす">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" class="qty-input" value="1" min="1" max="10">
+                            <button class="qty-btn qty-plus" aria-label="数量を増やす">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="cart-item-price">
+                            <span class="item-total-price">¥3,990</span>
+                        </div>
+                        <div class="cart-item-remove">
+                            <button class="btn-remove-item" aria-label="削除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 空のカート（初期は非表示） -->
+                    <div class="empty-cart" style="display: none;">
+                        <i class="fas fa-shopping-cart fa-4x"></i>
+                        <p>カートに商品がありません</p>
+                        <a href="goemon-index.html" class="btn-cmn-02">ショッピングを続ける</a>
+                    </div>
+                </div>
+
+                <!-- カートサマリー -->
+                <div class="cart-summary">
+                    <div class="summary-card">
+                        <h3 class="summary-title">ご注文内容</h3>
+
+                        <div class="summary-row">
+                            <span>商品小計（2点）</span>
+                            <span class="summary-subtotal">¥6,980</span>
+                        </div>
+
+                        <div class="summary-row">
+                            <span>配送料</span>
+                            <span class="summary-shipping">¥0</span>
+                        </div>
+
+                        <div class="summary-note">
+                            ※ ¥5,000以上で送料無料
+                        </div>
+
+                        <!-- クーポン適用 -->
+                        <div class="coupon-section">
+                            <input type="text" class="coupon-input" placeholder="クーポンコードを入力">
+                            <button class="btn-apply-coupon">適用</button>
+                        </div>
+
+                        <div class="summary-row summary-discount" style="display: none;">
+                            <span>クーポン割引</span>
+                            <span class="discount-amount">-¥500</span>
+                        </div>
+
+                        <div class="summary-divider"></div>
+
+                        <div class="summary-row summary-total">
+                            <span>合計（税込）</span>
+                            <span class="total-amount">¥6,980</span>
+                        </div>
+
+                        <button class="btn-cmn-02 btn-checkout" onclick="location.href='goemon-checkout.html'">
+                            レジに進む
+                        </button>
+
+                        <button class="btn-cmn-01 btn-continue-shopping" onclick="location.href='goemon-index.html'">
+                            買い物を続ける
+                        </button>
+                    </div>
+
+                    <!-- 配送・返品情報 -->
+                    <div class="cart-info">
+                        <div class="info-item">
+                            <i class="fas fa-truck"></i>
+                            <div>
+                                <strong>送料無料</strong>
+                                <p>¥5,000以上のご注文で全国送料無料</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-undo"></i>
+                            <div>
+                                <strong>返品・交換OK</strong>
+                                <p>30日間の返品・交換保証</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-lock"></i>
+                            <div>
+                                <strong>安全な決済</strong>
+                                <p>SSL暗号化で安心のお買い物</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- おすすめ商品 -->
+            <section class="recommended-products">
+                <h2 class="section-title">あなたへのおすすめ</h2>
+                <div class="list-products-01">
+                    <article class="product-card" data-product-id="11">
+                        <div class="product-image">
+                            <div class="product-img-wrapper">
+                                <div class="product-placeholder">
+                                    <i class="fas fa-vest fa-2x"></i>
+                                </div>
+                            </div>
+                            <button class="btn-wishlist" aria-label="お気に入りに追加">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">ニットカーディガン</h3>
+                            <div class="product-price">
+                                <span class="price-current">¥3,490</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="product-card" data-product-id="12">
+                        <div class="product-image">
+                            <div class="product-img-wrapper">
+                                <div class="product-placeholder">
+                                    <i class="fas fa-female fa-2x"></i>
+                                </div>
+                            </div>
+                            <button class="btn-wishlist" aria-label="お気に入りに追加">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">フローラルワンピース</h3>
+                            <div class="product-price">
+                                <span class="price-current">¥4,990</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="product-card" data-product-id="13">
+                        <div class="product-image">
+                            <div class="product-img-wrapper">
+                                <div class="product-placeholder">
+                                    <i class="fas fa-tshirt fa-2x"></i>
+                                </div>
+                            </div>
+                            <button class="btn-wishlist" aria-label="お気に入りに追加">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">ベーシックTシャツ</h3>
+                            <div class="product-price">
+                                <span class="price-current">¥1,590</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="product-card" data-product-id="14">
+                        <div class="product-image">
+                            <div class="product-img-wrapper">
+                                <div class="product-placeholder">
+                                    <i class="fas fa-vest fa-2x"></i>
+                                </div>
+                            </div>
+                            <button class="btn-wishlist" aria-label="お気に入りに追加">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">オーバーサイズニット</h3>
+                            <div class="product-price">
+                                <span class="price-current">¥3,990</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- フッター（シンプル版） -->
+    <footer class="footer-simple">
+        <div class="container">
+            <p>&copy; 2025 五右衛門 All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/goemon-auto-logout.js"></script>
+    <script src="./js/goemon-cart.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お気に入り | 五右衛門</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./assets/goemon/favicon.png">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="./css/goemon-style.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- ヘッダー(シンプル版) -->
+    <header class="header-simple">
+        <div class="container">
+            <div class="header-logo">
+                <a href="goemon-index.html">
+                    <h1>五右衛門</h1>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main-content" style="padding: 40px 0; min-height: 60vh;">
+        <div class="container">
+            <!-- ページタイトル -->
+            <div style="margin-bottom: 30px;">
+                <a href="goemon-mypage.html" class="link-text" style="display: inline-block; margin-bottom: 15px;">
+                    <i class="fas fa-arrow-left"></i> マイページに戻る
+                </a>
+                <h1 style="font-size: 28px; margin-bottom: 10px;">
+                    <i class="fas fa-heart" style="color: #e74c3c;"></i> お気に入り
+                </h1>
+                <p id="wishlistCount" style="color: #666; font-size: 14px;">0件の商品</p>
+            </div>
+
+            <!-- お気に入り商品がない場合 -->
+            <div id="emptyWishlist" style="display: none; text-align: center; padding: 60px 20px;">
+                <i class="fas fa-heart-broken" style="font-size: 80px; color: #ddd; margin-bottom: 20px;"></i>
+                <h2 style="font-size: 20px; color: #666; margin-bottom: 15px;">お気に入り商品がありません</h2>
+                <p style="color: #999; margin-bottom: 30px;">商品ページで<i class="fas fa-heart"></i>アイコンをクリックして、お気に入りに追加しましょう</p>
+                <a href="goemon-index.html" class="btn-cmn-02" style="display: inline-block; text-decoration: none; padding: 12px 30px;">
+                    商品を探す
+                </a>
+            </div>
+
+            <!-- お気に入り商品リスト -->
+            <div id="wishlistGrid" class="product-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px;">
+                <!-- JavaScriptで動的に生成 -->
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター(シンプル版) -->
+    <footer class="footer-simple">
+        <div class="container">
+            <p>&copy; 2025 五右衛門 All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/goemon-wishlist.js"></script>
+</body>
+</html>

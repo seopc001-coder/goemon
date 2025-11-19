@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン | 五右衛門</title>
+    <link rel="stylesheet" href="./css/goemon-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- シンプルヘッダー -->
+    <header class="header-simple">
+        <div class="container">
+            <div class="header-logo">
+                <a href="goemon-index.html">
+                    <h1>五右衛門</h1>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ログインフォーム -->
+    <main class="auth-page">
+        <div class="container-small">
+            <div class="auth-container">
+                <h1 class="auth-title">ログイン</h1>
+                <p class="auth-subtitle">会員の方はこちらからログインしてください</p>
+
+                <form class="auth-form" id="loginForm" novalidate>
+                    <!-- メールアドレス -->
+                    <div class="form-group">
+                        <label for="loginEmail" class="form-label">
+                            メールアドレス
+                        </label>
+                        <div class="form-cmn-input-01">
+                            <input
+                                type="email"
+                                id="loginEmail"
+                                name="email"
+                                placeholder="example@email.com"
+                                required
+                                autocomplete="email"
+                            >
+                        </div>
+                        <p class="form-error" id="loginEmailError"></p>
+                    </div>
+
+                    <!-- パスワード -->
+                    <div class="form-group">
+                        <label for="loginPassword" class="form-label">
+                            パスワード
+                        </label>
+                        <div class="form-cmn-input-01 password-input">
+                            <input
+                                type="password"
+                                id="loginPassword"
+                                name="password"
+                                placeholder="パスワードを入力"
+                                required
+                                autocomplete="current-password"
+                            >
+                            <button type="button" class="password-toggle" aria-label="パスワード表示切替">
+                                <i class="far fa-eye"></i>
+                            </button>
+                        </div>
+                        <p class="form-error" id="loginPasswordError"></p>
+                    </div>
+
+                    <!-- ログイン状態を保持 -->
+                    <div class="form-group">
+                        <div class="form-cmn-check-01">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="rememberMe" id="rememberMe">
+                                <span class="checkbox-custom"></span>
+                                <span>ログイン状態を保持する</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- ログインボタン -->
+                    <div class="form-submit">
+                        <button type="submit" class="btn-cmn-02 btn-submit">
+                            ログイン
+                        </button>
+                    </div>
+
+                    <!-- パスワードを忘れた場合 -->
+                    <div class="auth-links">
+                        <a href="goemon-password-reset.html" class="link-text">パスワードをお忘れの方</a>
+                    </div>
+                </form>
+
+                <!-- SNSログイン -->
+                <div class="sns-login">
+                    <p class="sns-login-label">または</p>
+                    <div class="sns-login-buttons">
+                        <button class="btn-sns-login btn-google">
+                            <i class="fab fa-google"></i>
+                            Googleでログイン
+                        </button>
+                        <button class="btn-sns-login btn-line">
+                            <i class="fab fa-line"></i>
+                            LINEでログイン
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 新規登録リンク -->
+                <div class="auth-footer">
+                    <p>会員登録がまだの方は</p>
+                    <a href="goemon-register.html" class="btn-cmn-01">新規会員登録（無料）</a>
+                    <p class="benefits-text">会員登録で500円クーポンプレゼント中！</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター（シンプル版） -->
+    <footer class="footer-simple">
+        <div class="container">
+            <p>&copy; 2025 五右衛門 All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/goemon-login.js"></script>
+</body>
+</html>
