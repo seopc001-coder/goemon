@@ -117,9 +117,14 @@ function loadCategories() {
             return;
         }
 
+        // 現在のURLパラメータを取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentType = urlParams.get('type');
+
         // 「すべて」を最初に追加
         const allCategory = document.createElement('li');
-        allCategory.innerHTML = `<a href="goemon-products.html" class="active" data-category="all">すべて</a>`;
+        const allUrl = currentType ? `goemon-products.html?type=${currentType}` : 'goemon-products.html';
+        allCategory.innerHTML = `<a href="${allUrl}" class="active" data-category="all">すべて</a>`;
         categoryList.appendChild(allCategory);
 
         // localStorageからカテゴリを読み込み
@@ -132,7 +137,11 @@ function loadCategories() {
             // 各カテゴリを追加
             categories.forEach(category => {
                 const li = document.createElement('li');
-                li.innerHTML = `<a href="goemon-products.html?category=${category.slug}" data-category="${category.slug}">${category.name}</a>`;
+                // 商品タイプパラメータがあれば保持
+                const categoryUrl = currentType
+                    ? `goemon-products.html?type=${currentType}&category=${category.slug}`
+                    : `goemon-products.html?category=${category.slug}`;
+                li.innerHTML = `<a href="${categoryUrl}" data-category="${category.slug}">${category.name}</a>`;
                 categoryList.appendChild(li);
             });
 
