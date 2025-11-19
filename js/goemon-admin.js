@@ -237,6 +237,12 @@ function viewOrderDetail(orderId) {
     console.log('View order detail:', orderId);
 }
 
+// 在庫アラート商品を表示
+function viewLowStockProducts() {
+    // 商品管理ページへ遷移し、在庫少フィルターを適用
+    window.location.href = 'goemon-admin-products.html?filter=lowstock';
+}
+
 // 管理者ログアウト
 function adminLogout() {
     showConfirmModal('ログアウトしますか？', () => {

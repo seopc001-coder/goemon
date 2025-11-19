@@ -15,6 +15,15 @@ async function initializeProductManagement() {
     // 商品データを読み込み
     loadProducts();
 
+    // URLパラメータをチェック
+    const urlParams = new URLSearchParams(window.location.search);
+    const filter = urlParams.get('filter');
+
+    if (filter === 'lowstock') {
+        // 在庫が少ない商品のみ表示
+        filterLowStockProducts();
+    }
+
     // フォーム送信イベント
     document.getElementById('productForm').addEventListener('submit', handleProductFormSubmit);
 
@@ -128,6 +137,27 @@ function searchProducts() {
     }
 
     renderProducts(filteredProducts);
+}
+
+// 在庫が少ない商品をフィルタリング
+function filterLowStockProducts() {
+    filteredProducts = {};
+    Object.keys(allProducts).forEach(key => {
+        const product = allProducts[key];
+        const stock = product.stock || Math.floor(Math.random() * 100);
+        if (stock < 10) {
+            filteredProducts[key] = product;
+        }
+    });
+
+    renderProducts(filteredProducts);
+
+    // 検索ボックスにヒントを表示
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.placeholder = '在庫が少ない商品を表示中...';
+        searchInput.style.borderColor = '#ff9800';
+    }
 }
 
 // 商品追加モーダルを開く
