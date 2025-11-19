@@ -237,7 +237,11 @@ window.openAddCategoryModal = function() {
 
     const modal = document.getElementById('categoryModal');
     if (modal) {
-        modal.classList.add('active');
+        modal.style.display = 'flex';
+        const container = modal.querySelector('.modal-cmn-container');
+        if (container) {
+            container.classList.add('active');
+        }
         console.log('Category modal opened');
     } else {
         console.error('Category modal not found');
@@ -265,7 +269,11 @@ window.editCategory = function(id) {
 
     const modal = document.getElementById('categoryModal');
     if (modal) {
-        modal.classList.add('active');
+        modal.style.display = 'flex';
+        const container = modal.querySelector('.modal-cmn-container');
+        if (container) {
+            container.classList.add('active');
+        }
         console.log('Category edit modal opened');
     } else {
         console.error('Category modal not found');
@@ -362,7 +370,11 @@ window.deleteCategory = function(id) {
 // カテゴリモーダルを閉じる
 window.closeCategoryModal = function() {
     const modal = document.getElementById('categoryModal');
-    modal.classList.remove('active');
+    modal.style.display = 'none';
+    const container = modal.querySelector('.modal-cmn-container');
+    if (container) {
+        container.classList.remove('active');
+    }
     document.getElementById('categoryForm').reset();
     editingCategoryId = null;
 }
@@ -492,7 +504,11 @@ window.openAddHeroImageModal = function() {
 
     const modal = document.getElementById('heroImageModal');
     if (modal) {
-        modal.classList.add('active');
+        modal.style.display = 'flex';
+        const container = modal.querySelector('.modal-cmn-container');
+        if (container) {
+            container.classList.add('active');
+        }
         console.log('Hero image modal opened');
     } else {
         console.error('Hero image modal not found');
@@ -521,7 +537,11 @@ window.editHeroImage = function(id) {
 
     const modal = document.getElementById('heroImageModal');
     if (modal) {
-        modal.classList.add('active');
+        modal.style.display = 'flex';
+        const container = modal.querySelector('.modal-cmn-container');
+        if (container) {
+            container.classList.add('active');
+        }
         console.log('Hero image edit modal opened');
     } else {
         console.error('Hero image modal not found');
@@ -609,7 +629,11 @@ window.deleteHeroImage = function(id) {
 // ヒーロー画像モーダルを閉じる
 window.closeHeroImageModal = function() {
     const modal = document.getElementById('heroImageModal');
-    modal.classList.remove('active');
+    modal.style.display = 'none';
+    const container = modal.querySelector('.modal-cmn-container');
+    if (container) {
+        container.classList.remove('active');
+    }
     document.getElementById('heroImageForm').reset();
     editingHeroImageId = null;
 }
