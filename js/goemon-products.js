@@ -18,10 +18,48 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeProductsPage() {
+    loadCategories(); // カテゴリを先に読み込み
     loadProducts();
     initializeFilters();
     initializeSort();
     initializePagination();
+}
+
+// カテゴリをlocalStorageから読み込んで表示
+function loadCategories() {
+    try {
+        const savedCategories = localStorage.getItem('goemoncategories');
+        const categoryList = document.getElementById('categoryList');
+
+        if (!categoryList) {
+            console.error('Category list element not found');
+            return;
+        }
+
+        // 「すべて」を最初に追加
+        const allCategory = document.createElement('li');
+        allCategory.innerHTML = '<a href="#" class="active" data-category="all">すべて (100)</a>';
+        categoryList.appendChild(allCategory);
+
+        // localStorageからカテゴリを読み込み
+        if (savedCategories) {
+            const categories = JSON.parse(savedCategories);
+
+            // 並び順でソート
+            categories.sort((a, b) => a.order - b.order);
+
+            // 各カテゴリを追加
+            categories.forEach(category => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="#" data-category="${category.slug}">${category.name}</a>`;
+                categoryList.appendChild(li);
+            });
+
+            console.log('Categories loaded:', categories.length);
+        }
+    } catch (error) {
+        console.error('Error loading categories:', error);
+    }
 }
 
 // 商品データを読み込み（実際の実装ではAPIから取得）

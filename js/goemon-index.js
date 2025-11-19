@@ -158,6 +158,9 @@ function loadHeroImages() {
                 effect: 'slide',
             });
             console.log('Swiper initialized with', heroImages.length, 'slides');
+
+            // ヒーロー画像を表示
+            showHeroSection();
         }, 200);
 
     } catch (error) {
@@ -184,8 +187,32 @@ function initializeDefaultSwiper() {
                 effect: 'slide',
             });
             console.log('Default Swiper initialized with HTML slides');
+
+            // ヒーロー画像を表示
+            showHeroSection();
         }
     }, 100);
+}
+
+// ヒーロー画像セクションを表示
+function showHeroSection() {
+    const heroSection = document.querySelector('.hero-cmn-01');
+    if (heroSection) {
+        heroSection.style.opacity = '1';
+        console.log('Hero section displayed');
+    }
+}
+
+// カテゴリセクションを表示
+function showCategorySection() {
+    const widgets = document.querySelectorAll('.sidebar-widget');
+    widgets.forEach(widget => {
+        const title = widget.querySelector('.widget-title');
+        if (title && title.textContent.includes('カテゴリー')) {
+            widget.style.opacity = '1';
+            console.log('Category section displayed');
+        }
+    });
 }
 
 // カテゴリをlocalStorageから読み込んで表示
@@ -233,6 +260,9 @@ function loadCategories() {
         });
 
         console.log('Categories loaded:', categories.length);
+
+        // カテゴリを表示
+        showCategorySection();
 
     } catch (error) {
         console.error('Error loading categories:', error);

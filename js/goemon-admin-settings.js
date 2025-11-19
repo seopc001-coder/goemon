@@ -96,14 +96,14 @@ async function checkAdminAccess() {
 }
 
 // ログアウト
-function logout() {
+window.logout = function() {
     sessionStorage.removeItem('adminAuthenticated');
     sessionStorage.removeItem('adminId');
     window.location.href = 'goemon-admin-login.html';
 }
 
 // タブ切り替え
-function switchTab(tabName) {
+window.switchTab = function(tabName) {
     // すべてのタブとコンテンツを非アクティブに
     document.querySelectorAll('.settings-tab').forEach(tab => {
         tab.classList.remove('active');
@@ -216,7 +216,7 @@ function updateCategoryOrder() {
 }
 
 // カテゴリ追加モーダルを開く
-function openAddCategoryModal() {
+window.openAddCategoryModal = function() {
     editingCategoryId = null;
     document.getElementById('categoryModalTitle').innerHTML = '<i class="fas fa-plus"></i> カテゴリを追加';
     document.getElementById('categoryForm').reset();
@@ -227,7 +227,7 @@ function openAddCategoryModal() {
 }
 
 // カテゴリ編集モーダルを開く
-function editCategory(id) {
+window.editCategory = function(id) {
     const category = categories.find(c => c.id === id);
 
     if (!category) {
@@ -314,7 +314,7 @@ function handleCategoryFormSubmit(e) {
 }
 
 // カテゴリを削除
-function deleteCategory(id) {
+window.deleteCategory = function(id) {
     const category = categories.find(c => c.id === id);
 
     if (!category) {
@@ -335,7 +335,7 @@ function deleteCategory(id) {
 }
 
 // カテゴリモーダルを閉じる
-function closeCategoryModal() {
+window.closeCategoryModal = function() {
     const modal = document.getElementById('categoryModal');
     modal.classList.remove('active');
     document.getElementById('categoryForm').reset();
@@ -458,7 +458,7 @@ function updateHeroImageOrder() {
 }
 
 // ヒーロー画像追加モーダルを開く
-function openAddHeroImageModal() {
+window.openAddHeroImageModal = function() {
     editingHeroImageId = null;
     document.getElementById('heroImageModalTitle').innerHTML = '<i class="fas fa-plus"></i> ヒーロー画像を追加';
     document.getElementById('heroImageForm').reset();
@@ -469,7 +469,7 @@ function openAddHeroImageModal() {
 }
 
 // ヒーロー画像編集モーダルを開く
-function editHeroImage(id) {
+window.editHeroImage = function(id) {
     const image = heroImages.find(img => img.id === id);
 
     if (!image) {
@@ -548,7 +548,7 @@ function handleHeroImageFormSubmit(e) {
 }
 
 // ヒーロー画像を削除
-function deleteHeroImage(id) {
+window.deleteHeroImage = function(id) {
     const image = heroImages.find(img => img.id === id);
 
     if (!image) {
@@ -569,7 +569,7 @@ function deleteHeroImage(id) {
 }
 
 // ヒーロー画像モーダルを閉じる
-function closeHeroImageModal() {
+window.closeHeroImageModal = function() {
     const modal = document.getElementById('heroImageModal');
     modal.classList.remove('active');
     document.getElementById('heroImageForm').reset();
