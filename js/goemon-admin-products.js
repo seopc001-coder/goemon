@@ -12,6 +12,9 @@ async function initializeProductManagement() {
     // 管理者権限チェック
     await checkAdminAccess();
 
+    // デフォルトデータを初期化（localStorageにない場合）
+    initializeDefaultDataIfNeeded();
+
     // カテゴリーと商品タイプをlocalStorageから読み込み
     loadCategoriesToSelect();
     loadProductTypesToSelect();
@@ -53,6 +56,36 @@ async function checkAdminAccess() {
 
     const adminId = sessionStorage.getItem('adminId');
     console.log('Admin access granted for:', adminId);
+}
+
+// デフォルトデータを初期化（localStorageにない場合）
+function initializeDefaultDataIfNeeded() {
+    const categoriesExist = localStorage.getItem('goemoncategories');
+    const productTypesExist = localStorage.getItem('goemonproducttypes');
+
+    if (!categoriesExist) {
+        const defaultCategories = [
+            { id: 'outer', name: 'アウター', slug: 'outer', description: 'ジャケット、コートなど', order: 0 },
+            { id: 'tops', name: 'トップス', slug: 'tops', description: 'シャツ、カットソーなど', order: 1 },
+            { id: 'bottoms', name: 'ボトムス', slug: 'bottoms', description: 'パンツ、スカートなど', order: 2 },
+            { id: 'onepiece', name: 'ワンピース', slug: 'onepiece', description: 'ワンピース・ドレス', order: 3 },
+            { id: 'shoes', name: 'シューズ', slug: 'shoes', description: '靴・スニーカー', order: 4 },
+            { id: 'bags', name: 'バッグ', slug: 'bags', description: 'バッグ・小物', order: 5 },
+            { id: 'accessories', name: 'アクセサリー', slug: 'accessories', description: 'アクセサリー・小物', order: 6 }
+        ];
+        localStorage.setItem('goemoncategories', JSON.stringify(defaultCategories));
+        console.log('Default categories initialized in product management');
+    }
+
+    if (!productTypesExist) {
+        const defaultProductTypes = [
+            { id: 'new-arrivals', name: '新着アイテム', slug: 'new-arrivals', description: '最新の入荷商品', order: 0 },
+            { id: 'pre-order', name: '予約アイテム', slug: 'pre-order', description: '予約受付中の商品', order: 1 },
+            { id: 'restock', name: '再入荷', slug: 'restock', description: '人気商品が再入荷', order: 2 }
+        ];
+        localStorage.setItem('goemonproducttypes', JSON.stringify(defaultProductTypes));
+        console.log('Default product types initialized in product management');
+    }
 }
 
 // カテゴリーをlocalStorageから読み込んでセレクトボックスに設定
@@ -322,7 +355,12 @@ function editProduct(productId) {
     document.getElementById('productType').value = product.productType || '';
     document.getElementById('productStock').value = product.stock || 0;
     document.getElementById('productDescription').value = product.description || '';
+
+    // メイン画像とサブ画像を設定
     document.getElementById('productImage').value = product.image || '';
+    document.getElementById('productImage2').value = product.image2 || '';
+    document.getElementById('productImage3').value = product.image3 || '';
+    document.getElementById('productImage4').value = product.image4 || '';
 
     const modal = document.getElementById('productModal');
     modal.classList.add('active');
@@ -342,6 +380,9 @@ function handleProductFormSubmit(e) {
     const productStock = parseInt(document.getElementById('productStock').value);
     const productDescription = document.getElementById('productDescription').value.trim();
     const productImage = document.getElementById('productImage').value.trim();
+    const productImage2 = document.getElementById('productImage2').value.trim();
+    const productImage3 = document.getElementById('productImage3').value.trim();
+    const productImage4 = document.getElementById('productImage4').value.trim();
 
     // バリデーション
     if (!productName) {
@@ -364,6 +405,11 @@ function handleProductFormSubmit(e) {
         return;
     }
 
+    if (!productImage) {
+        showAlertModal('メイン画像URLを入力してください', 'warning');
+        return;
+    }
+
     // 商品データを構築
     const productData = {
         name: productName,
@@ -373,7 +419,10 @@ function handleProductFormSubmit(e) {
         productType: productType || null, // 商品タイプ（任意）
         stock: productStock,
         description: productDescription,
-        image: productImage
+        image: productImage,
+        image2: productImage2 || null,
+        image3: productImage3 || null,
+        image4: productImage4 || null
     };
 
     if (editingProductId) {

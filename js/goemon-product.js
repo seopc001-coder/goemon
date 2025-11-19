@@ -57,6 +57,9 @@ function updateProductDisplay() {
         }
     }
 
+    // 商品画像を更新
+    updateProductImages();
+
     // パンくずリストの商品名を更新
     const breadcrumbElement = document.querySelector('.breadcrumb li:last-child');
     if (breadcrumbElement) {
@@ -70,6 +73,35 @@ function updateProductDisplay() {
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
         metaDescription.setAttribute('content', `${productData.name} - 五右衛門`);
+    }
+}
+
+// 商品画像を更新（メイン画像とサムネイル）
+function updateProductImages() {
+    const images = [
+        productData.image,
+        productData.image2,
+        productData.image3,
+        productData.image4
+    ].filter(img => img); // 空の画像URLを除外
+
+    // メイン画像を更新
+    const mainImageContainer = document.getElementById('mainProductImage');
+    if (mainImageContainer && images.length > 0) {
+        mainImageContainer.innerHTML = `<img src="${images[0]}" alt="${productData.name}" style="width: 100%; height: 100%; object-fit: cover;">`;
+    }
+
+    // サムネイル画像を更新
+    const thumbnailContainer = document.querySelector('.thumbnail-images');
+    if (thumbnailContainer) {
+        thumbnailContainer.innerHTML = '';
+        images.forEach((imageUrl, index) => {
+            const thumbnail = document.createElement('div');
+            thumbnail.className = `thumbnail ${index === 0 ? 'active' : ''}`;
+            thumbnail.dataset.imageUrl = imageUrl;
+            thumbnail.innerHTML = `<img src="${imageUrl}" alt="${productData.name} - 画像${index + 1}" style="width: 100%; height: 100%; object-fit: cover;">`;
+            thumbnailContainer.appendChild(thumbnail);
+        });
     }
 }
 
@@ -94,17 +126,26 @@ async function initializeProductPage() {
 
 // サムネイル画像クリック
 function initializeThumbnails() {
-    const thumbnails = document.querySelectorAll('.thumbnail');
-    thumbnails.forEach((thumb, index) => {
-        thumb.addEventListener('click', function() {
+    // サムネイルクリックイベントを動的に設定
+    document.addEventListener('click', function(e) {
+        const thumbnail = e.target.closest('.thumbnail');
+        if (!thumbnail) return;
+
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        const imageUrl = thumbnail.dataset.imageUrl;
+
+        if (imageUrl) {
             // すべてのサムネイルからactiveクラスを削除
             thumbnails.forEach(t => t.classList.remove('active'));
             // クリックされたサムネイルにactiveクラスを追加
-            this.classList.add('active');
+            thumbnail.classList.add('active');
 
-            // メイン画像を更新（実際の実装では画像URLを変更）
-            console.log('メイン画像を変更:', index);
-        });
+            // メイン画像を更新
+            const mainImageContainer = document.getElementById('mainProductImage');
+            if (mainImageContainer) {
+                mainImageContainer.innerHTML = `<img src="${imageUrl}" alt="${productData.name}" style="width: 100%; height: 100%; object-fit: cover;">`;
+            }
+        }
     });
 }
 

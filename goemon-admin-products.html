@@ -390,8 +390,19 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="productImage">画像URL</label>
-                        <input type="text" id="productImage" placeholder="https://example.com/image.jpg">
+                        <label for="productImage">メイン画像URL <span style="color: #f44336;">*</span></label>
+                        <input type="text" id="productImage" placeholder="https://example.com/image.jpg" required>
+                        <small style="color: #666; font-size: 12px;">商品のメイン画像として表示されます</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>サブ画像URL（任意）</label>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <input type="text" id="productImage2" placeholder="サブ画像1のURL（任意）" style="margin-bottom: 5px;">
+                            <input type="text" id="productImage3" placeholder="サブ画像2のURL（任意）" style="margin-bottom: 5px;">
+                            <input type="text" id="productImage4" placeholder="サブ画像3のURL（任意）">
+                        </div>
+                        <small style="color: #666; font-size: 12px;">最大3枚のサブ画像を追加できます（合計4枚）</small>
                     </div>
 
                     <div class="form-actions">
