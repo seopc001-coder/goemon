@@ -2559,8 +2559,10 @@ input, select, textarea {
 }
 
 /* 商品詳細ページの画像エリア内のタグは非表示 */
-.main-image-container .product-tags {
-    display: none;
+.product-detail-page .product-images .product-tags,
+.product-detail-page .main-image-container .product-tags,
+.product-detail-page .product-image .product-tags {
+    display: none !important;
 }
 
 .main-image {
