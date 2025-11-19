@@ -58,8 +58,11 @@ function applyURLFilters() {
         // 商品タイプでフィルター（カテゴリーと同じロジックで処理）
         filters.productType = typeParam;
 
-        // ページタイトルを更新
-        updatePageTitle(typeParam, 'type');
+        // カテゴリが指定されていない場合のみタイトルを更新
+        // （カテゴリ指定時は、updatePageTitle(categoryParam, 'category')内でtypeParamをチェックして2行表示を行うため）
+        if (!categoryParam) {
+            updatePageTitle(typeParam, 'type');
+        }
 
         console.log('Applied product type filter from URL:', typeParam);
     }
