@@ -107,7 +107,9 @@ function initializeEditLinks() {
 
                 // お気に入りセクションの場合はお気に入りページへ遷移
                 if (sectionTitle.includes('お気に入り')) {
-                    window.location.href = 'goemon-wishlist.html';
+                    window.location.href = 'goemon-favorites.html';
+                } else if (sectionTitle.includes('お届け先住所')) {
+                    window.location.href = 'goemon-addresses.html';
                 } else {
                     alert(`${sectionTitle}の詳細機能は実装予定です`);
                 }
@@ -116,108 +118,9 @@ function initializeEditLinks() {
     });
 }
 
-// 住所管理機能
+// 住所管理機能（マイページでは表示のみ）
 function initializeAddressManagement() {
-    const addAddressBtn = document.getElementById('addAddressBtn');
-    const addressModal = document.getElementById('addressModal');
-    const addressModalOverlay = document.getElementById('addressModalOverlay');
-    const closeAddressModal = document.getElementById('closeAddressModal');
-    const addAddressForm = document.getElementById('addAddressForm');
-    const searchAddressBtn = document.getElementById('searchAddressBtn');
-
-    // モーダルを開く
-    if (addAddressBtn) {
-        addAddressBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            addressModal.style.display = 'block';
-            addressModalOverlay.style.display = 'block';
-        });
-    }
-
-    // モーダルを閉じる
-    if (closeAddressModal) {
-        closeAddressModal.addEventListener('click', function() {
-            addressModal.style.display = 'none';
-            addressModalOverlay.style.display = 'none';
-            addAddressForm.reset();
-        });
-    }
-
-    // オーバーレイクリックでモーダルを閉じる
-    if (addressModalOverlay) {
-        addressModalOverlay.addEventListener('click', function() {
-            addressModal.style.display = 'none';
-            addressModalOverlay.style.display = 'none';
-            addAddressForm.reset();
-        });
-    }
-
-    // 郵便番号から住所検索
-    if (searchAddressBtn) {
-        searchAddressBtn.addEventListener('click', async function(e) {
-            e.preventDefault();
-            const postalCode = document.getElementById('newPostalCode').value.replace(/[^0-9]/g, '');
-
-            if (postalCode.length !== 7) {
-                alert('7桁の郵便番号を入力してください');
-                return;
-            }
-
-            try {
-                const response = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${postalCode}`);
-                const data = await response.json();
-
-                if (data.results) {
-                    const result = data.results[0];
-                    document.getElementById('newPrefecture').value = result.address1;
-                    document.getElementById('newCity').value = result.address2 + result.address3;
-                } else {
-                    alert('住所が見つかりませんでした');
-                }
-            } catch (error) {
-                console.error('Address search error:', error);
-                alert('住所の検索に失敗しました');
-            }
-        });
-    }
-
-    // フォーム送信
-    if (addAddressForm) {
-        addAddressForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const newAddress = {
-                id: Date.now().toString(),
-                name: document.getElementById('newAddressName').value,
-                postalCode: document.getElementById('newPostalCode').value,
-                prefecture: document.getElementById('newPrefecture').value,
-                city: document.getElementById('newCity').value,
-                address1: document.getElementById('newAddress1').value,
-                address2: document.getElementById('newAddress2').value,
-                phone: document.getElementById('newPhone').value,
-                isDefault: false
-            };
-
-            try {
-                // localStorageに保存
-                const addresses = JSON.parse(localStorage.getItem('goemonaddresses')) || [];
-                addresses.push(newAddress);
-                localStorage.setItem('goemonaddresses', JSON.stringify(addresses));
-
-                // モーダルを閉じる
-                addressModal.style.display = 'none';
-                addressModalOverlay.style.display = 'none';
-                addAddressForm.reset();
-
-                // 住所リストを再読み込み
-                checkLoginStatus();
-                alert('住所を追加しました');
-            } catch (error) {
-                console.error('Error saving address:', error);
-                alert('住所の保存に失敗しました');
-            }
-        });
-    }
+    // マイページでは住所の表示のみ、編集は住所一覧ページで行う
 }
 
 // 住所情報を読み込み

@@ -2,7 +2,6 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     checkLoginAndLoadProfile();
-    initializeAddressSearch();
     initializeFormSubmit();
 });
 
@@ -39,44 +38,6 @@ function loadUserProfile(user) {
     document.getElementById('lastNameKana').value = metadata.lastNameKana || '';
     document.getElementById('firstNameKana').value = metadata.firstNameKana || '';
     document.getElementById('phone').value = metadata.phone || '';
-    document.getElementById('postalCode').value = metadata.postalCode || '';
-    document.getElementById('prefecture').value = metadata.prefecture || '';
-    document.getElementById('city').value = metadata.city || '';
-    document.getElementById('address1').value = metadata.address1 || '';
-    document.getElementById('address2').value = metadata.address2 || '';
-}
-
-// 住所検索機能
-function initializeAddressSearch() {
-    const searchBtn = document.getElementById('searchAddressBtn');
-
-    if (searchBtn) {
-        searchBtn.addEventListener('click', async function(e) {
-            e.preventDefault();
-            const postalCode = document.getElementById('postalCode').value.replace(/[^0-9]/g, '');
-
-            if (postalCode.length !== 7) {
-                alert('7桁の郵便番号を入力してください');
-                return;
-            }
-
-            try {
-                const response = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${postalCode}`);
-                const data = await response.json();
-
-                if (data.results) {
-                    const result = data.results[0];
-                    document.getElementById('prefecture').value = result.address1;
-                    document.getElementById('city').value = result.address2 + result.address3;
-                } else {
-                    alert('住所が見つかりませんでした');
-                }
-            } catch (error) {
-                console.error('Address search error:', error);
-                alert('住所の検索に失敗しました');
-            }
-        });
-    }
 }
 
 // フォーム送信処理
@@ -131,12 +92,7 @@ async function saveProfile() {
             firstName: document.getElementById('firstName').value,
             lastNameKana: document.getElementById('lastNameKana').value,
             firstNameKana: document.getElementById('firstNameKana').value,
-            phone: document.getElementById('phone').value,
-            postalCode: document.getElementById('postalCode').value,
-            prefecture: document.getElementById('prefecture').value,
-            city: document.getElementById('city').value,
-            address1: document.getElementById('address1').value,
-            address2: document.getElementById('address2').value
+            phone: document.getElementById('phone').value
         };
 
         // Supabaseのuser_metadataを更新
