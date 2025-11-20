@@ -554,6 +554,12 @@ function openAddProductModal() {
         }
     });
 
+    // 新規商品はデフォルトで公開状態なので、ランキングチェックボックスを有効化
+    const showInRankingCheckbox = document.getElementById('showInRanking');
+    if (showInRankingCheckbox) {
+        showInRankingCheckbox.disabled = false;
+    }
+
     const modal = document.getElementById('productModal');
     modal.classList.add('active');
 }
@@ -616,6 +622,15 @@ function editProduct(productId) {
         rankingPositionGroup.style.display = 'none';
     }
 
+    // 公開状態に応じてランキングチェックボックスの有効/無効を設定
+    if (!isPublished) {
+        showInRankingCheckbox.disabled = true;
+        showInRankingCheckbox.checked = false;
+        rankingPositionGroup.style.display = 'none';
+    } else {
+        showInRankingCheckbox.disabled = false;
+    }
+
     // メイン画像とサブ画像を設定
     document.getElementById('productImage').value = product.image || '';
     document.getElementById('productImage2').value = product.image2 || '';
@@ -676,6 +691,21 @@ function handleProductFormSubmit(e) {
     if (!productImage) {
         showAlertModal('メイン画像URLを入力してください', 'warning');
         return;
+    }
+
+    // ランキング表示と公開状態のバリデーション
+    if (showInRanking && !isPublished) {
+        showAlertModal('人気ランキングに表示できるのは公開商品のみです', 'error');
+        return;
+    }
+
+    // ランキング表示中の商品を非公開にしようとしている場合
+    if (editingProductId && allProducts[editingProductId]) {
+        const currentProduct = allProducts[editingProductId];
+        if (currentProduct.showInRanking && !isPublished) {
+            showAlertModal('人気ランキングに表示中の商品は非公開にできません。\n先にランキング表示を解除してください。', 'error');
+            return;
+        }
     }
 
     // 画像アップロード中のチェック
@@ -953,15 +983,44 @@ function initializeImageUploads() {
 function setupRankingCheckbox() {
     const showInRankingCheckbox = document.getElementById('showInRanking');
     const rankingPositionGroup = document.getElementById('rankingPositionGroup');
+    const isPublishedCheckbox = document.getElementById('isPublished');
 
     if (showInRankingCheckbox && rankingPositionGroup) {
+        // ランキング表示チェックボックスの変更時
         showInRankingCheckbox.addEventListener('change', function() {
+            // 公開商品のみランキング表示可能
             if (this.checked) {
+                if (!isPublishedCheckbox.checked) {
+                    this.checked = false;
+                    showAlertModal('人気ランキングに表示できるのは公開商品のみです', 'warning');
+                    return;
+                }
                 rankingPositionGroup.style.display = 'block';
             } else {
                 rankingPositionGroup.style.display = 'none';
                 document.getElementById('rankingPosition').value = '';
             }
         });
+
+        // 公開状態チェックボックスの変更時
+        if (isPublishedCheckbox) {
+            isPublishedCheckbox.addEventListener('change', function() {
+                // ランキング表示中の商品は非公開にできない
+                if (!this.checked && showInRankingCheckbox.checked) {
+                    this.checked = true;
+                    showAlertModal('人気ランキングに表示中の商品は非公開にできません。\n先にランキング表示を解除してください。', 'error');
+                    return;
+                }
+
+                // 非公開にする場合、ランキングチェックボックスを無効化
+                if (!this.checked) {
+                    showInRankingCheckbox.disabled = true;
+                    showInRankingCheckbox.checked = false;
+                    rankingPositionGroup.style.display = 'none';
+                } else {
+                    showInRankingCheckbox.disabled = false;
+                }
+            });
+        }
     }
 }
