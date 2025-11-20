@@ -177,13 +177,29 @@ function loadCategories() {
 
 // 商品データを読み込み（実際の実装ではAPIから取得）
 function loadProducts() {
-    // デモ商品データを完全削除（ユーザーの要望により）
-    localStorage.removeItem('goemonproducts');
-    console.log('Demo products data cleared from localStorage');
+    // localStorageから商品データを読み込み
+    const savedProducts = localStorage.getItem('goemonproducts');
 
-    // 空の配列を使用
-    allProducts = [];
-    console.log('No products in localStorage');
+    if (savedProducts) {
+        // 保存されている商品データを使用
+        try {
+            const productsData = JSON.parse(savedProducts);
+            // オブジェクト形式の場合は配列に変換
+            if (Array.isArray(productsData)) {
+                allProducts = productsData;
+            } else {
+                allProducts = Object.values(productsData);
+            }
+            console.log('Loaded products from localStorage:', allProducts.length);
+        } catch (error) {
+            console.error('Error parsing saved products:', error);
+            allProducts = [];
+        }
+    } else {
+        // localStorageにデータがない場合は空の配列を使用
+        allProducts = [];
+        console.log('No products in localStorage');
+    }
 
     filteredProducts = [...allProducts];
 

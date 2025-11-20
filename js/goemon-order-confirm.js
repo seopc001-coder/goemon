@@ -8,13 +8,19 @@
 
     // 商品データを初期化
     function initializeProductsData() {
-        // デモ商品データを完全削除（ユーザーの要望により）
-        localStorage.removeItem('goemonproducts');
-        console.log('Demo products data cleared from localStorage');
-
-        // 空のオブジェクトを使用
-        productsData = {};
-        console.log('No products in localStorage');
+        const savedProducts = localStorage.getItem('goemonproducts');
+        if (savedProducts) {
+            try {
+                const parsed = JSON.parse(savedProducts);
+                productsData = Array.isArray(parsed) ?
+                    parsed.reduce((acc, p) => ({ ...acc, [p.id]: p }), {}) : parsed;
+            } catch (error) {
+                console.error('Error parsing products:', error);
+                productsData = {};
+            }
+        } else {
+            productsData = {};
+        }
     }
 
     document.addEventListener('DOMContentLoaded', async function() {

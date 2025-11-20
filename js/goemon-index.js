@@ -8,13 +8,33 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeIndexPage() {
-    // デモ商品データを完全削除（ユーザーの要望により）
-    localStorage.removeItem('goemonproducts');
-    console.log('Demo products data cleared from localStorage');
+    // 商品データを初期化
+    const savedProducts = localStorage.getItem('goemonproducts');
 
-    // 空のオブジェクトを使用
-    allProducts = {};
-    console.log('No products in localStorage');
+    if (savedProducts) {
+        // 保存されている商品データを使用
+        try {
+            const productsData = JSON.parse(savedProducts);
+            // オブジェクト形式の場合は配列形式に変換
+            if (Array.isArray(productsData)) {
+                // 配列の場合は、IDをキーとするオブジェクトに変換
+                allProducts = {};
+                productsData.forEach(product => {
+                    allProducts[product.id] = product;
+                });
+            } else {
+                allProducts = productsData;
+            }
+            console.log('Loaded products from localStorage:', Object.keys(allProducts).length);
+        } catch (error) {
+            console.error('Error parsing saved products:', error);
+            allProducts = {};
+        }
+    } else {
+        // localStorageにデータがない場合は空のオブジェクトを使用
+        allProducts = {};
+        console.log('No products in localStorage');
+    }
 
     // デフォルトデータを初期化（localStorageにない場合）
     initializeDefaultDataIfNeeded();
