@@ -2057,7 +2057,7 @@ img[src*="unsplash"] {
 
 .cart-item {
     display: grid;
-    grid-template-columns: auto 100px 1fr auto auto auto;
+    grid-template-columns: auto 1fr auto auto auto;
     gap: 20px;
     align-items: center;
     padding: 20px;
@@ -2082,9 +2082,6 @@ img[src*="unsplash"] {
     font-size: 16px;
     font-weight: 500;
     margin-bottom: 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .cart-item-options p {
