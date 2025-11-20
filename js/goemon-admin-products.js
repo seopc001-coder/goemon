@@ -546,21 +546,40 @@ function handleProductFormSubmit(e) {
         }
     } else {
         // 新規追加モード
+        console.log('=== 新規商品追加開始 ===');
+        console.log('現在の商品数:', Object.keys(allProducts).length);
+
         const ids = Object.keys(allProducts).map(id => parseInt(id) || 0);
         const newId = String(Math.max(0, ...ids) + 1);
 
-        allProducts[newId] = {
+        console.log('既存のID一覧:', ids);
+        console.log('新しいID:', newId);
+
+        const newProduct = {
             id: newId,
             ...productData,
             viewCount: 0,
             publishedAt: isPublished ? Date.now() : null
         };
 
+        console.log('新規商品データ:', newProduct);
+
+        allProducts[newId] = newProduct;
+
+        console.log('追加後の商品数:', Object.keys(allProducts).length);
+        console.log('=== 新規商品追加完了 ===');
+
         showAlertModal('商品を追加しました', 'success');
     }
 
     // localStorageに保存
+    console.log('localStorageに保存します。商品数:', Object.keys(allProducts).length);
     localStorage.setItem('goemonproducts', JSON.stringify(allProducts));
+
+    // 保存確認
+    const savedData = localStorage.getItem('goemonproducts');
+    const parsedData = JSON.parse(savedData);
+    console.log('localStorage保存後の商品数:', Object.keys(parsedData).length);
 
     // モーダルを閉じる
     closeProductModal();
