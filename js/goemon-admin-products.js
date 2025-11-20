@@ -274,6 +274,13 @@ function loadProducts() {
         }
 
         filteredProducts = { ...allProducts };
+
+        // フィルター用のセレクトボックスを初期化
+        initializeFilterSelects();
+
+        // 商品総数を更新
+        updateProductCount();
+
         renderProducts(filteredProducts);
     } catch (error) {
         console.error('Error loading products:', error);
@@ -359,21 +366,7 @@ function renderProducts(products) {
 
 // 商品を検索
 function searchProducts() {
-    const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-
-    if (searchTerm === '') {
-        filteredProducts = { ...allProducts };
-    } else {
-        filteredProducts = {};
-        Object.keys(allProducts).forEach(key => {
-            const product = allProducts[key];
-            if (product.name.toLowerCase().includes(searchTerm)) {
-                filteredProducts[key] = product;
-            }
-        });
-    }
-
-    renderProducts(filteredProducts);
+    applyFilters();
 }
 
 // 在庫が少ない商品をフィルタリング
@@ -390,6 +383,7 @@ function filterLowStockProducts() {
         }
     });
 
+    updateProductCount();
     renderProducts(filteredProducts);
 
     // 検索ボックスにヒントを表示
@@ -397,6 +391,113 @@ function filterLowStockProducts() {
     if (searchInput) {
         searchInput.placeholder = '在庫が少ない商品を表示中（在庫10未満）';
         searchInput.style.borderColor = '#ff9800';
+    }
+}
+
+// フィルター用のセレクトボックスを初期化
+function initializeFilterSelects() {
+    // 商品タイプのセレクトボックスを初期化
+    const productTypeSelect = document.getElementById('filterProductType');
+    if (productTypeSelect) {
+        const productTypes = JSON.parse(localStorage.getItem('goemonproducttypes')) || [];
+        productTypeSelect.innerHTML = '<option value="">すべて</option>';
+        productTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type;
+            option.textContent = type;
+            productTypeSelect.appendChild(option);
+        });
+    }
+
+    // カテゴリーのセレクトボックスを初期化
+    const categorySelect = document.getElementById('filterCategory');
+    if (categorySelect) {
+        const categories = JSON.parse(localStorage.getItem('goemoncategories')) || [];
+        categorySelect.innerHTML = '<option value="">すべて</option>';
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categorySelect.appendChild(option);
+        });
+    }
+}
+
+// 絞り込みを適用
+function applyFilters() {
+    const productType = document.getElementById('filterProductType').value;
+    const category = document.getElementById('filterCategory').value;
+    const ranking = document.getElementById('filterRanking').value;
+    const published = document.getElementById('filterPublished').value;
+    const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+
+    filteredProducts = {};
+
+    Object.keys(allProducts).forEach(key => {
+        const product = allProducts[key];
+
+        // 商品タイプフィルター
+        if (productType && product.productType !== productType) {
+            return;
+        }
+
+        // カテゴリーフィルター
+        if (category && product.category !== category) {
+            return;
+        }
+
+        // ランキング表示フィルター
+        if (ranking !== '') {
+            const showInRanking = product.showInRanking === true;
+            if (ranking === 'true' && !showInRanking) return;
+            if (ranking === 'false' && showInRanking) return;
+        }
+
+        // 公開状態フィルター
+        if (published !== '') {
+            const isPublished = product.isPublished !== false;
+            if (published === 'true' && !isPublished) return;
+            if (published === 'false' && isPublished) return;
+        }
+
+        // 検索キーワードフィルター
+        if (searchTerm && !product.name.toLowerCase().includes(searchTerm)) {
+            return;
+        }
+
+        filteredProducts[key] = product;
+    });
+
+    updateProductCount();
+    renderProducts(filteredProducts);
+}
+
+// フィルターをリセット
+function resetFilters() {
+    document.getElementById('filterProductType').value = '';
+    document.getElementById('filterCategory').value = '';
+    document.getElementById('filterRanking').value = '';
+    document.getElementById('filterPublished').value = '';
+    document.getElementById('searchInput').value = '';
+
+    filteredProducts = { ...allProducts };
+    updateProductCount();
+    renderProducts(filteredProducts);
+}
+
+// 商品総数を更新
+function updateProductCount() {
+    const totalCount = Object.keys(allProducts).length;
+    const filteredCount = Object.keys(filteredProducts).length;
+
+    const totalCountElement = document.getElementById('totalCount');
+    const filteredCountElement = document.getElementById('filteredCount');
+
+    if (totalCountElement) {
+        totalCountElement.textContent = totalCount;
+    }
+    if (filteredCountElement) {
+        filteredCountElement.textContent = filteredCount;
     }
 }
 
