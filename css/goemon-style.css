@@ -681,6 +681,13 @@ input, select, textarea {
     position: relative;
 }
 
+.product-img-wrapper img {
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+}
+
 .product-placeholder {
     color: #ddd;
 }
