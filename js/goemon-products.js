@@ -337,7 +337,18 @@ function initializeSort() {
 function applySorting() {
     switch (sortOrder) {
         case 'new':
-            filteredProducts.sort((a, b) => b.id - a.id);
+            // publishedAtで降順ソート（新しい順）、publishedAtがない場合はIDで降順
+            filteredProducts.sort((a, b) => {
+                const publishedAtA = a.publishedAt || 0;
+                const publishedAtB = b.publishedAt || 0;
+                if (publishedAtB !== publishedAtA) {
+                    return publishedAtB - publishedAtA;
+                }
+                // publishedAtが同じ場合はIDで降順
+                const idA = parseInt(a.id) || 0;
+                const idB = parseInt(b.id) || 0;
+                return idB - idA;
+            });
             break;
         case 'price-low':
             filteredProducts.sort((a, b) => a.price - b.price);

@@ -374,11 +374,17 @@ function loadNewArrivals() {
         product.productType === 'new-arrivals' && product.isPublished !== false
     );
 
-    // IDの降順（新しい順）にソート
+    // publishedAtの降順（新しい順）にソート、publishedAtがない場合はIDで降順
     newArrivalsProducts.sort((a, b) => {
+        const publishedAtA = a.publishedAt || 0;
+        const publishedAtB = b.publishedAt || 0;
+        if (publishedAtB !== publishedAtA) {
+            return publishedAtB - publishedAtA;
+        }
+        // publishedAtが同じ場合はIDで降順
         const idA = parseInt(a.id) || 0;
         const idB = parseInt(b.id) || 0;
-        return idB - idA; // 降順（新しい順）
+        return idB - idA;
     });
 
     // 最新10件を表示
@@ -516,11 +522,17 @@ function loadSaleItems() {
         product.productType === 'sale' && product.isPublished !== false
     );
 
-    // IDの降順（新しい順）にソート
+    // publishedAtの降順（新しい順）にソート、publishedAtがない場合はIDで降順
     saleProducts.sort((a, b) => {
+        const publishedAtA = a.publishedAt || 0;
+        const publishedAtB = b.publishedAt || 0;
+        if (publishedAtB !== publishedAtA) {
+            return publishedAtB - publishedAtA;
+        }
+        // publishedAtが同じ場合はIDで降順
         const idA = parseInt(a.id) || 0;
         const idB = parseInt(b.id) || 0;
-        return idB - idA; // 降順（新しい順）
+        return idB - idA;
     });
 
     // 最新10件を表示

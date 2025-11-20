@@ -255,6 +255,7 @@ function renderProducts(products) {
         const isLowStock = stock < 10;
         const isSoldOut = stock === 0;
         const soldOutConfirmed = product.soldOutConfirmed || false;
+        const isPublished = product.isPublished !== false; // デフォルトはtrue
 
         return `
             <div class="product-card">
@@ -263,11 +264,16 @@ function renderProducts(products) {
                         `<img src="${product.image}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">` :
                         `<i class="fas fa-image"></i>`
                     }
+                    ${!isPublished ? `<div class="unpublished-badge">非公開</div>` : ''}
                 </div>
                 <div class="product-info">
                     <h3 class="product-name" title="${product.name}">${product.name}</h3>
                     <div class="product-price">¥${product.price.toLocaleString()}</div>
                     <div class="product-meta">
+                        <span class="publish-status-badge ${isPublished ? 'published' : 'unpublished'}">
+                            <i class="fas fa-${isPublished ? 'eye' : 'eye-slash'}"></i>
+                            ${isPublished ? '公開中' : '非公開'}
+                        </span>
                         <span class="stock-info ${isLowStock ? 'stock-low' : ''}">
                             <i class="fas fa-boxes"></i> 在庫: ${stock}
                             ${isSoldOut && !soldOutConfirmed ? '<span style="color: #ff4444; font-weight: bold; margin-left: 8px;">売り切れ</span>' : ''}
@@ -513,23 +519,20 @@ function handleProductFormSubmit(e) {
         const existingProduct = allProducts[editingProductId];
 
         if (needsNewId) {
-            // 非公開→公開: 古いIDを削除して新しいIDで再登録（最新商品として上位表示）
-            const newId = Math.max(...Object.keys(allProducts).map(Number)) + 1;
-            delete allProducts[editingProductId];
-
-            allProducts[newId] = {
-                id: newId,
+            // 非公開→公開: IDは変更せず、公開日時を更新して最新商品として上位表示
+            allProducts[editingProductId] = {
+                id: editingProductId,
                 ...existingProduct,
                 ...productData,
                 viewCount: existingProduct.viewCount || 0,
-                publishedAt: Date.now() // 公開日時を記録
+                publishedAt: Date.now() // 公開日時を更新
             };
 
-            editingProductId = newId; // 編集中のIDを更新
             showAlertModal('商品を公開しました（最新商品として上位表示されます）', 'success');
         } else {
             // 通常の編集
             allProducts[editingProductId] = {
+                id: editingProductId, // IDを明示的に保持
                 ...existingProduct,
                 ...productData,
                 viewCount: existingProduct.viewCount || 0,
@@ -540,7 +543,8 @@ function handleProductFormSubmit(e) {
         }
     } else {
         // 新規追加モード
-        const newId = Math.max(...Object.keys(allProducts).map(Number)) + 1;
+        const ids = Object.keys(allProducts).map(id => parseInt(id) || 0);
+        const newId = String(Math.max(0, ...ids) + 1);
 
         allProducts[newId] = {
             id: newId,
