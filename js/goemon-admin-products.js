@@ -568,16 +568,22 @@ function handleProductFormSubmit(e) {
 
 // 商品を削除
 function deleteProduct(productId) {
+    console.log('🔴 deleteProduct関数が呼び出されました:', productId);
+
     const product = allProducts[productId];
 
     if (!product) {
+        console.log('❌ 商品が見つかりません:', productId);
         showAlertModal('商品が見つかりません', 'error');
         return;
     }
 
+    console.log('✅ 削除確認モーダルを表示します:', product.name);
+
     showConfirmModal(
         `「${product.name}」を削除してもよろしいですか？\n\nこの操作は取り消せません。`,
         () => {
+            console.log('🟢 確認モーダルのOKボタンがクリックされました');
             console.log('=== 削除処理開始 ===');
             console.log('削除対象商品ID:', productId);
             console.log('削除前のallProducts:', Object.keys(allProducts).length, '件');
