@@ -534,6 +534,31 @@ function initializeAddToCart() {
     if (!addToCartBtn) return;
 
     addToCartBtn.addEventListener('click', function() {
+        // 商品が削除されていないか再確認
+        const savedProducts = localStorage.getItem('goemonproducts');
+        let currentProduct = null;
+
+        if (savedProducts) {
+            try {
+                const productsData = JSON.parse(savedProducts);
+                if (Array.isArray(productsData)) {
+                    currentProduct = productsData.find(p => p.id === productData.id);
+                } else {
+                    currentProduct = productsData[productData.id];
+                }
+            } catch (error) {
+                console.error('Error checking product status:', error);
+            }
+        }
+
+        // 商品が存在しないか、非公開の場合はエラー
+        if (!currentProduct || currentProduct.isPublished === false) {
+            alert('この商品は現在ご購入いただけません。商品が削除されたか、公開が停止されています。');
+            // ページをリロードして最新の状態を表示
+            window.location.reload();
+            return;
+        }
+
         const product = {
             id: productData.id,
             name: productData.name,
