@@ -684,6 +684,8 @@ input, select, textarea {
 .product-img-wrapper img,
 .product-image img,
 .main-image img,
+.thumbnail img,
+.main-image-container img,
 img[src*="supabase"],
 img[src*="unsplash"] {
     pointer-events: none;
