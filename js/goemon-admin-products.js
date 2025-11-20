@@ -577,8 +577,16 @@ function handleProductFormSubmit(e) {
         return;
     }
 
-    // base64データのチェック（localStorageの容量制限を防ぐため）
+    // 画像アップロード中のチェック
     const imageFields = [productImage, productImage2, productImage3, productImage4].filter(img => img);
+    const isUploading = imageFields.some(img => img === 'アップロード中...');
+
+    if (isUploading) {
+        showAlertModal('画像のアップロードが完了するまでお待ちください', 'warning');
+        return;
+    }
+
+    // base64データのチェック（localStorageの容量制限を防ぐため）
     const hasBase64 = imageFields.some(img => img.startsWith('data:image'));
 
     if (hasBase64) {
