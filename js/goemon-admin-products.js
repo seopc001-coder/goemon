@@ -1036,6 +1036,11 @@ function setupRankingCheckbox() {
                     showInRankingCheckbox.disabled = true;
                     showInRankingCheckbox.checked = false;
                     rankingPositionGroup.style.display = 'none';
+                    // ランキング順位もクリア
+                    const rankingPositionInput = document.getElementById('rankingPosition');
+                    if (rankingPositionInput) {
+                        rankingPositionInput.value = '';
+                    }
                 } else {
                     showInRankingCheckbox.disabled = false;
                 }
