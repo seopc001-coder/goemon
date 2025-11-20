@@ -675,18 +675,10 @@ function handleProductFormSubmit(e) {
     }
 
     // ランキング表示と公開状態のバリデーション
+    // フォームの現在の値でチェック（データベースの値ではない）
     if (showInRanking && !isPublished) {
         showAlertModal('人気ランキングに表示できるのは公開商品のみです', 'error');
         return;
-    }
-
-    // ランキング表示中の商品を非公開にしようとしている場合
-    if (editingProductId && allProducts[editingProductId]) {
-        const currentProduct = allProducts[editingProductId];
-        if (currentProduct.showInRanking && !isPublished) {
-            showAlertModal('人気ランキングに表示中の商品は非公開にできません。\n先にランキング表示を解除してください。', 'error');
-            return;
-        }
     }
 
     // 画像アップロード中のチェック
