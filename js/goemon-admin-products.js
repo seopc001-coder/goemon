@@ -279,14 +279,14 @@ function renderProducts(products) {
                     </div>
                     <div class="product-actions">
                         ${isSoldOut && !soldOutConfirmed ? `
-                            <button class="btn-small btn-confirm-soldout" onclick="confirmSoldOut(${product.id})" style="background: #ff9800; color: white;">
+                            <button class="btn-small btn-confirm-soldout" onclick="confirmSoldOut('${product.id}')" style="background: #ff9800; color: white;">
                                 <i class="fas fa-check"></i> 売り切れ確認
                             </button>
                         ` : ''}
-                        <button class="btn-small btn-edit" onclick="editProduct(${product.id})">
+                        <button class="btn-small btn-edit" onclick="editProduct('${product.id}')">
                             <i class="fas fa-edit"></i> 編集
                         </button>
-                        <button class="btn-small btn-delete" onclick="deleteProduct(${product.id})">
+                        <button class="btn-small btn-delete" onclick="deleteProduct('${product.id}')">
                             <i class="fas fa-trash"></i> 削除
                         </button>
                     </div>
