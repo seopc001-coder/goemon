@@ -114,6 +114,7 @@ function incrementViewCount(productId, savedProductsString) {
 function showProductNotFound() {
     const mainContent = document.querySelector('main');
     if (mainContent) {
+        mainContent.style.opacity = '1';
         mainContent.innerHTML = `
             <div style="text-align: center; padding: 100px 20px;">
                 <i class="fas fa-exclamation-circle" style="font-size: 80px; color: #999; margin-bottom: 30px;"></i>
@@ -130,6 +131,12 @@ function showProductNotFound() {
 }
 
 function updateProductDisplay() {
+    // ページを表示（フェードイン）
+    const mainPage = document.querySelector('.product-detail-page');
+    if (mainPage) {
+        mainPage.style.opacity = '1';
+    }
+
     // 商品タイトル
     const titleElement = document.querySelector('.product-title');
     if (titleElement) {
@@ -753,7 +760,6 @@ function formatPrice(price) {
 // SNSシェアボタンの初期化
 function initializeShareButtons() {
     const currentUrl = encodeURIComponent(window.location.href);
-    const productName = encodeURIComponent(productData.name);
     const shareText = encodeURIComponent(`${productData.name} - 五右衛門`);
 
     // Instagram（Instagramは直接シェアできないため、コピー機能を実装）
