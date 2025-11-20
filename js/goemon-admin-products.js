@@ -979,12 +979,18 @@ function setupRankingCheckbox() {
         // 公開/非公開トグルボタンのクリックイベントを監視
         const publishButtons = document.querySelectorAll('.publish-btn');
         publishButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function(e) {
                 const newValue = this.dataset.value;
                 const isPublished = newValue === 'true';
 
                 // ランキング表示中の商品を非公開にしようとしている場合
-                if (!isPublished && showInRankingCheckbox.checked) {
+                // チェックボックスの現在の状態を確認
+                const isRankingChecked = showInRankingCheckbox.checked;
+
+                if (!isPublished && isRankingChecked) {
+                    // イベントをキャンセル（ボタンの状態変更を防ぐ）
+                    e.preventDefault();
+                    e.stopPropagation();
                     showAlertModal('人気ランキングに表示中の商品は非公開にできません。\n先にランキング表示を解除してください。', 'error');
                     return;
                 }
