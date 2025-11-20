@@ -82,18 +82,19 @@ async function uploadToSupabase(file, folder) {
         console.log('Upload successful, getting public URL...');
 
         // 公開URLを取得
-        const { data: urlData } = supabaseClient.storage
+        const urlData = supabaseClient.storage
             .from(STORAGE_BUCKET)
             .getPublicUrl(fileName);
 
         console.log('URL data received:', urlData);
 
-        if (!urlData || !urlData.publicUrl) {
+        // getPublicUrlは data オブジェクトを直接返す
+        if (!urlData || !urlData.data || !urlData.data.publicUrl) {
             throw new Error('公開URLの取得に失敗しました');
         }
 
-        console.log('Public URL:', urlData.publicUrl);
-        return urlData.publicUrl;
+        console.log('Public URL:', urlData.data.publicUrl);
+        return urlData.data.publicUrl;
     } catch (error) {
         console.error('Supabase upload error:', error);
         throw new Error('画像のアップロードに失敗しました: ' + error.message);
