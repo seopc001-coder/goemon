@@ -550,6 +550,7 @@ function openAddProductModal() {
 
 // 商品編集モーダルを開く
 function editProduct(productId) {
+    console.log('editProduct called with productId:', productId);
     const product = allProducts[productId];
 
     if (!product) {
@@ -964,9 +965,16 @@ let publishButtonHandlers = new Map();
 
 // ランキングチェックボックスの動作を設定
 function setupRankingCheckbox() {
+    console.log('setupRankingCheckbox called');
     const showInRankingCheckbox = document.getElementById('showInRanking');
     const rankingPositionGroup = document.getElementById('rankingPositionGroup');
     const isPublishedInput = document.getElementById('isPublished');
+
+    console.log('Elements found:', {
+        showInRankingCheckbox: !!showInRankingCheckbox,
+        rankingPositionGroup: !!rankingPositionGroup,
+        isPublishedInput: !!isPublishedInput
+    });
 
     if (showInRankingCheckbox && rankingPositionGroup) {
         // 既存のイベントリスナーを削除
