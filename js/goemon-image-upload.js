@@ -1,17 +1,15 @@
 // 五右衛門 ECサイト - 画像アップロードユーティリティ
 
-// Supabase設定（実際の値に置き換えてください）
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+// Supabase設定（グローバルのsupabaseクライアントを使用）
 const STORAGE_BUCKET = 'goemon-images';
 
-// Supabaseクライアントの初期化
+// グローバルのsupabaseクライアントを参照
 let supabaseClient = null;
 
 function initializeSupabase() {
     if (typeof supabase !== 'undefined') {
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('Supabase initialized');
+        supabaseClient = supabase;
+        console.log('Supabase client initialized for image upload');
     } else {
         console.warn('Supabase library not loaded. Using fallback mode.');
     }

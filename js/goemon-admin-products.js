@@ -670,12 +670,34 @@ function handleProductFormSubmit(e) {
 
     // localStorageに保存
     console.log('localStorageに保存します。商品数:', Object.keys(allProducts).length);
-    localStorage.setItem('goemonproducts', JSON.stringify(allProducts));
 
-    // 保存確認
-    const savedData = localStorage.getItem('goemonproducts');
-    const parsedData = JSON.parse(savedData);
-    console.log('localStorage保存後の商品数:', Object.keys(parsedData).length);
+    try {
+        const dataToSave = JSON.stringify(allProducts);
+        const sizeInBytes = new Blob([dataToSave]).size;
+        const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+        const sizeInMB = (sizeInBytes / 1024 / 1024).toFixed(2);
+
+        console.log('保存するデータサイズ:', sizeInKB, 'KB (', sizeInMB, 'MB)');
+
+        if (sizeInBytes > 5 * 1024 * 1024) {
+            showAlertModal('警告: データサイズが5MBを超えています。localStorageの容量制限により保存できない可能性があります。', 'warning');
+        }
+
+        localStorage.setItem('goemonproducts', dataToSave);
+
+        // 保存確認
+        const savedData = localStorage.getItem('goemonproducts');
+        const parsedData = JSON.parse(savedData);
+        console.log('localStorage保存後の商品数:', Object.keys(parsedData).length);
+    } catch (error) {
+        console.error('localStorage保存エラー:', error);
+        if (error.name === 'QuotaExceededError') {
+            showAlertModal('エラー: localStorageの容量制限を超えました。古い商品を削除するか、base64画像データがある場合は削除してください。', 'error');
+        } else {
+            showAlertModal('エラー: 商品データの保存に失敗しました: ' + error.message, 'error');
+        }
+        return;
+    }
 
     // モーダルを閉じる
     closeProductModal();

@@ -76,13 +76,9 @@ const initHeader = () => {
     // Smooth scroll for navigation links
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
+            e.preventDefault();
             const target = link.getAttribute('href');
-
-            // Only prevent default and smooth scroll for anchor links (starting with #)
-            if (target.startsWith('#')) {
-                e.preventDefault();
-                smoothScroll(target);
-            }
+            smoothScroll(target);
 
             // Close mobile menu if open
             if (navMenu.classList.contains('active')) {
@@ -92,7 +88,14 @@ const initHeader = () => {
         });
     });
 
-    // CTA buttons smooth scroll (removed - now using direct LINE links)
+    // CTA buttons smooth scroll
+    const ctaButtons = document.querySelectorAll('a[href="#contact"]');
+    ctaButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            smoothScroll('#contact');
+        });
+    });
 };
 
 // ===========================
@@ -112,7 +115,10 @@ const initFloatingCTA = () => {
         }
     });
 
-    // Click handler removed - now using direct LINE link
+    floatingCta.addEventListener('click', (e) => {
+        e.preventDefault();
+        smoothScroll('#contact');
+    });
 };
 
 // ===========================
