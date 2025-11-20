@@ -541,6 +541,9 @@ function openAddProductModal() {
         showInRankingCheckbox.disabled = false;
     }
 
+    // ランキングチェックボックスのイベントリスナーを設定
+    setupRankingCheckbox();
+
     const modal = document.getElementById('productModal');
     modal.classList.add('active');
 }
@@ -617,6 +620,9 @@ function editProduct(productId) {
     document.getElementById('productImage2').value = product.image2 || '';
     document.getElementById('productImage3').value = product.image3 || '';
     document.getElementById('productImage4').value = product.image4 || '';
+
+    // ランキングチェックボックスのイベントリスナーを設定
+    setupRankingCheckbox();
 
     const modal = document.getElementById('productModal');
     modal.classList.add('active');
@@ -952,6 +958,10 @@ function initializeImageUploads() {
     console.log('Image upload functionality initialized');
 }
 
+// ランキングチェックボックスのイベントハンドラを保持
+let rankingCheckboxHandler = null;
+let publishButtonHandlers = new Map();
+
 // ランキングチェックボックスの動作を設定
 function setupRankingCheckbox() {
     const showInRankingCheckbox = document.getElementById('showInRanking');
@@ -959,8 +969,13 @@ function setupRankingCheckbox() {
     const isPublishedInput = document.getElementById('isPublished');
 
     if (showInRankingCheckbox && rankingPositionGroup) {
-        // ランキング表示チェックボックスの変更時
-        showInRankingCheckbox.addEventListener('change', function() {
+        // 既存のイベントリスナーを削除
+        if (rankingCheckboxHandler) {
+            showInRankingCheckbox.removeEventListener('change', rankingCheckboxHandler);
+        }
+
+        // 新しいイベントハンドラを作成
+        rankingCheckboxHandler = function() {
             console.log('Ranking checkbox changed:', this.checked);
             // 公開商品のみランキング表示可能
             if (this.checked) {
@@ -976,12 +991,21 @@ function setupRankingCheckbox() {
                 rankingPositionGroup.style.display = 'none';
                 document.getElementById('rankingPosition').value = '';
             }
-        });
+        };
+
+        // ランキング表示チェックボックスの変更時
+        showInRankingCheckbox.addEventListener('change', rankingCheckboxHandler);
 
         // 公開/非公開トグルボタンのクリックイベントを監視
         const publishButtons = document.querySelectorAll('.publish-btn');
         publishButtons.forEach(btn => {
-            btn.addEventListener('click', function(e) {
+            // 既存のイベントリスナーを削除
+            if (publishButtonHandlers.has(btn)) {
+                btn.removeEventListener('click', publishButtonHandlers.get(btn));
+            }
+
+            // 新しいイベントハンドラを作成
+            const handler = function(e) {
                 const newValue = this.dataset.value;
                 const isPublished = newValue === 'true';
 
@@ -1022,7 +1046,10 @@ function setupRankingCheckbox() {
                 } else {
                     showInRankingCheckbox.disabled = false;
                 }
-            });
+            };
+
+            publishButtonHandlers.set(btn, handler);
+            btn.addEventListener('click', handler);
         });
     }
 }
