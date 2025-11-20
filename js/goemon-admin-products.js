@@ -961,9 +961,11 @@ function setupRankingCheckbox() {
     if (showInRankingCheckbox && rankingPositionGroup) {
         // ランキング表示チェックボックスの変更時
         showInRankingCheckbox.addEventListener('change', function() {
+            console.log('Ranking checkbox changed:', this.checked);
             // 公開商品のみランキング表示可能
             if (this.checked) {
                 const isPublished = isPublishedInput.value === 'true';
+                console.log('Checking if published:', isPublished);
                 if (!isPublished) {
                     this.checked = false;
                     showAlertModal('人気ランキングに表示できるのは公開商品のみです', 'warning');
@@ -983,17 +985,27 @@ function setupRankingCheckbox() {
                 const newValue = this.dataset.value;
                 const isPublished = newValue === 'true';
 
+                console.log('Publish button clicked:', {
+                    newValue: newValue,
+                    isPublished: isPublished,
+                    checkboxChecked: showInRankingCheckbox.checked,
+                    checkboxDisabled: showInRankingCheckbox.disabled
+                });
+
                 // ランキング表示中の商品を非公開にしようとしている場合
                 // チェックボックスの現在の状態を確認
                 const isRankingChecked = showInRankingCheckbox.checked;
 
                 if (!isPublished && isRankingChecked) {
+                    console.log('Preventing unpublish - ranking is still checked');
                     // イベントをキャンセル（ボタンの状態変更を防ぐ）
                     e.preventDefault();
                     e.stopPropagation();
                     showAlertModal('人気ランキングに表示中の商品は非公開にできません。\n先にランキング表示を解除してください。', 'error');
                     return;
                 }
+
+                console.log('Updating publish state to:', newValue);
 
                 // 実際に値を更新
                 isPublishedInput.value = newValue;
