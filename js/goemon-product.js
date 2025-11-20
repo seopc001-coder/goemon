@@ -46,11 +46,20 @@ function loadProductData() {
     }
 
     if (product) {
+        // 非公開商品の場合は表示しない
+        if (product.isPublished === false) {
+            showProductNotFound();
+            return;
+        }
+
         productData = product;
         updateProductDisplay();
 
         // 閲覧数をカウント（localStorageに保存）
         incrementViewCount(productId, savedProducts);
+    } else {
+        // 商品が見つからない場合
+        showProductNotFound();
     }
 }
 
@@ -87,6 +96,25 @@ function incrementViewCount(productId, savedProductsString) {
 }
 
 // 商品情報を画面に表示
+// 商品が見つからない場合の表示
+function showProductNotFound() {
+    const mainContent = document.querySelector('main');
+    if (mainContent) {
+        mainContent.innerHTML = `
+            <div style="text-align: center; padding: 100px 20px;">
+                <i class="fas fa-exclamation-circle" style="font-size: 80px; color: #999; margin-bottom: 30px;"></i>
+                <h1 style="font-size: 28px; margin-bottom: 20px;">商品が見つかりません</h1>
+                <p style="font-size: 16px; color: #666; margin-bottom: 40px;">
+                    この商品は削除されたか、現在公開されていません。
+                </p>
+                <a href="goemon-index.html" style="display: inline-block; padding: 15px 40px; background: #8B4513; color: white; text-decoration: none; border-radius: 5px; font-size: 16px;">
+                    トップページに戻る
+                </a>
+            </div>
+        `;
+    }
+}
+
 function updateProductDisplay() {
     // 商品タイトル
     const titleElement = document.querySelector('.product-title');
