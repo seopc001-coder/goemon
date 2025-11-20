@@ -9,10 +9,18 @@
 
     // 商品データを初期化
     function initializeProductsData() {
-        if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.generateProductsData === 'function') {
-            productsData = window.GOEMON_PRODUCTS.generateProductsData(100);
+        const savedProducts = localStorage.getItem('goemonproducts');
+        if (savedProducts) {
+            try {
+                const parsed = JSON.parse(savedProducts);
+                productsData = Array.isArray(parsed) ?
+                    parsed.reduce((acc, p) => ({ ...acc, [p.id]: p }), {}) : parsed;
+            } catch (error) {
+                console.error('Error parsing products:', error);
+                productsData = {};
+            }
         } else {
-            console.error('GOEMON_PRODUCTS not loaded');
+            productsData = {};
         }
     }
 

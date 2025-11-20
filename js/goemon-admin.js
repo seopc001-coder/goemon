@@ -152,27 +152,12 @@ function calculateLowStockCount() {
         // localStorageから商品データを取得（商品管理ページと同じデータ）
         let products = localStorage.getItem('goemonproducts');
 
-        // データがない場合は生成して保存
+        // データがない場合は0を返す
         if (!products) {
-            if (!window.GOEMON_PRODUCTS || typeof window.GOEMON_PRODUCTS.generateProductsData !== 'function') {
-                return 0;
-            }
-
-            const generatedProducts = window.GOEMON_PRODUCTS.generateProductsData(100);
-
-            // 各商品に在庫数を設定
-            Object.keys(generatedProducts).forEach(key => {
-                const product = generatedProducts[key];
-                if (!product.hasOwnProperty('stock')) {
-                    product.stock = Math.floor(Math.random() * 100);
-                }
-            });
-
-            localStorage.setItem('goemonproducts', JSON.stringify(generatedProducts));
-            products = generatedProducts;
-        } else {
-            products = JSON.parse(products);
+            return 0;
         }
+
+        products = JSON.parse(products);
 
         let lowStockCount = 0;
 

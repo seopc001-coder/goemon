@@ -54,11 +54,7 @@ function loadProductData() {
         console.log('✗ localStorageにgoemonproductsが存在しません');
     }
 
-    // localStorageにない場合はデモデータから取得
-    if (!product && window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.getProductById === 'function') {
-        product = window.GOEMON_PRODUCTS.getProductById(productId);
-        console.log('⚠ デモデータから商品を読み込みました');
-    }
+    // デモデータは使用しない（削除済み商品が表示されてしまう問題があるため）
 
     if (product) {
         // 非公開商品の場合は表示しない
@@ -684,10 +680,7 @@ function loadRelatedProducts() {
             }
         }
 
-        // localStorageにない場合はデモデータから取得
-        if (!product && window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.getProductById === 'function') {
-            product = window.GOEMON_PRODUCTS.getProductById(id);
-        }
+        // デモデータは使用しない
 
         if (product) {
             const card = createProductCard(product);

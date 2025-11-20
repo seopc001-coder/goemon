@@ -196,13 +196,9 @@ function loadProducts() {
             allProducts = [];
         }
     } else {
-        // localStorageにデータがない場合は、デモデータを使用
-        if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.getProductsArray === 'function') {
-            allProducts = window.GOEMON_PRODUCTS.getProductsArray(100);
-            console.log('Using demo products data');
-        } else {
-            allProducts = [];
-        }
+        // localStorageにデータがない場合は空の配列を使用
+        allProducts = [];
+        console.log('No products in localStorage');
     }
 
     filteredProducts = [...allProducts];
