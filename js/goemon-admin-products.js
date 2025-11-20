@@ -578,10 +578,26 @@ function deleteProduct(productId) {
     showConfirmModal(
         `「${product.name}」を削除してもよろしいですか？\n\nこの操作は取り消せません。`,
         () => {
+            console.log('=== 削除処理開始 ===');
+            console.log('削除対象商品ID:', productId);
+            console.log('削除前のallProducts:', Object.keys(allProducts).length, '件');
+            console.log('削除前にこの商品が存在:', productId in allProducts);
+
+            // 商品を削除
             delete allProducts[productId];
+
+            console.log('削除後のallProducts:', Object.keys(allProducts).length, '件');
+            console.log('削除後にこの商品が存在:', productId in allProducts);
 
             // localStorageに保存
             localStorage.setItem('goemonproducts', JSON.stringify(allProducts));
+
+            // 保存直後に確認
+            const savedData = localStorage.getItem('goemonproducts');
+            const parsedData = JSON.parse(savedData);
+            console.log('localStorage保存後の商品数:', Object.keys(parsedData).length, '件');
+            console.log('localStorageにこの商品が存在:', productId in parsedData);
+            console.log('=== 削除処理完了 ===');
 
             showAlertModal('商品を削除しました', 'success');
             searchProducts();
