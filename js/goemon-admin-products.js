@@ -344,14 +344,14 @@ function renderProducts(products) {
                     </div>
                     <div class="product-actions">
                         ${isSoldOut && !soldOutConfirmed ? `
-                            <button class="btn-small btn-confirm-soldout" onclick="confirmSoldOut('${product.id}')" style="background: #ff9800; color: white;">
+                            <button class="btn-small btn-confirm-soldout" data-product-id="${product.id}" data-action="confirm-soldout" style="background: #ff9800; color: white;">
                                 <i class="fas fa-check"></i> 売り切れ確認
                             </button>
                         ` : ''}
-                        <button class="btn-small btn-edit" onclick="editProduct('${product.id}')">
+                        <button class="btn-small btn-edit" data-product-id="${product.id}" data-action="edit">
                             <i class="fas fa-edit"></i> 編集
                         </button>
-                        <button class="btn-small btn-delete" onclick="deleteProduct('${product.id}')">
+                        <button class="btn-small btn-delete" data-product-id="${product.id}" data-action="delete">
                             <i class="fas fa-trash"></i> 削除
                         </button>
                     </div>
@@ -359,6 +359,45 @@ function renderProducts(products) {
             </div>
         `;
     }).join('');
+
+    // イベントリスナーを追加
+    attachProductButtonListeners();
+}
+
+// 商品ボタンにイベントリスナーを追加（1回だけ実行）
+let gridListenerAttached = false;
+
+function attachProductButtonListeners() {
+    if (gridListenerAttached) return;
+
+    const grid = document.getElementById('productsGrid');
+    if (!grid) return;
+
+    // イベント委譲を使用
+    grid.addEventListener('click', function(e) {
+        const button = e.target.closest('button[data-product-id]');
+        if (!button) return;
+
+        const productId = button.dataset.productId;
+        const action = button.dataset.action;
+
+        console.log('Button clicked:', { productId, action });
+
+        switch (action) {
+            case 'edit':
+                editProduct(productId);
+                break;
+            case 'delete':
+                deleteProduct(productId);
+                break;
+            case 'confirm-soldout':
+                confirmSoldOut(productId);
+                break;
+        }
+    });
+
+    gridListenerAttached = true;
+    console.log('Product button listeners attached');
 }
 
 // 商品を検索
