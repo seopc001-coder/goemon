@@ -89,12 +89,15 @@ function createCartItemElement(item) {
     const colorText = item.color ? '<p>カラー: ' + item.color + '</p>' : '';
     const sizeText = item.size ? '<p>サイズ: ' + item.size + '</p>' : '';
     const productName = product.name || item.name;
+    const imageUrl = product.image || '';
 
     itemDiv.innerHTML = `
         <div class="cart-item-image">
+            ${imageUrl ? `<img src="${imageUrl}" alt="${productName}" style="width: 100%; height: 100%; object-fit: cover;">` : `
             <div class="product-placeholder">
                 <i class="fas fa-tshirt fa-2x"></i>
             </div>
+            `}
         </div>
         <div class="cart-item-details">
             <h3 class="cart-item-name">` + productName + `</h3>
