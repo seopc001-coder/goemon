@@ -43,9 +43,6 @@ async function initializeProductManagement() {
     // フォーム送信イベント
     document.getElementById('productForm').addEventListener('submit', handleProductFormSubmit);
 
-    // 公開/非公開トグルボタンのイベント
-    initializePublishToggle();
-
     // 検索入力時のイベント
     document.getElementById('searchInput').addEventListener('input', function(e) {
         if (e.target.value === '') {
@@ -502,23 +499,7 @@ function updateProductCount() {
 }
 
 // 公開/非公開トグルボタンを初期化
-function initializePublishToggle() {
-    const publishButtons = document.querySelectorAll('.publish-btn');
-    const hiddenInput = document.getElementById('isPublished');
-
-    publishButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // すべてのボタンから active クラスを削除
-            publishButtons.forEach(btn => btn.classList.remove('active'));
-
-            // クリックされたボタンに active クラスを追加
-            this.classList.add('active');
-
-            // hidden input の値を更新
-            hiddenInput.value = this.dataset.value;
-        });
-    });
-}
+// この関数は setupRankingCheckbox() に統合されました
 
 // 商品追加モーダルを開く
 function openAddProductModal() {
@@ -983,14 +964,15 @@ function initializeImageUploads() {
 function setupRankingCheckbox() {
     const showInRankingCheckbox = document.getElementById('showInRanking');
     const rankingPositionGroup = document.getElementById('rankingPositionGroup');
-    const isPublishedCheckbox = document.getElementById('isPublished');
+    const isPublishedInput = document.getElementById('isPublished');
 
     if (showInRankingCheckbox && rankingPositionGroup) {
         // ランキング表示チェックボックスの変更時
         showInRankingCheckbox.addEventListener('change', function() {
             // 公開商品のみランキング表示可能
             if (this.checked) {
-                if (!isPublishedCheckbox.checked) {
+                const isPublished = isPublishedInput.value === 'true';
+                if (!isPublished) {
                     this.checked = false;
                     showAlertModal('人気ランキングに表示できるのは公開商品のみです', 'warning');
                     return;
@@ -1002,18 +984,28 @@ function setupRankingCheckbox() {
             }
         });
 
-        // 公開状態チェックボックスの変更時
-        if (isPublishedCheckbox) {
-            isPublishedCheckbox.addEventListener('change', function() {
-                // ランキング表示中の商品は非公開にできない
-                if (!this.checked && showInRankingCheckbox.checked) {
-                    this.checked = true;
+        // 公開/非公開トグルボタンのクリックイベントを監視
+        const publishButtons = document.querySelectorAll('.publish-btn');
+        publishButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const newValue = this.dataset.value;
+                const isPublished = newValue === 'true';
+
+                // ランキング表示中の商品を非公開にしようとしている場合
+                if (!isPublished && showInRankingCheckbox.checked) {
                     showAlertModal('人気ランキングに表示中の商品は非公開にできません。\n先にランキング表示を解除してください。', 'error');
                     return;
                 }
 
+                // 実際に値を更新
+                isPublishedInput.value = newValue;
+
+                // ボタンのアクティブ状態を更新
+                publishButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
                 // 非公開にする場合、ランキングチェックボックスを無効化
-                if (!this.checked) {
+                if (!isPublished) {
                     showInRankingCheckbox.disabled = true;
                     showInRankingCheckbox.checked = false;
                     rankingPositionGroup.style.display = 'none';
@@ -1021,6 +1013,6 @@ function setupRankingCheckbox() {
                     showInRankingCheckbox.disabled = false;
                 }
             });
-        }
+        });
     }
 }
