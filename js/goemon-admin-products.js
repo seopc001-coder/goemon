@@ -12,6 +12,9 @@ async function initializeProductManagement() {
     // 管理者権限チェック
     await checkAdminAccess();
 
+    // デモ商品データを削除（1回のみ実行）
+    clearDemoProductsOnce();
+
     // デフォルトデータを初期化（localStorageにない場合）
     initializeDefaultDataIfNeeded();
 
@@ -65,6 +68,20 @@ async function checkAdminAccess() {
 
     const adminId = sessionStorage.getItem('adminId');
     console.log('Admin access granted for:', adminId);
+}
+
+// デモ商品データを削除（1回のみ実行）
+function clearDemoProductsOnce() {
+    const cleared = localStorage.getItem('goemon_demo_cleared');
+
+    if (!cleared) {
+        console.log('🗑️ デモ商品データを削除します...');
+        localStorage.removeItem('goemonproducts');
+        localStorage.setItem('goemon_demo_cleared', 'true');
+        console.log('✅ デモ商品データを削除しました');
+    } else {
+        console.log('✓ デモ商品データは既に削除済みです');
+    }
 }
 
 // デフォルトデータを初期化（localStorageにない場合）
@@ -197,25 +214,11 @@ function loadProducts() {
         if (savedProducts) {
             // 保存済みデータを使用
             allProducts = JSON.parse(savedProducts);
+            console.log('Loaded products from localStorage:', Object.keys(allProducts).length);
         } else {
-            // データがない場合は生成
-            if (window.GOEMON_PRODUCTS && typeof window.GOEMON_PRODUCTS.generateProductsData === 'function') {
-                allProducts = window.GOEMON_PRODUCTS.generateProductsData(100);
-
-                // 各商品に在庫数を設定
-                Object.keys(allProducts).forEach(key => {
-                    const product = allProducts[key];
-                    if (!product.hasOwnProperty('stock')) {
-                        product.stock = Math.floor(Math.random() * 100);
-                    }
-                });
-
-                // localStorageに保存
-                localStorage.setItem('goemonproducts', JSON.stringify(allProducts));
-            } else {
-                console.error('GOEMON_PRODUCTS not loaded');
-                allProducts = {};
-            }
+            // デモデータは生成しない（ユーザーの要望により）
+            allProducts = {};
+            console.log('No products in localStorage - starting with empty data');
         }
 
         filteredProducts = { ...allProducts };
