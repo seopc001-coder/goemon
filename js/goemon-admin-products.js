@@ -611,6 +611,9 @@ function deleteProduct(productId) {
     );
 }
 
+// グローバルスコープに公開
+window.deleteProduct = deleteProduct;
+
 // 売り切れ確認
 function confirmSoldOut(productId) {
     const product = allProducts[productId];
