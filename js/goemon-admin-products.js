@@ -375,6 +375,32 @@ function openAddProductModal() {
     document.getElementById('productForm').reset();
     document.getElementById('productId').value = '';
 
+    // 画像プレビューをすべてクリア
+    if (typeof clearImagePreview === 'function') {
+        clearImagePreview('productImagePreview');
+        clearImagePreview('productImage2Preview');
+        clearImagePreview('productImage3Preview');
+        clearImagePreview('productImage4Preview');
+    }
+
+    // ファイル入力もクリア
+    const fileInputs = ['productImageFile', 'productImage2File', 'productImage3File', 'productImage4File'];
+    fileInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.value = '';
+        }
+    });
+
+    // URL入力フィールドもクリア
+    const urlInputs = ['productImage', 'productImage2', 'productImage3', 'productImage4'];
+    urlInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.value = '';
+        }
+    });
+
     const modal = document.getElementById('productModal');
     modal.classList.add('active');
 }
@@ -671,6 +697,33 @@ function closeProductModal() {
     modal.classList.remove('active');
     document.getElementById('productForm').reset();
     editingProductId = null;
+
+    // 画像プレビューをすべてクリア
+    if (typeof clearImagePreview === 'function') {
+        clearImagePreview('productImagePreview');
+        clearImagePreview('productImage2Preview');
+        clearImagePreview('productImage3Preview');
+        clearImagePreview('productImage4Preview');
+    }
+
+    // ファイル入力もクリア
+    const fileInputs = ['productImageFile', 'productImage2File', 'productImage3File', 'productImage4File'];
+    fileInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.value = '';
+        }
+    });
+
+    // URL入力フィールドもクリア（編集時に残らないように）
+    const urlInputs = ['productImage', 'productImage2', 'productImage3', 'productImage4'];
+    urlInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input && !input.value.startsWith('http')) {
+            // 既存のURLでない場合のみクリア
+            input.value = '';
+        }
+    });
 }
 
 // モーダル外クリックで閉じる
