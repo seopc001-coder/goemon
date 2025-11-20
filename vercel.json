@@ -4,5 +4,6 @@
       "source": "/",
       "destination": "/goemon-index.html"
     }
-  ]
+  ],
+  "buildCommand": null
 }
