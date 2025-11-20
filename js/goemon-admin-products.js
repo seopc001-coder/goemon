@@ -685,8 +685,8 @@ function handleProductFormSubmit(e) {
     const productImage2 = document.getElementById('productImage2').value.trim();
     const productImage3 = document.getElementById('productImage3').value.trim();
     const productImage4 = document.getElementById('productImage4').value.trim();
-    const showInRanking = document.getElementById('showInRanking').checked;
-    const rankingPosition = document.getElementById('rankingPosition').value ? parseInt(document.getElementById('rankingPosition').value) : null;
+    let showInRanking = document.getElementById('showInRanking').checked;
+    let rankingPosition = document.getElementById('rankingPosition').value ? parseInt(document.getElementById('rankingPosition').value) : null;
     const isPublished = document.getElementById('isPublished').value === 'true';
 
     // 非公開→公開の状態変化を検出
@@ -720,18 +720,18 @@ function handleProductFormSubmit(e) {
         return;
     }
 
-    // ランキング表示と公開状態のバリデーション
+    // ランキング表示と公開状態の自動修正
     // 非公開商品はランキング表示できないため、自動的にランキングを無効化
-    if (!isPublished && showInRanking) {
-        // 非公開の場合は自動的にランキングを無効にする
-        document.getElementById('showInRanking').checked = false;
-        const rankingPositionInput = document.getElementById('rankingPosition');
-        if (rankingPositionInput) {
-            rankingPositionInput.value = '';
+    if (!isPublished) {
+        // 非公開の場合は必ずランキングを無効にする
+        if (showInRanking) {
+            document.getElementById('showInRanking').checked = false;
+            showInRanking = false;
         }
-        // 更新された値を再取得
-        showInRanking = false;
-        rankingPosition = null;
+        if (rankingPosition) {
+            document.getElementById('rankingPosition').value = '';
+            rankingPosition = null;
+        }
     }
 
     // 画像アップロード中のチェック
