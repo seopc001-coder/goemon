@@ -1024,21 +1024,6 @@ function setupRankingCheckbox() {
                     checkboxDisabled: showInRankingCheckbox.disabled
                 });
 
-                // ランキング表示中の商品を非公開にしようとしている場合
-                // チェックボックスの現在の状態を確認
-                const isRankingChecked = showInRankingCheckbox.checked;
-
-                if (!isPublished && isRankingChecked) {
-                    console.log('Preventing unpublish - ranking is still checked');
-                    // イベントをキャンセル（ボタンの状態変更を防ぐ）
-                    e.preventDefault();
-                    e.stopPropagation();
-                    showAlertModal('人気ランキングに表示中の商品は非公開にできません。\n先にランキング表示を解除してください。', 'error');
-                    return;
-                }
-
-                console.log('Updating publish state to:', newValue);
-
                 // 実際に値を更新
                 isPublishedInput.value = newValue;
 
@@ -1046,7 +1031,7 @@ function setupRankingCheckbox() {
                 publishButtons.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
 
-                // 非公開にする場合、ランキングチェックボックスを無効化
+                // 非公開にする場合、ランキングチェックボックスを無効化して自動的にチェックを外す
                 if (!isPublished) {
                     showInRankingCheckbox.disabled = true;
                     showInRankingCheckbox.checked = false;
