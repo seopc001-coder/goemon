@@ -2082,6 +2082,9 @@ img[src*="unsplash"] {
     font-size: 16px;
     font-weight: 500;
     margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .cart-item-options p {
