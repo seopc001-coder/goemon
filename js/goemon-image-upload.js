@@ -54,11 +54,17 @@ async function uploadImage(file, folder = 'products') {
  */
 async function uploadToSupabase(file, folder) {
     try {
+        if (!supabaseClient) {
+            throw new Error('Supabaseクライアントが初期化されていません');
+        }
+
         // ファイル名を生成（タイムスタンプ + ランダム文字列）
         const timestamp = Date.now();
         const randomStr = Math.random().toString(36).substring(2, 15);
         const extension = file.name.split('.').pop();
         const fileName = `${folder}/${timestamp}_${randomStr}.${extension}`;
+
+        console.log('Uploading to Supabase:', fileName);
 
         // Supabase Storageにアップロード
         const { data, error } = await supabaseClient.storage
@@ -69,14 +75,24 @@ async function uploadToSupabase(file, folder) {
             });
 
         if (error) {
+            console.error('Upload error:', error);
             throw error;
         }
+
+        console.log('Upload successful, getting public URL...');
 
         // 公開URLを取得
         const { data: urlData } = supabaseClient.storage
             .from(STORAGE_BUCKET)
             .getPublicUrl(fileName);
 
+        console.log('URL data received:', urlData);
+
+        if (!urlData || !urlData.publicUrl) {
+            throw new Error('公開URLの取得に失敗しました');
+        }
+
+        console.log('Public URL:', urlData.publicUrl);
         return urlData.publicUrl;
     } catch (error) {
         console.error('Supabase upload error:', error);
