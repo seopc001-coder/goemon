@@ -720,23 +720,18 @@ function handleProductFormSubmit(e) {
         return;
     }
 
-    // デバッグ: 保存時のフォーム状態をログ出力
-    console.log('=== 保存時のフォーム状態 ===');
-    console.log('showInRanking checkbox element:', document.getElementById('showInRanking'));
-    console.log('showInRanking.checked:', document.getElementById('showInRanking').checked);
-    console.log('showInRanking variable:', showInRanking);
-    console.log('isPublished input element:', document.getElementById('isPublished'));
-    console.log('isPublished.value:', document.getElementById('isPublished').value);
-    console.log('isPublished variable:', isPublished);
-    console.log('rankingPosition:', rankingPosition);
-    console.log('Validation will fail?:', showInRanking && !isPublished);
-    console.log('=======================');
-
     // ランキング表示と公開状態のバリデーション
-    // フォームの現在の値でチェック（データベースの値ではない）
-    if (showInRanking && !isPublished) {
-        showAlertModal('人気ランキングに表示できるのは公開商品のみです', 'error');
-        return;
+    // 非公開商品はランキング表示できないため、自動的にランキングを無効化
+    if (!isPublished && showInRanking) {
+        // 非公開の場合は自動的にランキングを無効にする
+        document.getElementById('showInRanking').checked = false;
+        const rankingPositionInput = document.getElementById('rankingPosition');
+        if (rankingPositionInput) {
+            rankingPositionInput.value = '';
+        }
+        // 更新された値を再取得
+        showInRanking = false;
+        rankingPosition = null;
     }
 
     // 画像アップロード中のチェック
@@ -1016,16 +1011,9 @@ let publishButtonHandlers = new Map();
 
 // ランキングチェックボックスの動作を設定
 function setupRankingCheckbox() {
-    console.log('setupRankingCheckbox called');
     const showInRankingCheckbox = document.getElementById('showInRanking');
     const rankingPositionGroup = document.getElementById('rankingPositionGroup');
     const isPublishedInput = document.getElementById('isPublished');
-
-    console.log('Elements found:', {
-        showInRankingCheckbox: !!showInRankingCheckbox,
-        rankingPositionGroup: !!rankingPositionGroup,
-        isPublishedInput: !!isPublishedInput
-    });
 
     if (showInRankingCheckbox && rankingPositionGroup) {
         // 既存のイベントリスナーを削除
@@ -1035,11 +1023,9 @@ function setupRankingCheckbox() {
 
         // 新しいイベントハンドラを作成
         rankingCheckboxHandler = function() {
-            console.log('Ranking checkbox changed:', this.checked);
             // 公開商品のみランキング表示可能
             if (this.checked) {
                 const isPublished = isPublishedInput.value === 'true';
-                console.log('Checking if published:', isPublished);
                 if (!isPublished) {
                     this.checked = false;
                     showAlertModal('人気ランキングに表示できるのは公開商品のみです', 'warning');
@@ -1068,13 +1054,6 @@ function setupRankingCheckbox() {
                 const newValue = this.dataset.value;
                 const isPublished = newValue === 'true';
 
-                console.log('Publish button clicked:', {
-                    newValue: newValue,
-                    isPublished: isPublished,
-                    checkboxChecked: showInRankingCheckbox.checked,
-                    checkboxDisabled: showInRankingCheckbox.disabled
-                });
-
                 // 実際に値を更新
                 isPublishedInput.value = newValue;
 
@@ -1084,9 +1063,6 @@ function setupRankingCheckbox() {
 
                 // 非公開にする場合、ランキングチェックボックスを無効化して自動的にチェックを外す
                 if (!isPublished) {
-                    console.log('非公開ボタンがクリックされました - ランキングを解除します');
-                    console.log('変更前 - checkbox.checked:', showInRankingCheckbox.checked);
-
                     showInRankingCheckbox.disabled = true;
                     showInRankingCheckbox.checked = false;
                     rankingPositionGroup.style.display = 'none';
@@ -1096,12 +1072,7 @@ function setupRankingCheckbox() {
                     if (rankingPositionInput) {
                         rankingPositionInput.value = '';
                     }
-
-                    console.log('変更後 - checkbox.checked:', showInRankingCheckbox.checked);
-                    console.log('変更後 - checkbox.disabled:', showInRankingCheckbox.disabled);
-                    console.log('変更後 - rankingPosition.value:', rankingPositionInput ? rankingPositionInput.value : 'N/A');
                 } else {
-                    console.log('公開ボタンがクリックされました');
                     showInRankingCheckbox.disabled = false;
                 }
             };
