@@ -590,9 +590,9 @@ function handleProductFormSubmit(e) {
     const hasBase64 = imageFields.some(img => img.startsWith('data:image'));
 
     if (hasBase64) {
-        showAlertModal('エラー: 画像はSupabaseにアップロードしてURLを使用してください。base64データは保存できません。', 'error');
-        console.error('Base64 image data detected. Please upload images to Supabase first.');
-        return;
+        console.warn('⚠️ 警告: base64画像データが検出されました。localStorageの容量制限により、多数の商品を保存できない可能性があります。');
+        console.warn('画像フィールド:', imageFields.filter(img => img.startsWith('data:image')));
+        // 一旦警告のみで保存は許可（デバッグ用）
     }
 
     // 商品データを構築
