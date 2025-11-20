@@ -681,6 +681,18 @@ function handleProductFormSubmit(e) {
         return;
     }
 
+    // デバッグ: 保存時のフォーム状態をログ出力
+    console.log('=== 保存時のフォーム状態 ===');
+    console.log('showInRanking checkbox element:', document.getElementById('showInRanking'));
+    console.log('showInRanking.checked:', document.getElementById('showInRanking').checked);
+    console.log('showInRanking variable:', showInRanking);
+    console.log('isPublished input element:', document.getElementById('isPublished'));
+    console.log('isPublished.value:', document.getElementById('isPublished').value);
+    console.log('isPublished variable:', isPublished);
+    console.log('rankingPosition:', rankingPosition);
+    console.log('Validation will fail?:', showInRanking && !isPublished);
+    console.log('=======================');
+
     // ランキング表示と公開状態のバリデーション
     // フォームの現在の値でチェック（データベースの値ではない）
     if (showInRanking && !isPublished) {
@@ -1033,15 +1045,24 @@ function setupRankingCheckbox() {
 
                 // 非公開にする場合、ランキングチェックボックスを無効化して自動的にチェックを外す
                 if (!isPublished) {
+                    console.log('非公開ボタンがクリックされました - ランキングを解除します');
+                    console.log('変更前 - checkbox.checked:', showInRankingCheckbox.checked);
+
                     showInRankingCheckbox.disabled = true;
                     showInRankingCheckbox.checked = false;
                     rankingPositionGroup.style.display = 'none';
+
                     // ランキング順位もクリア
                     const rankingPositionInput = document.getElementById('rankingPosition');
                     if (rankingPositionInput) {
                         rankingPositionInput.value = '';
                     }
+
+                    console.log('変更後 - checkbox.checked:', showInRankingCheckbox.checked);
+                    console.log('変更後 - checkbox.disabled:', showInRankingCheckbox.disabled);
+                    console.log('変更後 - rankingPosition.value:', rankingPositionInput ? rankingPositionInput.value : 'N/A');
                 } else {
+                    console.log('公開ボタンがクリックされました');
                     showInRankingCheckbox.disabled = false;
                 }
             };
