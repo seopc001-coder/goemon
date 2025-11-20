@@ -268,6 +268,59 @@
             margin-bottom: 20px;
             display: block;
         }
+
+        /* 公開/非公開トグルボタン */
+        .publish-toggle-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .publish-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .publish-btn:hover {
+            border-color: #999;
+            background: #f9f9f9;
+        }
+
+        .publish-btn.active {
+            border-color: #4CAF50;
+            background: #4CAF50;
+            color: white;
+        }
+
+        .publish-btn.active:hover {
+            background: #45a049;
+            border-color: #45a049;
+        }
+
+        .publish-btn[data-value="false"].active {
+            border-color: #999;
+            background: #999;
+            color: white;
+        }
+
+        .publish-btn[data-value="false"].active:hover {
+            background: #777;
+            border-color: #777;
+        }
+
+        .publish-btn i {
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -406,12 +459,18 @@
                     </div>
 
                     <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" id="isPublished" style="width: auto; margin: 0;" checked>
-                            <span>公開する</span>
-                        </label>
-                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
-                            チェックを外すと、ECサイトに表示されなくなります。非公開→公開時は最新商品として上位表示されます。
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">公開設定</label>
+                        <div class="publish-toggle-buttons">
+                            <button type="button" class="publish-btn active" data-value="true">
+                                <i class="fas fa-eye"></i> 公開
+                            </button>
+                            <button type="button" class="publish-btn" data-value="false">
+                                <i class="fas fa-eye-slash"></i> 非公開
+                            </button>
+                        </div>
+                        <input type="hidden" id="isPublished" value="true">
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 8px;">
+                            非公開にすると、ECサイトに表示されなくなります。非公開→公開時は最新商品として上位表示されます。
                         </small>
                     </div>
 

@@ -37,6 +37,9 @@ async function initializeProductManagement() {
     // フォーム送信イベント
     document.getElementById('productForm').addEventListener('submit', handleProductFormSubmit);
 
+    // 公開/非公開トグルボタンのイベント
+    initializePublishToggle();
+
     // 検索入力時のイベント
     document.getElementById('searchInput').addEventListener('input', function(e) {
         if (e.target.value === '') {
@@ -336,6 +339,25 @@ function filterLowStockProducts() {
     }
 }
 
+// 公開/非公開トグルボタンを初期化
+function initializePublishToggle() {
+    const publishButtons = document.querySelectorAll('.publish-btn');
+    const hiddenInput = document.getElementById('isPublished');
+
+    publishButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // すべてのボタンから active クラスを削除
+            publishButtons.forEach(btn => btn.classList.remove('active'));
+
+            // クリックされたボタンに active クラスを追加
+            this.classList.add('active');
+
+            // hidden input の値を更新
+            hiddenInput.value = this.dataset.value;
+        });
+    });
+}
+
 // 商品追加モーダルを開く
 function openAddProductModal() {
     editingProductId = null;
@@ -379,8 +401,18 @@ function editProduct(productId) {
     document.getElementById('productStock').value = product.stock || 0;
     document.getElementById('productDescription').value = product.description || '';
 
-    // 公開/非公開設定
-    document.getElementById('isPublished').checked = product.isPublished !== false; // デフォルトtrue
+    // 公開/非公開設定（トグルボタン）
+    const isPublished = product.isPublished !== false; // デフォルトtrue
+    document.getElementById('isPublished').value = isPublished.toString();
+
+    // ボタンのアクティブ状態を更新
+    const publishButtons = document.querySelectorAll('.publish-btn');
+    publishButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.value === isPublished.toString()) {
+            btn.classList.add('active');
+        }
+    });
 
     // ランキング設定
     const showInRankingCheckbox = document.getElementById('showInRanking');
@@ -425,7 +457,7 @@ function handleProductFormSubmit(e) {
     const productImage4 = document.getElementById('productImage4').value.trim();
     const showInRanking = document.getElementById('showInRanking').checked;
     const rankingPosition = document.getElementById('rankingPosition').value ? parseInt(document.getElementById('rankingPosition').value) : null;
-    const isPublished = document.getElementById('isPublished').checked;
+    const isPublished = document.getElementById('isPublished').value === 'true';
 
     // 非公開→公開の状態変化を検出
     const wasUnpublished = editingProductId && allProducts[editingProductId] && allProducts[editingProductId].isPublished === false;
