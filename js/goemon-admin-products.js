@@ -15,6 +15,9 @@ async function initializeProductManagement() {
     // デモ商品データを削除（1回のみ実行）
     clearDemoProductsOnce();
 
+    // base64画像データをクリーンアップ（1回のみ実行）
+    cleanupBase64ImagesOnce();
+
     // デフォルトデータを初期化（localStorageにない場合）
     initializeDefaultDataIfNeeded();
 
@@ -81,6 +84,55 @@ function clearDemoProductsOnce() {
         console.log('✅ デモ商品データを削除しました');
     } else {
         console.log('✓ デモ商品データは既に削除済みです');
+    }
+}
+
+// base64画像データをクリーンアップ（1回のみ実行）
+function cleanupBase64ImagesOnce() {
+    const cleaned = localStorage.getItem('goemon_base64_cleaned');
+
+    if (!cleaned) {
+        console.log('🧹 base64画像データをクリーンアップします...');
+
+        try {
+            const savedProducts = localStorage.getItem('goemonproducts');
+            if (savedProducts) {
+                const products = JSON.parse(savedProducts);
+                let hasBase64 = false;
+                let cleanedCount = 0;
+
+                // 全商品をチェック
+                Object.keys(products).forEach(key => {
+                    const product = products[key];
+                    const imageFields = ['image', 'image2', 'image3', 'image4'];
+
+                    imageFields.forEach(field => {
+                        if (product[field] && product[field].startsWith('data:image')) {
+                            hasBase64 = true;
+                            console.warn(`⚠️ 商品ID ${key} の ${field} にbase64データを検出しました`);
+                            // base64データを削除（URLではないため）
+                            product[field] = null;
+                            cleanedCount++;
+                        }
+                    });
+                });
+
+                if (hasBase64) {
+                    console.log(`🔧 ${cleanedCount}個のbase64画像データを削除しました`);
+                    // クリーンアップされたデータを保存
+                    localStorage.setItem('goemonproducts', JSON.stringify(products));
+                    console.log('✅ 商品データをクリーンアップして保存しました');
+                } else {
+                    console.log('✓ base64データは見つかりませんでした');
+                }
+            }
+
+            localStorage.setItem('goemon_base64_cleaned', 'true');
+        } catch (error) {
+            console.error('❌ クリーンアップ中にエラーが発生しました:', error);
+        }
+    } else {
+        console.log('✓ base64データのクリーンアップは既に完了しています');
     }
 }
 
@@ -522,6 +574,16 @@ function handleProductFormSubmit(e) {
 
     if (!productImage) {
         showAlertModal('メイン画像URLを入力してください', 'warning');
+        return;
+    }
+
+    // base64データのチェック（localStorageの容量制限を防ぐため）
+    const imageFields = [productImage, productImage2, productImage3, productImage4].filter(img => img);
+    const hasBase64 = imageFields.some(img => img.startsWith('data:image'));
+
+    if (hasBase64) {
+        showAlertModal('エラー: 画像はSupabaseにアップロードしてURLを使用してください。base64データは保存できません。', 'error');
+        console.error('Base64 image data detected. Please upload images to Supabase first.');
         return;
     }
 
