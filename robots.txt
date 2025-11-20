@@ -1,0 +1,14 @@
+# robots.txt for Re:ラボ (https://relab.vercel.app)
+
+# すべてのクローラーを許可
+User-agent: *
+Allow: /
+
+# プライバシーポリシーは検索結果に表示しない
+Disallow: /privacy-policy.html
+
+# サイトマップの場所を指定
+Sitemap: https://relab.vercel.app/sitemap.xml
+
+# クロール速度の調整（オプション）
+Crawl-delay: 1
