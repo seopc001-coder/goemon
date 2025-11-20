@@ -23,38 +23,13 @@ function loadProductData() {
     console.log('=== 商品詳細ページ: データ読み込み開始 ===');
     console.log('商品ID:', productId);
 
-    // localStorageから商品データを取得
-    const savedProducts = localStorage.getItem('goemonproducts');
+    // デモ商品データを完全削除（ユーザーの要望により）
+    localStorage.removeItem('goemonproducts');
+    console.log('Demo products data cleared from localStorage');
+
+    // 商品データなし
     let product = null;
-
-    if (savedProducts) {
-        try {
-            const productsData = JSON.parse(savedProducts);
-            console.log('localStorage商品データ形式:', Array.isArray(productsData) ? '配列' : 'オブジェクト');
-            console.log('localStorage商品数:', Array.isArray(productsData) ? productsData.length : Object.keys(productsData).length);
-
-            // 配列形式かオブジェクト形式か判定して商品を検索
-            if (Array.isArray(productsData)) {
-                product = productsData.find(p => p.id === productId);
-            } else {
-                product = productsData[productId];
-            }
-
-            if (product) {
-                console.log('✓ localStorageから商品を読み込みました:', productId);
-                console.log('商品名:', product.name);
-                console.log('公開状態:', product.isPublished !== false ? '公開' : '非公開');
-            } else {
-                console.log('✗ localStorageに商品が見つかりません:', productId);
-            }
-        } catch (error) {
-            console.error('Error parsing saved products:', error);
-        }
-    } else {
-        console.log('✗ localStorageにgoemonproductsが存在しません');
-    }
-
-    // デモデータは使用しない（削除済み商品が表示されてしまう問題があるため）
+    console.log('No products in localStorage');
 
     if (product) {
         // 非公開商品の場合は表示しない
