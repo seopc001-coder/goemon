@@ -8,18 +8,13 @@
     let productsData = {};
 
     // 商品データを初期化
-    function initializeProductsData() {
-        const savedProducts = localStorage.getItem('goemonproducts');
-        if (savedProducts) {
-            try {
-                const parsed = JSON.parse(savedProducts);
-                productsData = Array.isArray(parsed) ?
-                    parsed.reduce((acc, p) => ({ ...acc, [p.id]: p }), {}) : parsed;
-            } catch (error) {
-                console.error('Error parsing products:', error);
-                productsData = {};
-            }
-        } else {
+    async function initializeProductsData() {
+        try {
+            const products = await fetchPublishedProducts();
+            productsData = products.reduce((acc, p) => ({ ...acc, [p.id]: p }), {});
+            console.log('Loaded products from Supabase:', Object.keys(productsData).length);
+        } catch (error) {
+            console.error('Error loading products from Supabase:', error);
             productsData = {};
         }
     }
@@ -27,7 +22,7 @@
     document.addEventListener('DOMContentLoaded', async function() {
         try {
             // 商品データを初期化
-            initializeProductsData();
+            await initializeProductsData();
 
             // UI機能を初期化
             initializeMobileMenu();
@@ -65,17 +60,7 @@
             currentUser = user;
 
             // Supabaseからお気に入りを取得
-            const { data, error } = await supabase
-                .from('user_favorites')
-                .select('product_id')
-                .eq('user_id', user.id);
-
-            if (error) {
-                console.error('Error loading favorites:', error);
-                // エラーの場合はlocalStorageから読み込み
-                favoritesPageWishlist = JSON.parse(localStorage.getItem('goemonwishlist')) || [];
-                return;
-            }
+            const data = await fetchFavorites(user.id);
 
             // 商品IDの配列に変換
             favoritesPageWishlist = data.map(item => item.product_id);
@@ -209,15 +194,7 @@
 
             // ログインしている場合はSupabaseも更新
             if (currentUser) {
-                const { error } = await supabase
-                    .from('user_favorites')
-                    .delete()
-                    .eq('user_id', currentUser.id)
-                    .eq('product_id', productId);
-
-                if (error) {
-                    console.error('Error removing from Supabase:', error);
-                }
+                await removeFromFavoritesByProductId(currentUser.id, productId);
             }
 
             // ヘッダーのお気に入り件数を更新

@@ -8,24 +8,18 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCartPage();
 });
 
-function initializeCartPage() {
-    // 商品データをlocalStorageから読み込み
-    const savedProducts = localStorage.getItem('goemonproducts');
-    if (savedProducts) {
-        try {
-            const parsed = JSON.parse(savedProducts);
-            productsData = Array.isArray(parsed) ?
-                parsed.reduce((acc, p) => ({ ...acc, [p.id]: p }), {}) : parsed;
-        } catch (error) {
-            console.error('Error parsing products:', error);
-            productsData = {};
-        }
-    } else {
+async function initializeCartPage() {
+    // 商品データをSupabaseから読み込み
+    try {
+        const products = await fetchPublishedProducts();
+        productsData = products.reduce((acc, p) => ({ ...acc, [p.id]: p }), {});
+    } catch (error) {
+        console.error('Error loading products from Supabase:', error);
         productsData = {};
     }
 
     // カートデータを読み込み
-    loadCartData();
+    await loadCartData();
 
     // カートを描画
     renderCartItems();
@@ -37,9 +31,39 @@ function initializeCartPage() {
     initializeCouponInput();
 }
 
-// カートデータを読み込み
-function loadCartData() {
-    cartItems = JSON.parse(localStorage.getItem('goemoncart')) || [];
+// カートデータを読み込み（認証ユーザーはSupabase、ゲストはlocalStorage）
+async function loadCartData() {
+    try {
+        // Supabaseで認証状態をチェック
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session?.user) {
+            // 認証ユーザー: Supabaseからカートを読み込み
+            const userId = session.user.id;
+            const dbCartItems = await fetchCartItems(userId);
+
+            // DBのフォーマットをアプリ用に変換
+            cartItems = dbCartItems.map(item => ({
+                id: item.product_id,
+                name: '', // 商品データから取得
+                price: 0, // 商品データから取得
+                quantity: item.quantity,
+                color: item.color,
+                size: item.size,
+                cartItemId: item.id // DB上のカートアイテムID
+            }));
+
+            console.log('Loaded cart from Supabase:', cartItems.length, 'items');
+        } else {
+            // ゲストユーザー: localStorageから読み込み
+            cartItems = JSON.parse(localStorage.getItem('goemoncart')) || [];
+            console.log('Loaded cart from localStorage:', cartItems.length, 'items');
+        }
+    } catch (error) {
+        console.error('Error loading cart:', error);
+        // エラー時はlocalStorageから読み込み
+        cartItems = JSON.parse(localStorage.getItem('goemoncart')) || [];
+    }
 }
 
 // カートアイテムを描画
@@ -186,10 +210,10 @@ function initializeRemoveButtons() {
 }
 
 // 商品を削除済みとしてマーク
-function markItemAsDeleted(cartItem) {
+async function markItemAsDeleted(cartItem) {
     // すでに削除済みの場合は戻す
     if (cartItem.classList.contains('deleted')) {
-        restoreDeletedItem(cartItem);
+        await restoreDeletedItem(cartItem);
         return;
     }
 
@@ -217,18 +241,18 @@ function markItemAsDeleted(cartItem) {
     qtyButtons.forEach(btn => btn.disabled = true);
     if (qtyInput) qtyInput.disabled = true;
 
-    // localStorageから削除
+    // カートから削除
     const itemId = cartItem.dataset.itemId;
     const color = cartItem.dataset.color;
     const size = cartItem.dataset.size;
-    removeCartItem(itemId, color, size);
+    await removeCartItem(itemId, color, size);
 
     // サマリーを更新
     renderCartSummary();
 }
 
 // 削除済み商品を元に戻す
-function restoreDeletedItem(cartItem) {
+async function restoreDeletedItem(cartItem) {
     // 削除済みフラグを削除
     cartItem.classList.remove('deleted');
 
@@ -252,7 +276,7 @@ function restoreDeletedItem(cartItem) {
     qtyButtons.forEach(btn => btn.disabled = false);
     if (qtyInput) qtyInput.disabled = false;
 
-    // localStorageに追加し直す
+    // カートに追加し直す
     const itemId = cartItem.dataset.itemId;
     const color = cartItem.dataset.color;
     const size = cartItem.dataset.size;
@@ -269,14 +293,14 @@ function restoreDeletedItem(cartItem) {
     };
 
     cartItems.push(itemData);
-    saveCart();
+    await saveCart();
 
     // サマリーを更新
     renderCartSummary();
 }
 
 // カートアイテムの数量更新
-function updateItemQuantity(cartItem, newQuantity) {
+async function updateItemQuantity(cartItem, newQuantity) {
     const itemId = cartItem.dataset.itemId;
     const color = cartItem.dataset.color;
     const size = cartItem.dataset.size;
@@ -299,20 +323,20 @@ function updateItemQuantity(cartItem, newQuantity) {
             priceElement.textContent = formatPrice(newTotal);
         }
 
-        saveCart();
+        await saveCart();
         renderCartSummary();
     }
 }
 
 // カートから商品を削除
-function removeCartItem(itemId, color, size) {
+async function removeCartItem(itemId, color, size) {
     cartItems = cartItems.filter(item => {
         const matchId = item.id == itemId;
         const matchColor = (item.color || '') === color;
         const matchSize = (item.size || '') === size;
         return !(matchId && matchColor && matchSize);
     });
-    saveCart();
+    await saveCart();
 }
 
 // カートサマリー表示
@@ -442,9 +466,40 @@ function applyCoupon(couponCode) {
     }
 }
 
-// カートをローカルストレージに保存
-function saveCart() {
-    localStorage.setItem('goemoncart', JSON.stringify(cartItems));
+// カートを保存（認証ユーザーはSupabase、ゲストはlocalStorage）
+async function saveCart() {
+    try {
+        // Supabaseで認証状態をチェック
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session?.user) {
+            // 認証ユーザー: Supabaseに保存
+            const userId = session.user.id;
+
+            // 既存のカートをクリア
+            await clearCart(userId);
+
+            // 新しいカートアイテムを追加
+            for (const item of cartItems) {
+                await addToCart(userId, {
+                    productId: item.id,
+                    quantity: item.quantity,
+                    color: item.color,
+                    size: item.size
+                });
+            }
+
+            console.log('Cart saved to Supabase');
+        } else {
+            // ゲストユーザー: localStorageに保存
+            localStorage.setItem('goemoncart', JSON.stringify(cartItems));
+            console.log('Cart saved to localStorage');
+        }
+    } catch (error) {
+        console.error('Error saving cart:', error);
+        // エラー時はlocalStorageに保存
+        localStorage.setItem('goemoncart', JSON.stringify(cartItems));
+    }
 }
 
 // 価格フォーマット

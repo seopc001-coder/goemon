@@ -37,47 +37,50 @@ async function checkAdminAccess() {
 }
 
 // クーポンデータを読み込み
-function loadCoupons() {
+async function loadCoupons() {
+    try {
+        // Supabaseから全クーポンを取得
+        const dbCoupons = await fetchAllCoupons();
+
+        // DBクーポンデータをアプリ用フォーマットに変換
+        allCoupons = dbCoupons.map(coupon => ({
+            id: coupon.id,
+            code: coupon.code,
+            type: coupon.type,
+            value: coupon.value,
+            minPurchase: coupon.min_purchase || 0,
+            maxDiscount: coupon.max_discount || null,
+            expiryDate: coupon.expiry_date,
+            usageLimit: coupon.usage_limit || null,
+            usedCount: coupon.used_count || 0,
+            description: coupon.description || '',
+            createdAt: coupon.created_at
+        }));
+
+        renderCoupons(allCoupons);
+        console.log('Loaded coupons from Supabase:', allCoupons.length);
+    } catch (error) {
+        console.error('Error loading coupons from Supabase:', error);
+        showAlertModal('クーポンデータの読み込みに失敗しました', 'error');
+        // エラー時はlocalStorageから読み込み（フォールバック）
+        loadCouponsFromLocalStorage();
+    }
+}
+
+// localStorageからクーポンを読み込み（フォールバック）
+function loadCouponsFromLocalStorage() {
     try {
         const savedCoupons = localStorage.getItem('goemoncoupons');
         if (savedCoupons) {
             allCoupons = JSON.parse(savedCoupons);
         } else {
-            // デフォルトクーポンを作成
-            allCoupons = [
-                {
-                    id: 'WELCOME2025',
-                    code: 'WELCOME2025',
-                    type: 'percentage',
-                    value: 10,
-                    minPurchase: 3000,
-                    maxDiscount: 1000,
-                    expiryDate: '2025-12-31',
-                    usageLimit: null,
-                    usedCount: 0,
-                    description: '新規会員様限定！10%OFF',
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: 'SPRING500',
-                    code: 'SPRING500',
-                    type: 'fixed',
-                    value: 500,
-                    minPurchase: 5000,
-                    maxDiscount: null,
-                    expiryDate: '2025-03-31',
-                    usageLimit: 100,
-                    usedCount: 23,
-                    description: '春のキャンペーン 500円OFF',
-                    createdAt: new Date().toISOString()
-                }
-            ];
-            localStorage.setItem('goemoncoupons', JSON.stringify(allCoupons));
+            allCoupons = [];
         }
 
         renderCoupons(allCoupons);
+        console.log('Loaded coupons from localStorage (fallback):', allCoupons.length);
     } catch (error) {
-        console.error('Error loading coupons:', error);
+        console.error('Error loading coupons from localStorage:', error);
         showAlertModal('クーポンデータの読み込みに失敗しました', 'error');
     }
 }
@@ -160,7 +163,7 @@ function renderCoupons(coupons) {
                         <button class="btn-small btn-edit" onclick="editCoupon('${coupon.id}')">
                             <i class="fas fa-edit"></i> 編集
                         </button>
-                        <button class="btn-small btn-delete" onclick="deleteCoupon('${coupon.id}')">
+                        <button class="btn-small btn-delete" onclick="deleteCouponFromUI('${coupon.id}')">
                             <i class="fas fa-trash"></i> 削除
                         </button>
                     </div>
@@ -239,7 +242,7 @@ function editCoupon(couponId) {
 }
 
 // クーポンフォーム送信処理
-function handleCouponFormSubmit(e) {
+async function handleCouponFormSubmit(e) {
     e.preventDefault();
 
     const code = document.getElementById('couponCode').value.trim().toUpperCase();
@@ -286,12 +289,10 @@ function handleCouponFormSubmit(e) {
         }
     }
 
-    if (editingCouponId) {
-        // 編集モード
-        const index = allCoupons.findIndex(c => c.id === editingCouponId);
-        if (index !== -1) {
-            allCoupons[index] = {
-                ...allCoupons[index],
+    try {
+        if (editingCouponId) {
+            // 編集モード - Supabaseを更新
+            const updates = {
                 code,
                 type,
                 value,
@@ -301,42 +302,68 @@ function handleCouponFormSubmit(e) {
                 usageLimit,
                 description
             };
+
+            await updateCoupon(editingCouponId, updates);
+
+            // ローカル配列も更新
+            const index = allCoupons.findIndex(c => c.id === editingCouponId);
+            if (index !== -1) {
+                allCoupons[index] = {
+                    ...allCoupons[index],
+                    ...updates
+                };
+            }
+
+            showAlertModal('クーポンを更新しました', 'success');
+        } else {
+            // 新規追加モード - Supabaseに保存
+            const newCoupon = {
+                code,
+                type,
+                value,
+                minPurchase,
+                maxDiscount,
+                expiryDate,
+                usageLimit,
+                description
+            };
+
+            const savedCoupon = await addCoupon(newCoupon);
+
+            // ローカル配列に追加（アプリ用フォーマットに変換）
+            allCoupons.push({
+                id: savedCoupon.id,
+                code: savedCoupon.code,
+                type: savedCoupon.type,
+                value: savedCoupon.value,
+                minPurchase: savedCoupon.min_purchase || 0,
+                maxDiscount: savedCoupon.max_discount || null,
+                expiryDate: savedCoupon.expiry_date,
+                usageLimit: savedCoupon.usage_limit || null,
+                usedCount: savedCoupon.used_count || 0,
+                description: savedCoupon.description || '',
+                createdAt: savedCoupon.created_at
+            });
+
+            showAlertModal('クーポンを作成しました', 'success');
         }
 
-        showAlertModal('クーポンを更新しました', 'success');
-    } else {
-        // 新規追加モード
-        const newCoupon = {
-            id: code,
-            code,
-            type,
-            value,
-            minPurchase,
-            maxDiscount,
-            expiryDate,
-            usageLimit,
-            usedCount: 0,
-            description,
-            createdAt: new Date().toISOString()
-        };
+        // localStorageにもバックアップ
+        localStorage.setItem('goemoncoupons', JSON.stringify(allCoupons));
 
-        allCoupons.push(newCoupon);
+        // モーダルを閉じる
+        closeCouponModal();
 
-        showAlertModal('クーポンを作成しました', 'success');
+        // クーポンリストを再表示
+        renderCoupons(allCoupons);
+    } catch (error) {
+        console.error('Error saving coupon:', error);
+        showAlertModal('クーポンの保存に失敗しました: ' + error.message, 'error');
     }
-
-    // localStorageに保存
-    localStorage.setItem('goemoncoupons', JSON.stringify(allCoupons));
-
-    // モーダルを閉じる
-    closeCouponModal();
-
-    // クーポンリストを再表示
-    renderCoupons(allCoupons);
 }
 
 // クーポンを削除
-function deleteCoupon(couponId) {
+function deleteCouponFromUI(couponId) {
     const coupon = allCoupons.find(c => c.id === couponId);
 
     if (!coupon) {
@@ -346,12 +373,21 @@ function deleteCoupon(couponId) {
 
     showConfirmModal(
         `クーポン「${coupon.code}」を削除してもよろしいですか？\n\nこの操作は取り消せません。`,
-        () => {
-            allCoupons = allCoupons.filter(c => c.id !== couponId);
-            localStorage.setItem('goemoncoupons', JSON.stringify(allCoupons));
+        async () => {
+            try {
+                // Supabaseから削除
+                await deleteCoupon(couponId);
 
-            showAlertModal('クーポンを削除しました', 'success');
-            renderCoupons(allCoupons);
+                // ローカル配列からも削除
+                allCoupons = allCoupons.filter(c => c.id !== couponId);
+                localStorage.setItem('goemoncoupons', JSON.stringify(allCoupons));
+
+                showAlertModal('クーポンを削除しました', 'success');
+                renderCoupons(allCoupons);
+            } catch (error) {
+                console.error('Error deleting coupon:', error);
+                showAlertModal('クーポンの削除に失敗しました: ' + error.message, 'error');
+            }
         }
     );
 }

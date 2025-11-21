@@ -7,45 +7,24 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeIndexPage();
 });
 
-function initializeIndexPage() {
-    // 商品データを初期化
-    const savedProducts = localStorage.getItem('goemonproducts');
-
-    if (savedProducts) {
-        // 保存されている商品データを使用
-        try {
-            const productsData = JSON.parse(savedProducts);
-            // オブジェクト形式の場合は配列形式に変換
-            if (Array.isArray(productsData)) {
-                // 配列の場合は、IDをキーとするオブジェクトに変換
-                allProducts = {};
-                productsData.forEach(product => {
-                    allProducts[product.id] = product;
-                });
-            } else {
-                allProducts = productsData;
-            }
-            console.log('Loaded products from localStorage:', Object.keys(allProducts).length);
-        } catch (error) {
-            console.error('Error parsing saved products:', error);
-            allProducts = {};
-        }
-    } else {
-        // localStorageにデータがない場合は空のオブジェクトを使用
+async function initializeIndexPage() {
+    try {
+        // 商品データをSupabaseから読み込み
+        const products = await fetchPublishedProducts();
+        allProducts = products.reduce((acc, p) => ({ ...acc, [p.id]: p }), {});
+        console.log('Loaded products from Supabase:', Object.keys(allProducts).length);
+    } catch (error) {
+        console.error('Error loading products from Supabase:', error);
         allProducts = {};
-        console.log('No products in localStorage');
     }
 
-    // デフォルトデータを初期化（localStorageにない場合）
-    initializeDefaultDataIfNeeded();
-
     // ヒーロー画像、カテゴリ、商品タイプを読み込み
-    loadCategories();
-    loadProductTypes();
+    await loadCategories();
+    await loadProductTypes();
 
     // Swiperの初期化を待ってからヒーロー画像を読み込み
     if (typeof Swiper !== 'undefined') {
-        loadHeroImages();
+        await loadHeroImages();
     } else {
         console.error('Swiper library not loaded');
     }
@@ -55,89 +34,18 @@ function initializeIndexPage() {
     loadSaleItems();
 }
 
-// デフォルトデータを初期化（localStorageにない場合）
-function initializeDefaultDataIfNeeded() {
-    const categoriesExist = localStorage.getItem('goemoncategories');
-    const heroImagesExist = localStorage.getItem('goemonheroimages');
-    const productTypesExist = localStorage.getItem('goemonproducttypes');
-
-    if (!categoriesExist) {
-        const defaultCategories = [
-            { id: 'outer', name: 'アウター', slug: 'outer', description: 'ジャケット、コートなど', order: 0 },
-            { id: 'tops', name: 'トップス', slug: 'tops', description: 'シャツ、カットソーなど', order: 1 },
-            { id: 'bottoms', name: 'ボトムス', slug: 'bottoms', description: 'パンツ、スカートなど', order: 2 },
-            { id: 'onepiece', name: 'ワンピース', slug: 'onepiece', description: 'ワンピース・ドレス', order: 3 },
-            { id: 'shoes', name: 'シューズ', slug: 'shoes', description: '靴・スニーカー', order: 4 },
-            { id: 'bags', name: 'バッグ', slug: 'bags', description: 'バッグ・小物', order: 5 },
-            { id: 'accessories', name: 'アクセサリー', slug: 'accessories', description: 'アクセサリー・小物', order: 6 }
-        ];
-        localStorage.setItem('goemoncategories', JSON.stringify(defaultCategories));
-        console.log('Default categories initialized on index page');
-    }
-
-    if (!heroImagesExist) {
-        const defaultHeroImages = [
-            {
-                id: 'hero1',
-                url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200',
-                link: 'goemon-products.html',
-                alt: '2025 SPRING COLLECTION',
-                title: '春の新作コレクション入荷',
-                order: 0
-            },
-            {
-                id: 'hero2',
-                url: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200',
-                link: 'goemon-products.html',
-                alt: 'SALE MAX 70% OFF',
-                title: '春夏アイテムがお買い得',
-                order: 1
-            },
-            {
-                id: 'hero3',
-                url: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200',
-                link: 'goemon-register.html',
-                alt: 'NEW MEMBER CAMPAIGN',
-                title: '新規登録で500円クーポン',
-                order: 2
-            }
-        ];
-        localStorage.setItem('goemonheroimages', JSON.stringify(defaultHeroImages));
-        console.log('Default hero images initialized on index page');
-    }
-
-    if (!productTypesExist) {
-        const defaultProductTypes = [
-            { id: 'new-arrivals', name: '新着アイテム', slug: 'new-arrivals', description: '最新の入荷商品', tag: 'NEW', tagColor: 'green', order: 0 },
-            { id: 'pre-order', name: '予約アイテム', slug: 'pre-order', description: '予約受付中の商品', tag: '予約', tagColor: 'orange', order: 1 },
-            { id: 'restock', name: '再入荷', slug: 'restock', description: '人気商品が再入荷', tag: '再入荷', tagColor: 'purple', order: 2 },
-            { id: 'sale', name: 'SALE', slug: 'sale', description: 'セール対象商品', tag: 'SALE', tagColor: 'red', order: 3 }
-        ];
-        localStorage.setItem('goemonproducttypes', JSON.stringify(defaultProductTypes));
-        console.log('Default product types initialized on index page');
-    }
-}
-
-// ヒーロー画像をlocalStorageから読み込んで表示
-function loadHeroImages() {
+// ヒーロー画像をSupabaseから読み込んで表示
+async function loadHeroImages() {
     try {
-        const savedHeroImages = localStorage.getItem('goemonheroimages');
+        const heroImages = await fetchActiveHeroImages();
 
-        // localStorageにデータがない場合は、HTMLのデフォルトスライドを使用
-        if (!savedHeroImages) {
-            console.log('No saved hero images, using HTML default slides');
-            initializeDefaultSwiper();
-            return;
-        }
-
-        const heroImages = JSON.parse(savedHeroImages);
         if (!heroImages || heroImages.length === 0) {
             console.log('Hero images array is empty, using HTML default slides');
             initializeDefaultSwiper();
             return;
         }
 
-        console.log('Loading hero images from localStorage:', heroImages.length);
+        console.log('Loading hero images from Supabase:', heroImages.length);
 
         // 並び順でソート
         heroImages.sort((a, b) => a.order - b.order);
@@ -157,21 +65,21 @@ function loadHeroImages() {
         heroImages.forEach((image, index) => {
             const slide = document.createElement('div');
             slide.className = 'swiper-slide';
-            const link = image.link || 'goemon-products.html';
+            const link = image.linkUrl || 'goemon-products.html';
 
             slide.innerHTML = `
                 <a href="${link}" class="hero-slide-link">
-                    <div class="hero-slide" style="background-image: url('${image.url}'); background-size: cover; background-position: center;">
+                    <div class="hero-slide" style="background-image: url('${image.imageUrl}'); background-size: cover; background-position: center;">
                         <div class="hero-content">
-                            <h2>${image.alt}</h2>
-                            <p>${image.title}</p>
+                            <h2>${image.title}</h2>
+                            <p>${image.subtitle || ''}</p>
                         </div>
                     </div>
                 </a>
             `;
 
             swiperWrapper.appendChild(slide);
-            console.log(`Added slide ${index + 1}:`, image.alt);
+            console.log(`Added slide ${index + 1}:`, image.title);
         });
 
         // 短い遅延の後にSwiperを初期化
@@ -251,23 +159,17 @@ function showCategorySection() {
     });
 }
 
-// カテゴリをlocalStorageから読み込んで表示
-function loadCategories() {
+// カテゴリをSupabaseから読み込んで表示
+async function loadCategories() {
     try {
-        const savedCategories = localStorage.getItem('goemoncategories');
-        if (!savedCategories) {
-            console.log('No saved categories found');
-            return;
-        }
-
-        const categories = JSON.parse(savedCategories);
+        const categories = await fetchCategories();
         if (!categories || categories.length === 0) {
             console.log('Categories array is empty');
             return;
         }
 
         // 並び順でソート
-        categories.sort((a, b) => a.order - b.order);
+        categories.sort((a, b) => a.display_order - b.display_order);
 
         // カテゴリリストを取得（タイトルが「カテゴリー」のwidgetを探す）
         const widgets = document.querySelectorAll('.sidebar-widget');
@@ -291,7 +193,7 @@ function loadCategories() {
         // カテゴリを動的に生成
         categories.forEach(category => {
             const li = document.createElement('li');
-            li.innerHTML = `<a href="goemon-products.html?category=${category.slug}">${category.name}</a>`;
+            li.innerHTML = `<a href="goemon-products.html?category=${category.name}">${category.name}</a>`;
             categoryList.appendChild(li);
         });
 
@@ -305,23 +207,17 @@ function loadCategories() {
     }
 }
 
-// 商品タイプをlocalStorageから読み込んで表示
-function loadProductTypes() {
+// 商品タイプをSupabaseから読み込んで表示
+async function loadProductTypes() {
     try {
-        const savedProductTypes = localStorage.getItem('goemonproducttypes');
-        if (!savedProductTypes) {
-            console.log('No saved product types found');
-            return;
-        }
-
-        const productTypes = JSON.parse(savedProductTypes);
+        const productTypes = await fetchProductTypes();
         if (!productTypes || productTypes.length === 0) {
             console.log('Product types array is empty');
             return;
         }
 
         // 並び順でソート
-        productTypes.sort((a, b) => a.order - b.order);
+        productTypes.sort((a, b) => a.display_order - b.display_order);
 
         // 商品タイプリストを取得（タイトルが「商品タイプから探す」のwidgetを探す）
         const widgets = document.querySelectorAll('.sidebar-widget');
@@ -345,7 +241,7 @@ function loadProductTypes() {
         // 商品タイプを動的に生成
         productTypes.forEach(type => {
             const li = document.createElement('li');
-            li.innerHTML = `<a href="goemon-products.html?type=${type.slug}">${type.name}</a>`;
+            li.innerHTML = `<a href="goemon-products.html?type=${type.name}">${type.name}</a>`;
             productTypeList.appendChild(li);
         });
 

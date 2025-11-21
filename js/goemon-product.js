@@ -17,60 +17,41 @@ function getProductIdFromURL() {
 }
 
 // 商品データを読み込み
-function loadProductData() {
+async function loadProductData() {
     const productId = getProductIdFromURL();
 
     console.log('=== 商品詳細ページ: データ読み込み開始 ===');
     console.log('商品ID:', productId);
 
-    // localStorageから商品データを取得
-    const savedProducts = localStorage.getItem('goemonproducts');
-    let product = null;
+    try {
+        // Supabaseから商品データを取得
+        const product = await fetchProductById(productId);
 
-    if (savedProducts) {
-        try {
-            const productsData = JSON.parse(savedProducts);
-            console.log('localStorage商品データ形式:', Array.isArray(productsData) ? '配列' : 'オブジェクト');
-            console.log('localStorage商品数:', Array.isArray(productsData) ? productsData.length : Object.keys(productsData).length);
+        if (product) {
+            console.log('✓ Supabaseから商品を読み込みました:', productId);
+            console.log('商品名:', product.name);
+            console.log('公開状態:', product.is_published !== false ? '公開' : '非公開');
 
-            // 配列形式かオブジェクト形式か判定して商品を検索
-            if (Array.isArray(productsData)) {
-                product = productsData.find(p => p.id === productId);
-            } else {
-                product = productsData[productId];
+            // 非公開商品の場合は表示しない
+            if (product.is_published === false) {
+                console.log('→ 非公開商品のため表示しません');
+                showProductNotFound();
+                return;
             }
 
-            if (product) {
-                console.log('✓ localStorageから商品を読み込みました:', productId);
-                console.log('商品名:', product.name);
-                console.log('公開状態:', product.isPublished !== false ? '公開' : '非公開');
-            } else {
-                console.log('✗ localStorageに商品が見つかりません:', productId);
-            }
-        } catch (error) {
-            console.error('Error parsing saved products:', error);
-        }
-    } else {
-        console.log('✗ localStorageにgoemonproductsが存在しません');
-    }
+            console.log('→ 商品を表示します');
+            productData = product;
+            updateProductDisplay();
 
-    if (product) {
-        // 非公開商品の場合は表示しない
-        if (product.isPublished === false) {
-            console.log('→ 非公開商品のため表示しません');
+            // 閲覧数をカウント（Supabaseに保存）
+            await incrementViewCount(productId);
+        } else {
+            // 商品が見つからない場合
+            console.log('→ 商品が見つからないため、エラーページを表示します');
             showProductNotFound();
-            return;
         }
-
-        console.log('→ 商品を表示します');
-        productData = product;
-        updateProductDisplay();
-
-        // 閲覧数をカウント（localStorageに保存）
-        incrementViewCount(productId, savedProducts);
-    } else {
-        // 商品が見つからない場合
-        console.log('→ 商品が見つからないため、エラーページを表示します');
+    } catch (error) {
+        console.error('Error loading product from Supabase:', error);
         showProductNotFound();
     }
 
@@ -78,32 +59,10 @@ function loadProductData() {
 }
 
 // 閲覧数をカウント
-function incrementViewCount(productId, savedProductsString) {
-    if (!savedProductsString) return;
-
+async function incrementViewCount(productId) {
     try {
-        const productsData = JSON.parse(savedProductsString);
-        let updated = false;
-
-        if (Array.isArray(productsData)) {
-            // 配列形式の場合
-            const product = productsData.find(p => p.id === productId);
-            if (product) {
-                product.viewCount = (product.viewCount || 0) + 1;
-                updated = true;
-            }
-        } else {
-            // オブジェクト形式の場合
-            if (productsData[productId]) {
-                productsData[productId].viewCount = (productsData[productId].viewCount || 0) + 1;
-                updated = true;
-            }
-        }
-
-        if (updated) {
-            localStorage.setItem('goemonproducts', JSON.stringify(productsData));
-            console.log('View count incremented for product:', productId);
-        }
+        await incrementProductViewCount(productId);
+        console.log('View count incremented for product:', productId);
     } catch (error) {
         console.error('Error incrementing view count:', error);
     }
@@ -533,26 +492,18 @@ function initializeAddToCart() {
     const addToCartBtn = document.getElementById('addToCartBtn');
     if (!addToCartBtn) return;
 
-    addToCartBtn.addEventListener('click', function() {
-        // 商品が削除されていないか再確認
-        const savedProducts = localStorage.getItem('goemonproducts');
+    addToCartBtn.addEventListener('click', async function() {
+        // 商品が削除されていないか再確認(Supabaseから取得)
         let currentProduct = null;
 
-        if (savedProducts) {
-            try {
-                const productsData = JSON.parse(savedProducts);
-                if (Array.isArray(productsData)) {
-                    currentProduct = productsData.find(p => p.id === productData.id);
-                } else {
-                    currentProduct = productsData[productData.id];
-                }
-            } catch (error) {
-                console.error('Error checking product status:', error);
-            }
+        try {
+            currentProduct = await fetchProductById(productData.id);
+        } catch (error) {
+            console.error('Error checking product status:', error);
         }
 
         // 商品が存在しないか、非公開の場合はエラー
-        if (!currentProduct || currentProduct.isPublished === false) {
+        if (!currentProduct || currentProduct.is_published === false) {
             alert('この商品は現在ご購入いただけません。商品が削除されたか、公開が停止されています。');
             // ページをリロードして最新の状態を表示
             window.location.reload();
@@ -679,44 +630,30 @@ function initializeTabs() {
 }
 
 // 関連商品を読み込み
-function loadRelatedProducts() {
+async function loadRelatedProducts() {
     const container = document.getElementById('relatedProducts');
     if (!container) return;
 
-    // 共通データから関連商品を取得
-    const relatedProductIds = ['2', '3', '4', '5'];
+    try {
+        // Supabaseから同じカテゴリーの商品を取得
+        const products = await fetchProductsByCategory(productData.category);
 
-    // localStorageから商品データを取得
-    const savedProducts = localStorage.getItem('goemonproducts');
-    let productsData = null;
+        // 現在の商品を除外
+        const relatedProducts = products.filter(p => p.id !== productData.id);
 
-    if (savedProducts) {
-        try {
-            productsData = JSON.parse(savedProducts);
-        } catch (error) {
-            console.error('Error parsing saved products:', error);
-        }
-    }
+        // ランダムに4件取得
+        const shuffled = relatedProducts.sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, 4);
 
-    relatedProductIds.forEach(id => {
-        let product = null;
-
-        // localStorageから商品を検索
-        if (productsData) {
-            if (Array.isArray(productsData)) {
-                product = productsData.find(p => p.id === id);
-            } else {
-                product = productsData[id];
-            }
-        }
-
-        // デモデータは使用しない
-
-        if (product) {
+        selected.forEach(product => {
             const card = createProductCard(product);
             container.appendChild(card);
-        }
-    });
+        });
+
+        console.log('Related products loaded:', selected.length);
+    } catch (error) {
+        console.error('Error loading related products:', error);
+    }
 }
 
 // 商品カードを生成

@@ -632,42 +632,19 @@ window.closeProductTypeModal = function() {
 // ========================================
 
 // ヒーロー画像データを読み込み
-function loadHeroImages() {
+async function loadHeroImages() {
     try {
-        const savedHeroImages = localStorage.getItem('goemonheroimages');
-        if (savedHeroImages) {
-            heroImages = JSON.parse(savedHeroImages);
-        } else {
-            // デフォルトヒーロー画像（ECサイトの現在の画像）
-            heroImages = [
-                {
-                    id: 'hero1',
-                    url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200',
-                    link: 'goemon-products.html',
-                    alt: '2025 SPRING COLLECTION',
-                    title: '春の新作コレクション入荷',
-                    order: 0
-                },
-                {
-                    id: 'hero2',
-                    url: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200',
-                    link: 'goemon-products.html',
-                    alt: 'SALE MAX 70% OFF',
-                    title: '春夏アイテムがお買い得',
-                    order: 1
-                },
-                {
-                    id: 'hero3',
-                    url: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200',
-                    link: 'goemon-register.html',
-                    alt: 'NEW MEMBER CAMPAIGN',
-                    title: '新規登録で500円クーポン',
-                    order: 2
-                }
-            ];
-            localStorage.setItem('goemonheroimages', JSON.stringify(heroImages));
-        }
+        const data = await fetchAllHeroImages();
+        heroImages = data.map(dbImage => ({
+            id: dbImage.id,
+            url: dbImage.image_url,
+            link: dbImage.link_url,
+            alt: dbImage.title || '',
+            title: dbImage.subtitle || dbImage.title || '',
+            order: dbImage.display_order
+        }));
 
+        console.log('Loaded hero images from Supabase:', heroImages.length);
         renderHeroImages();
     } catch (error) {
         console.error('Error loading hero images:', error);
@@ -727,19 +704,34 @@ function renderHeroImages() {
 }
 
 // ヒーロー画像順序を更新
-function updateHeroImageOrder() {
+async function updateHeroImageOrder() {
     const items = document.querySelectorAll('.hero-image-item');
-    items.forEach((item, index) => {
-        const id = item.dataset.id;
-        const image = heroImages.find(img => img.id === id);
-        if (image) {
-            image.order = index;
-        }
-    });
 
-    localStorage.setItem('goemonheroimages', JSON.stringify(heroImages));
-    showAlertModal('並び順を更新しました', 'success');
-    renderHeroImages(); // 表示順を更新するため再レンダリング
+    try {
+        for (let index = 0; index < items.length; index++) {
+            const item = items[index];
+            const id = item.dataset.id;
+            const image = heroImages.find(img => img.id === id);
+            if (image) {
+                image.order = index;
+                // Supabaseに順序を更新
+                await updateHeroImage(id, {
+                    imageUrl: image.url,
+                    title: image.alt,
+                    subtitle: image.title,
+                    linkUrl: image.link,
+                    displayOrder: index,
+                    isActive: true
+                });
+            }
+        }
+
+        showAlertModal('並び順を更新しました', 'success');
+        renderHeroImages(); // 表示順を更新するため再レンダリング
+    } catch (error) {
+        console.error('順序更新エラー:', error);
+        showAlertModal('並び順の更新に失敗しました: ' + error.message, 'error');
+    }
 }
 
 // ヒーロー画像追加モーダルを開く
@@ -797,7 +789,7 @@ window.editHeroImage = function(id) {
 }
 
 // ヒーロー画像フォーム送信処理
-function handleHeroImageFormSubmit(e) {
+async function handleHeroImageFormSubmit(e) {
     e.preventDefault();
 
     const url = document.getElementById('heroImageUrl').value.trim();
@@ -816,41 +808,66 @@ function handleHeroImageFormSubmit(e) {
         return;
     }
 
-    if (editingHeroImageId) {
-        // 編集モード
-        const index = heroImages.findIndex(img => img.id === editingHeroImageId);
-        if (index !== -1) {
-            heroImages[index] = {
-                ...heroImages[index],
+    try {
+        if (editingHeroImageId) {
+            // 編集モード
+            const index = heroImages.findIndex(img => img.id === editingHeroImageId);
+            if (index !== -1) {
+                heroImages[index] = {
+                    ...heroImages[index],
+                    url,
+                    link,
+                    alt,
+                    title
+                };
+
+                // Supabaseに更新
+                await updateHeroImage(editingHeroImageId, {
+                    imageUrl: url,
+                    title: alt,
+                    subtitle: title,
+                    linkUrl: link,
+                    displayOrder: heroImages[index].order,
+                    isActive: true
+                });
+            }
+            showAlertModal('ヒーロー画像を更新しました', 'success');
+        } else {
+            // 新規追加モード
+            const newImage = {
+                id: generateId(),
                 url,
                 link,
                 alt,
-                title
+                title,
+                order: heroImages.length
             };
+
+            // Supabaseに追加
+            const result = await addHeroImage({
+                imageUrl: url,
+                title: alt,
+                subtitle: title,
+                linkUrl: link,
+                displayOrder: newImage.order,
+                isActive: true
+            });
+
+            // 返ってきたIDを設定
+            newImage.id = result.id;
+            heroImages.push(newImage);
+            showAlertModal('ヒーロー画像を追加しました', 'success');
         }
-        showAlertModal('ヒーロー画像を更新しました', 'success');
-    } else {
-        // 新規追加モード
-        const newImage = {
-            id: generateId(),
-            url,
-            link,
-            alt,
-            title,
-            order: heroImages.length
-        };
-        heroImages.push(newImage);
-        showAlertModal('ヒーロー画像を追加しました', 'success');
+
+        // モーダルを閉じる
+        closeHeroImageModal();
+
+        // ヒーロー画像リストを再表示
+        renderHeroImages();
+    } catch (error) {
+        console.error('ヒーロー画像保存エラー:', error);
+        showAlertModal('ヒーロー画像の保存に失敗しました: ' + error.message, 'error');
     }
-
-    // localStorageに保存
-    localStorage.setItem('goemonheroimages', JSON.stringify(heroImages));
-
-    // モーダルを閉じる
-    closeHeroImageModal();
-
-    // ヒーロー画像リストを再表示
-    renderHeroImages();
 }
 
 // ヒーロー画像を削除
@@ -864,12 +881,18 @@ window.deleteHeroImage = function(id) {
 
     showConfirmModal(
         `ヒーロー画像「${image.title || image.alt}」を削除してもよろしいですか？\n\nこの操作は取り消せません。`,
-        () => {
-            heroImages = heroImages.filter(img => img.id !== id);
-            localStorage.setItem('goemonheroimages', JSON.stringify(heroImages));
+        async () => {
+            try {
+                // Supabaseから削除
+                await deleteHeroImage(id);
 
-            showAlertModal('ヒーロー画像を削除しました', 'success');
-            renderHeroImages();
+                heroImages = heroImages.filter(img => img.id !== id);
+                showAlertModal('ヒーロー画像を削除しました', 'success');
+                renderHeroImages();
+            } catch (error) {
+                console.error('ヒーロー画像削除エラー:', error);
+                showAlertModal('ヒーロー画像の削除に失敗しました: ' + error.message, 'error');
+            }
         }
     );
 }

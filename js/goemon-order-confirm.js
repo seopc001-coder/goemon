@@ -6,26 +6,21 @@
     let productsData = {};
     let currentUser = null;
 
-    // 商品データを初期化
-    function initializeProductsData() {
-        const savedProducts = localStorage.getItem('goemonproducts');
-        if (savedProducts) {
-            try {
-                const parsed = JSON.parse(savedProducts);
-                productsData = Array.isArray(parsed) ?
-                    parsed.reduce((acc, p) => ({ ...acc, [p.id]: p }), {}) : parsed;
-            } catch (error) {
-                console.error('Error parsing products:', error);
-                productsData = {};
-            }
-        } else {
+    // 商品データを初期化（Supabaseから読み込み）
+    async function initializeProductsData() {
+        try {
+            const products = await fetchPublishedProducts();
+            productsData = products.reduce((acc, p) => ({ ...acc, [p.id]: p }), {});
+            console.log('Loaded products from Supabase:', Object.keys(productsData).length);
+        } catch (error) {
+            console.error('Error loading products from Supabase:', error);
             productsData = {};
         }
     }
 
     document.addEventListener('DOMContentLoaded', async function() {
         // 商品データを初期化
-        initializeProductsData();
+        await initializeProductsData();
 
         // セッションストレージから注文データを取得
         const checkoutData = sessionStorage.getItem('checkoutData');
@@ -159,9 +154,11 @@
             // Supabaseに保存（ログインしている場合）
             if (currentUser) {
                 await saveOrderToSupabase(order);
+                // Supabaseのカートもクリア
+                await clearCart(currentUser.id);
             }
 
-            // カートをクリア
+            // localStorageのカートをクリア
             localStorage.removeItem('goemoncart');
 
             // セッションストレージをクリア
@@ -196,21 +193,57 @@
         console.log('Order saved to localStorage:', order);
     }
 
-    // Supabaseに注文を保存（未実装）
+    // Supabaseに注文を保存
     async function saveOrderToSupabase(order) {
         try {
-            // TODO: Supabaseのordersテーブルに保存
-            console.log('Order would be saved to Supabase:', order);
+            // 注文データをSupabase用フォーマットに変換
+            const orderData = {
+                purchaserFamilyName: order.shippingAddress.name ? order.shippingAddress.name.split(' ')[0] : '',
+                purchaserGivenName: order.shippingAddress.name ? order.shippingAddress.name.split(' ')[1] || '' : '',
+                purchaserFamilyNameKana: '',
+                purchaserGivenNameKana: '',
+                purchaserPhone: order.shippingAddress.phone || '',
+                purchaserEmail: order.customerEmail || '',
+                shippingFamilyName: order.shippingAddress.name ? order.shippingAddress.name.split(' ')[0] : '',
+                shippingGivenName: order.shippingAddress.name ? order.shippingAddress.name.split(' ')[1] || '' : '',
+                shippingFamilyNameKana: '',
+                shippingGivenNameKana: '',
+                shippingPhone: order.shippingAddress.phone || '',
+                shippingPostalCode: order.shippingAddress.postalCode || '',
+                shippingPrefecture: order.shippingAddress.prefecture || '',
+                shippingCity: order.shippingAddress.city || '',
+                shippingAddress1: order.shippingAddress.address1 || '',
+                shippingAddress2: order.shippingAddress.address2 || '',
+                paymentMethod: order.paymentMethod || 'credit',
+                subtotal: order.subtotal || 0,
+                shippingFee: order.shipping || 0,
+                tax: 0, // 税金計算は別途実装が必要な場合
+                discount: 0,
+                total: order.totalAmount || 0,
+                couponCode: null,
+                deliveryDate: null,
+                deliveryTime: null,
+                notes: null,
+                items: order.items.map(item => ({
+                    productId: String(item.productId),
+                    productName: item.name || '',
+                    productPrice: item.price || 0,
+                    quantity: item.quantity || 1,
+                    color: null,
+                    size: null,
+                    subtotal: (item.price || 0) * (item.quantity || 1)
+                }))
+            };
 
-            // const { data, error } = await supabase
-            //     .from('orders')
-            //     .insert([order]);
-            //
-            // if (error) throw error;
+            // createOrder関数を使用してSupabaseに保存
+            const result = await createOrder(currentUser.id, orderData);
+            console.log('Order saved to Supabase:', result);
+            return result;
 
         } catch (error) {
             console.error('Error saving to Supabase:', error);
             // Supabaseへの保存に失敗してもlocalStorageには保存されているので続行
+            throw error;
         }
     }
 

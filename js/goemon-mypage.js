@@ -174,35 +174,54 @@ function initializeAddressManagement() {
 // 住所情報を読み込み
 async function loadAddresses(user) {
     try {
-        // Supabaseから住所データを取得
         const addresses = [];
 
-        // 会員登録時の住所を取得（user.user_metadataから）
-        if (user.user_metadata) {
-            const metadata = user.user_metadata;
-            if (metadata.postalCode || metadata.prefecture || metadata.city || metadata.address1) {
+        // Supabaseから配送先住所を取得
+        const dbAddresses = await fetchShippingAddresses(user.id);
+
+        if (dbAddresses && dbAddresses.length > 0) {
+            // DB住所をアプリ用フォーマットに変換
+            dbAddresses.forEach(addr => {
                 addresses.push({
-                    id: 'default',
-                    name: `${metadata.lastName || ''} ${metadata.firstName || ''}`.trim() || '登録住所',
-                    postalCode: metadata.postalCode || '',
-                    prefecture: metadata.prefecture || '',
-                    city: metadata.city || '',
-                    address1: metadata.address1 || '',
-                    address2: metadata.address2 || '',
-                    phone: metadata.phone || '',
-                    isDefault: true
+                    id: addr.id,
+                    name: addr.address_name || `${addr.family_name || ''} ${addr.given_name || ''}`.trim(),
+                    postalCode: addr.postal_code || '',
+                    prefecture: addr.prefecture || '',
+                    city: addr.city || '',
+                    address1: addr.address || '',
+                    address2: addr.building || '',
+                    phone: addr.phone || '',
+                    isDefault: addr.is_default || false
                 });
+            });
+        } else {
+            // DBに住所がない場合、user_metadataから表示用に取得
+            if (user.user_metadata) {
+                const metadata = user.user_metadata;
+                if (metadata.postalCode || metadata.prefecture || metadata.city || metadata.address1) {
+                    addresses.push({
+                        id: 'default',
+                        name: `${metadata.lastName || ''} ${metadata.firstName || ''}`.trim() || '登録住所',
+                        postalCode: metadata.postalCode || '',
+                        prefecture: metadata.prefecture || '',
+                        city: metadata.city || '',
+                        address1: metadata.address1 || '',
+                        address2: metadata.address2 || '',
+                        phone: metadata.phone || '',
+                        isDefault: true
+                    });
+                }
             }
         }
 
-        // localStorageから追加の住所を取得
-        const savedAddresses = JSON.parse(localStorage.getItem('goemonaddresses')) || [];
-        addresses.push(...savedAddresses);
-
         // 住所リストを表示
         displayAddresses(addresses);
+        console.log('Loaded addresses from Supabase:', addresses.length);
     } catch (error) {
         console.error('Error loading addresses:', error);
+        // エラー時はlocalStorageから読み込み（フォールバック）
+        const savedAddresses = JSON.parse(localStorage.getItem('goemonaddresses')) || [];
+        displayAddresses(savedAddresses);
     }
 }
 
@@ -248,19 +267,24 @@ function displayAddresses(addresses) {
 }
 
 // 住所を削除
-function deleteAddress(addressId) {
-    showConfirmModal('この住所を削除しますか?', () => {
+async function deleteAddress(addressId) {
+    showConfirmModal('この住所を削除しますか?', async () => {
         try {
-            const addresses = JSON.parse(localStorage.getItem('goemonaddresses')) || [];
-            const updatedAddresses = addresses.filter(addr => addr.id !== addressId);
-            localStorage.setItem('goemonaddresses', JSON.stringify(updatedAddresses));
+            // デフォルト住所（user_metadata由来）は削除不可
+            if (addressId === 'default') {
+                showAlertModal('登録住所は削除できません', 'warning');
+                return;
+            }
+
+            // Supabaseから削除
+            await deleteShippingAddress(addressId);
 
             // 再読み込み
             checkLoginStatus();
             showAlertModal('住所を削除しました', 'success');
         } catch (error) {
             console.error('Error deleting address:', error);
-            showAlertModal('住所の削除に失敗しました', 'error');
+            showAlertModal('住所の削除に失敗しました: ' + error.message, 'error');
         }
     });
 }

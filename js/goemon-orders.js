@@ -6,26 +6,21 @@
     let productsData = {};
     let currentUser = null;
 
-    // 商品データを初期化
-    function initializeProductsData() {
-        const savedProducts = localStorage.getItem('goemonproducts');
-        if (savedProducts) {
-            try {
-                const parsed = JSON.parse(savedProducts);
-                productsData = Array.isArray(parsed) ?
-                    parsed.reduce((acc, p) => ({ ...acc, [p.id]: p }), {}) : parsed;
-            } catch (error) {
-                console.error('Error parsing products:', error);
-                productsData = {};
-            }
-        } else {
+    // 商品データを初期化（Supabaseから読み込み）
+    async function initializeProductsData() {
+        try {
+            const products = await fetchPublishedProducts();
+            productsData = products.reduce((acc, p) => ({ ...acc, [p.id]: p }), {});
+            console.log('Loaded products from Supabase:', Object.keys(productsData).length);
+        } catch (error) {
+            console.error('Error loading products from Supabase:', error);
             productsData = {};
         }
     }
 
     document.addEventListener('DOMContentLoaded', async function() {
         // 商品データを初期化
-        initializeProductsData();
+        await initializeProductsData();
 
         // ログイン状態を確認
         await checkLoginAndLoadOrders();
@@ -44,8 +39,8 @@
                 loadOrdersFromLocalStorage();
             } else {
                 currentUser = user;
-                // Supabaseから注文履歴を取得（未実装のため、localStorageから読み込み）
-                loadOrdersFromLocalStorage();
+                // Supabaseから注文履歴を取得
+                await loadOrdersFromSupabase(user.id);
             }
 
             renderOrders();
@@ -56,13 +51,69 @@
         }
     }
 
+    // Supabaseから注文履歴を読み込み
+    async function loadOrdersFromSupabase(userId) {
+        try {
+            const dbOrders = await fetchOrders(userId);
+
+            // DB注文データをアプリ用フォーマットに変換
+            ordersData = dbOrders.map(order => ({
+                orderId: order.order_number,
+                orderDate: order.created_at,
+                status: mapOrderStatus(order.status),
+                customerId: order.user_id,
+                customerEmail: order.purchaser_email,
+                customerName: `${order.shipping_family_name || ''} ${order.shipping_given_name || ''}`.trim(),
+                items: order.order_items ? order.order_items.map(item => ({
+                    productId: item.product_id,
+                    quantity: item.quantity,
+                    price: item.product_price,
+                    name: item.product_name
+                })) : [],
+                shippingAddress: {
+                    name: `${order.shipping_family_name || ''} ${order.shipping_given_name || ''}`.trim(),
+                    lastName: order.shipping_family_name,
+                    firstName: order.shipping_given_name,
+                    postalCode: order.shipping_postal_code,
+                    prefecture: order.shipping_prefecture,
+                    city: order.shipping_city,
+                    address1: order.shipping_address1,
+                    address2: order.shipping_address2,
+                    phone: order.shipping_phone
+                },
+                paymentMethod: order.payment_method,
+                subtotal: order.subtotal,
+                shipping: order.shipping_fee,
+                totalAmount: order.total
+            }));
+
+            console.log('Loaded orders from Supabase:', ordersData.length);
+        } catch (error) {
+            console.error('Error loading orders from Supabase:', error);
+            // エラー時はlocalStorageから読み込み
+            loadOrdersFromLocalStorage();
+        }
+    }
+
+    // 注文ステータスをマッピング
+    function mapOrderStatus(status) {
+        const statusMap = {
+            'pending': '準備中',
+            'processing': '準備中',
+            'shipped': '配送中',
+            'delivered': '配送完了',
+            'cancelled': 'キャンセル'
+        };
+        return statusMap[status] || status;
+    }
+
     // localStorageから注文履歴を読み込み
     function loadOrdersFromLocalStorage() {
         const savedOrders = localStorage.getItem('goemonorders');
         if (savedOrders) {
             try {
                 ordersData = JSON.parse(savedOrders);
-                console.log('Loaded orders from localStorage:', ordersData);
+                console.log('Loaded orders from localStorage:', ordersData.length);
             } catch (error) {
                 console.error('Error parsing orders:', error);
                 ordersData = [];

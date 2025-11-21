@@ -18,9 +18,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeProductsPage();
 });
 
-function initializeProductsPage() {
-    loadCategories(); // カテゴリを先に読み込み
-    loadProducts();
+async function initializeProductsPage() {
+    await loadCategories(); // カテゴリを先に読み込み
+    await loadProducts();
     initializeFilters();
     initializeSort();
     initializePagination();
@@ -74,7 +74,7 @@ function applyURLFilters() {
 }
 
 // ページタイトルを更新
-function updatePageTitle(slug, filterType) {
+async function updatePageTitle(slug, filterType) {
     const titleElement = document.getElementById('pageTitle');
     const descriptionElement = document.getElementById('pageDescription');
 
@@ -84,55 +84,55 @@ function updatePageTitle(slug, filterType) {
     const urlParams = new URLSearchParams(window.location.search);
     const typeParam = urlParams.get('type');
 
-    if (filterType === 'category') {
-        // カテゴリー名を取得
-        const savedCategories = localStorage.getItem('goemoncategories');
-        if (savedCategories) {
-            const categories = JSON.parse(savedCategories);
-            const category = categories.find(c => c.slug === slug);
-            if (category) {
-                // 商品タイプとカテゴリの両方が指定されている場合
-                if (typeParam) {
-                    const savedProductTypes = localStorage.getItem('goemonproducttypes');
-                    if (savedProductTypes) {
-                        const productTypes = JSON.parse(savedProductTypes);
-                        const productType = productTypes.find(t => t.slug === typeParam);
-                        if (productType) {
-                            titleElement.innerHTML = `${productType.name}<br>↪${category.name}`;
-                            if (descriptionElement) {
-                                descriptionElement.textContent = category.description;
+    try {
+        if (filterType === 'category') {
+            // カテゴリー名をSupabaseから取得
+            const categories = await fetchCategories();
+            if (categories && categories.length > 0) {
+                const category = categories.find(c => c.name === slug);
+                if (category) {
+                    // 商品タイプとカテゴリの両方が指定されている場合
+                    if (typeParam) {
+                        const productTypes = await fetchProductTypes();
+                        if (productTypes && productTypes.length > 0) {
+                            const productType = productTypes.find(t => t.name === typeParam);
+                            if (productType) {
+                                titleElement.innerHTML = `${productType.name}<br>↪${category.name}`;
+                                if (descriptionElement) {
+                                    descriptionElement.textContent = category.description;
+                                }
+                                return;
                             }
-                            return;
                         }
                     }
+                    // カテゴリのみの場合
+                    titleElement.textContent = category.name;
+                    if (descriptionElement && category.description) {
+                        descriptionElement.textContent = category.description;
+                    }
                 }
-                // カテゴリのみの場合
-                titleElement.textContent = category.name;
-                if (descriptionElement && category.description) {
-                    descriptionElement.textContent = category.description;
+            }
+        } else if (filterType === 'type') {
+            // 商品タイプ名をSupabaseから取得
+            const productTypes = await fetchProductTypes();
+            if (productTypes && productTypes.length > 0) {
+                const productType = productTypes.find(t => t.name === slug);
+                if (productType) {
+                    titleElement.textContent = productType.name;
+                    if (descriptionElement && productType.description) {
+                        descriptionElement.textContent = productType.description;
+                    }
                 }
             }
         }
-    } else if (filterType === 'type') {
-        // 商品タイプ名を取得
-        const savedProductTypes = localStorage.getItem('goemonproducttypes');
-        if (savedProductTypes) {
-            const productTypes = JSON.parse(savedProductTypes);
-            const productType = productTypes.find(t => t.slug === slug);
-            if (productType) {
-                titleElement.textContent = productType.name;
-                if (descriptionElement && productType.description) {
-                    descriptionElement.textContent = productType.description;
-                }
-            }
-        }
+    } catch (error) {
+        console.error('Error updating page title:', error);
     }
 }
 
-// カテゴリをlocalStorageから読み込んで表示
-function loadCategories() {
+// カテゴリをSupabaseから読み込んで表示
+async function loadCategories() {
     try {
-        const savedCategories = localStorage.getItem('goemoncategories');
         const categoryList = document.getElementById('categoryList');
 
         if (!categoryList) {
@@ -150,21 +150,21 @@ function loadCategories() {
         allCategory.innerHTML = `<a href="${allUrl}" class="active" data-category="all">すべて</a>`;
         categoryList.appendChild(allCategory);
 
-        // localStorageからカテゴリを読み込み
-        if (savedCategories) {
-            const categories = JSON.parse(savedCategories);
+        // Supabaseからカテゴリを読み込み
+        const categories = await fetchCategories();
 
+        if (categories && categories.length > 0) {
             // 並び順でソート
-            categories.sort((a, b) => a.order - b.order);
+            categories.sort((a, b) => a.display_order - b.display_order);
 
             // 各カテゴリを追加
             categories.forEach(category => {
                 const li = document.createElement('li');
                 // 商品タイプパラメータがあれば保持
                 const categoryUrl = currentType
-                    ? `goemon-products.html?type=${currentType}&category=${category.slug}`
-                    : `goemon-products.html?category=${category.slug}`;
-                li.innerHTML = `<a href="${categoryUrl}" data-category="${category.slug}">${category.name}</a>`;
+                    ? `goemon-products.html?type=${currentType}&category=${category.name}`
+                    : `goemon-products.html?category=${category.name}`;
+                li.innerHTML = `<a href="${categoryUrl}" data-category="${category.name}">${category.name}</a>`;
                 categoryList.appendChild(li);
             });
 
@@ -175,30 +175,16 @@ function loadCategories() {
     }
 }
 
-// 商品データを読み込み（実際の実装ではAPIから取得）
-function loadProducts() {
-    // localStorageから商品データを読み込み
-    const savedProducts = localStorage.getItem('goemonproducts');
-
-    if (savedProducts) {
-        // 保存されている商品データを使用
-        try {
-            const productsData = JSON.parse(savedProducts);
-            // オブジェクト形式の場合は配列に変換
-            if (Array.isArray(productsData)) {
-                allProducts = productsData;
-            } else {
-                allProducts = Object.values(productsData);
-            }
-            console.log('Loaded products from localStorage:', allProducts.length);
-        } catch (error) {
-            console.error('Error parsing saved products:', error);
-            allProducts = [];
-        }
-    } else {
-        // localStorageにデータがない場合は空の配列を使用
+// 商品データを読み込み（Supabaseから取得）
+async function loadProducts() {
+    try {
+        // Supabaseから商品データを読み込み
+        const products = await fetchPublishedProducts();
+        allProducts = products;
+        console.log('Loaded products from Supabase:', allProducts.length);
+    } catch (error) {
+        console.error('Error loading products from Supabase:', error);
         allProducts = [];
-        console.log('No products in localStorage');
     }
 
     filteredProducts = [...allProducts];

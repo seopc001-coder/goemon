@@ -59,12 +59,7 @@ async function searchWithdrawnUser(email) {
         `;
 
         // Supabase Admin APIを使用してユーザーを検索
-        // 注意: 実際の実装では管理者権限が必要
-        // const { data: { users }, error } = await supabase.auth.admin.listUsers();
-
-        // デモ実装: localStorageから退会履歴を検索
-        const withdrawnUsers = JSON.parse(localStorage.getItem('goemonwithdrawnusers')) || [];
-        const user = withdrawnUsers.find(u => u.email === email);
+        const user = await searchWithdrawnUserByEmail(email);
 
         if (user) {
             // ユーザーが見つかった場合
@@ -80,25 +75,66 @@ async function searchWithdrawnUser(email) {
             `;
         }
 
+        console.log('Searched withdrawn user from Supabase:', user ? 'Found' : 'Not found');
     } catch (error) {
-        console.error('Search error:', error);
+        console.error('Search error from Supabase:', error);
+        showAlertModal('検索中にエラーが発生しました', 'error');
+        // エラー時はlocalStorageから検索（フォールバック）
+        searchWithdrawnUserFromLocalStorage(email);
+    }
+}
+
+// localStorageから退会ユーザーを検索（フォールバック）
+async function searchWithdrawnUserFromLocalStorage(email) {
+    const searchResults = document.getElementById('searchResults');
+
+    try {
+        const withdrawnUsers = JSON.parse(localStorage.getItem('goemonwithdrawnusers')) || [];
+        const user = withdrawnUsers.find(u => u.email === email);
+
+        if (user) {
+            displayUserInfo(user);
+            console.log('Searched withdrawn user from localStorage (fallback): Found');
+        } else {
+            searchResults.innerHTML = `
+                <div style="background: white; border-radius: 8px; padding: 40px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <i class="fas fa-user-slash fa-3x" style="color: #999; margin-bottom: 20px;"></i>
+                    <h3 style="color: #666; margin-bottom: 10px;">退会ユーザーが見つかりませんでした</h3>
+                    <p style="color: #999;">入力されたメールアドレスに一致する退会ユーザーは存在しません</p>
+                </div>
+            `;
+            console.log('Searched withdrawn user from localStorage (fallback): Not found');
+        }
+    } catch (error) {
+        console.error('Search error from localStorage:', error);
         showAlertModal('検索中にエラーが発生しました', 'error');
         searchResults.style.display = 'none';
     }
 }
 
 // ユーザー情報を表示
-function displayUserInfo(user) {
+async function displayUserInfo(user) {
     const searchResults = document.getElementById('searchResults');
 
-    // 注文履歴を取得
-    const orders = JSON.parse(localStorage.getItem('goemonorders')) || [];
-    const userOrders = orders.filter(order => order.customerEmail === user.email);
+    try {
+        // Supabaseから注文履歴を取得
+        let userOrders = [];
+        try {
+            const dbOrders = await fetchOrders(user.id);
+            userOrders = dbOrders;
+        } catch (error) {
+            console.error('Error fetching orders from Supabase:', error);
+            // フォールバック: localStorageから取得
+            const orders = JSON.parse(localStorage.getItem('goemonorders')) || [];
+            userOrders = orders.filter(order => order.customerEmail === user.email);
+        }
 
-    const withdrawalDate = user.deleted_at ? new Date(user.deleted_at).toLocaleDateString('ja-JP') : '不明';
-    const lastOrderDate = userOrders.length > 0 ?
-        new Date(userOrders[userOrders.length - 1].orderDate).toLocaleDateString('ja-JP') :
-        '注文なし';
+        // ユーザーメタデータから退会情報を取得
+        const metadata = user.user_metadata || {};
+        const withdrawalDate = metadata.deleted_at ? new Date(metadata.deleted_at).toLocaleDateString('ja-JP') : '不明';
+        const lastOrderDate = userOrders.length > 0 ?
+            new Date(userOrders[userOrders.length - 1].created_at || userOrders[userOrders.length - 1].orderDate).toLocaleDateString('ja-JP') :
+            '注文なし';
 
     searchResults.innerHTML = `
         <div style="background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px;">
@@ -118,7 +154,7 @@ function displayUserInfo(user) {
                 </h3>
                 <div style="display: grid; grid-template-columns: 200px 1fr; gap: 15px;">
                     <div style="color: #666; font-weight: 500;">ユーザーID:</div>
-                    <div>${user.userId || 'N/A'}</div>
+                    <div>${user.id || user.userId || 'N/A'}</div>
 
                     <div style="color: #666; font-weight: 500;">メールアドレス:</div>
                     <div>${user.email}</div>
@@ -135,13 +171,13 @@ function displayUserInfo(user) {
             </div>
 
             <!-- 退会理由 -->
-            ${user.deletion_reason ? `
+            ${metadata.deletion_reason || user.deletion_reason ? `
                 <div style="margin-bottom: 30px;">
                     <h3 style="font-size: 18px; margin-bottom: 15px; color: #333;">
                         <i class="fas fa-comment"></i> 退会理由
                     </h3>
                     <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800;">
-                        ${user.deletion_reason}
+                        ${metadata.deletion_reason || user.deletion_reason}
                     </div>
                 </div>
             ` : ''}
@@ -153,21 +189,27 @@ function displayUserInfo(user) {
                 </h3>
                 ${userOrders.length > 0 ? `
                     <div style="max-height: 400px; overflow-y: auto;">
-                        ${userOrders.map(order => `
+                        ${userOrders.map(order => {
+                            const orderDate = order.created_at || order.orderDate;
+                            const orderNumber = order.order_number || order.orderId;
+                            const orderStatus = order.status;
+                            const orderTotal = order.total || order.totalAmount;
+                            const orderItems = order.order_items || order.items;
+                            return `
                             <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                    <strong>注文番号: ${order.orderId}</strong>
-                                    <span style="background: ${getStatusColor(order.status)}; color: white; padding: 2px 10px; border-radius: 4px; font-size: 12px;">
-                                        ${order.status}
+                                    <strong>注文番号: ${orderNumber}</strong>
+                                    <span style="background: ${getStatusColor(orderStatus)}; color: white; padding: 2px 10px; border-radius: 4px; font-size: 12px;">
+                                        ${orderStatus}
                                     </span>
                                 </div>
                                 <div style="color: #666; font-size: 14px;">
-                                    <p style="margin: 5px 0;">注文日: ${new Date(order.orderDate).toLocaleDateString('ja-JP')}</p>
-                                    <p style="margin: 5px 0;">金額: ¥${order.totalAmount?.toLocaleString()}</p>
-                                    <p style="margin: 5px 0;">商品数: ${order.items?.length}点</p>
+                                    <p style="margin: 5px 0;">注文日: ${new Date(orderDate).toLocaleDateString('ja-JP')}</p>
+                                    <p style="margin: 5px 0;">金額: ¥${orderTotal?.toLocaleString()}</p>
+                                    <p style="margin: 5px 0;">商品数: ${orderItems?.length || 0}点</p>
                                 </div>
                             </div>
-                        `).join('')}
+                        `}).join('')}
                     </div>
                 ` : `
                     <p style="color: #999; text-align: center; padding: 20px; background: #f9f9f9; border-radius: 8px;">
@@ -195,6 +237,16 @@ function displayUserInfo(user) {
             </div>
         </div>
     `;
+    } catch (error) {
+        console.error('Error displaying user info:', error);
+        searchResults.innerHTML = `
+            <div style="background: white; border-radius: 8px; padding: 40px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <i class="fas fa-exclamation-triangle fa-3x" style="color: #f44336; margin-bottom: 20px;"></i>
+                <h3 style="color: #666; margin-bottom: 10px;">ユーザー情報の表示中にエラーが発生しました</h3>
+                <p style="color: #999;">もう一度お試しください</p>
+            </div>
+        `;
+    }
 }
 
 // ステータスに応じた色を返す

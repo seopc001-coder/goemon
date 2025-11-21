@@ -12,7 +12,7 @@ async function initializeOrderManagement() {
     await checkAdminAccess();
 
     // 注文データを読み込み
-    loadOrders();
+    await loadOrders();
 
     // ダッシュボードから遷移してきた場合、該当注文の詳細を表示
     const viewOrderId = sessionStorage.getItem('viewOrderId');
@@ -56,28 +56,91 @@ function normalizeOrderStatus(order) {
 }
 
 // 注文データを読み込み
-function loadOrders() {
+async function loadOrders() {
+    try {
+        // Supabaseから全注文を取得
+        const dbOrders = await fetchAllOrders();
+
+        // DB注文データをアプリ用フォーマットに変換
+        allOrders = dbOrders.map(order => ({
+            orderId: order.order_number,
+            orderDate: order.created_at,
+            status: mapOrderStatus(order.status),
+            customerId: order.user_id,
+            customerEmail: order.purchaser_email,
+            customerName: `${order.shipping_family_name || ''} ${order.shipping_given_name || ''}`.trim(),
+            items: order.order_items ? order.order_items.map(item => ({
+                productId: item.product_id,
+                quantity: item.quantity,
+                price: item.product_price,
+                name: item.product_name
+            })) : [],
+            shippingAddress: {
+                name: `${order.shipping_family_name || ''} ${order.shipping_given_name || ''}`.trim(),
+                lastName: order.shipping_family_name,
+                firstName: order.shipping_given_name,
+                postalCode: order.shipping_postal_code,
+                prefecture: order.shipping_prefecture,
+                city: order.shipping_city,
+                address1: order.shipping_address1,
+                address2: order.shipping_address2,
+                phone: order.shipping_phone
+            },
+            paymentMethod: order.payment_method,
+            subtotal: order.subtotal,
+            shipping: order.shipping_fee,
+            totalAmount: order.total,
+            dbId: order.id // Supabase上のID
+        }));
+
+        // 注文を日付順にソート（新しい順）
+        allOrders.sort((a, b) => {
+            return new Date(b.orderDate) - new Date(a.orderDate);
+        });
+
+        filteredOrders = [...allOrders];
+
+        console.log('Loaded orders from Supabase:', allOrders.length);
+        renderOrders(filteredOrders);
+    } catch (error) {
+        console.error('Error loading orders from Supabase:', error);
+        // エラー時はlocalStorageから読み込み（フォールバック）
+        loadOrdersFromLocalStorage();
+    }
+}
+
+// localStorageから注文を読み込み（フォールバック用）
+function loadOrdersFromLocalStorage() {
     try {
         const orders = JSON.parse(localStorage.getItem('goemonorders')) || [];
 
         // ステータスを日本語に正規化
         orders.forEach(order => normalizeOrderStatus(order));
 
-        // localStorageに正規化されたデータを保存
-        localStorage.setItem('goemonorders', JSON.stringify(orders));
-
-        // 注文を日付順にソート（新しい順）
         allOrders = orders.sort((a, b) => {
             return new Date(b.orderDate) - new Date(a.orderDate);
         });
 
         filteredOrders = [...allOrders];
 
+        console.log('Loaded orders from localStorage:', allOrders.length);
         renderOrders(filteredOrders);
     } catch (error) {
         console.error('Error loading orders:', error);
         showAlertModal('注文データの読み込みに失敗しました', 'error');
     }
+}
+
+// 注文ステータスをマッピング
+function mapOrderStatus(status) {
+    const statusMap = {
+        'pending': '準備中',
+        'processing': '準備中',
+        'shipped': '配送中',
+        'delivered': '配送完了',
+        'cancelled': 'キャンセル'
+    };
+    return statusMap[status] || status;
 }
 
 // 注文リストを表示
@@ -336,7 +399,7 @@ function viewOrderDetail(orderId) {
                 <option value="配送完了" ${order.status === '配送完了' ? 'selected' : ''}>配送完了</option>
                 <option value="キャンセル" ${order.status === 'キャンセル' ? 'selected' : ''}>キャンセル</option>
             </select>
-            <button class="btn-cmn-02" onclick="updateOrderStatus('${order.orderId}')" style="width: 100%;">
+            <button class="btn-cmn-02" onclick="updateOrderStatusUI('${order.orderId}')" style="width: 100%;">
                 <i class="fas fa-save"></i> ステータスを更新
             </button>
         </div>
@@ -346,31 +409,53 @@ function viewOrderDetail(orderId) {
 }
 
 // 注文ステータスを更新
-function updateOrderStatus(orderId) {
+async function updateOrderStatusUI(orderId) {
     const newStatus = document.getElementById('newStatusSelect').value;
-    const orders = JSON.parse(localStorage.getItem('goemonorders')) || [];
 
-    const orderIndex = orders.findIndex(o => o.orderId === orderId);
+    // メモリ上の注文を検索
+    const order = allOrders.find(o => o.orderId === orderId);
 
-    if (orderIndex === -1) {
+    if (!order) {
         showAlertModal('注文が見つかりません', 'error');
         return;
     }
 
-    // ステータスを更新
-    orders[orderIndex].status = newStatus;
+    try {
+        // 日本語ステータスを英語にマッピング
+        const statusMapReverse = {
+            '準備中': 'pending',
+            '配送中': 'shipped',
+            '配送完了': 'delivered',
+            'キャンセル': 'cancelled'
+        };
+        const dbStatus = statusMapReverse[newStatus] || 'pending';
 
-    // localStorageに保存
-    localStorage.setItem('goemonorders', JSON.stringify(orders));
+        console.log('📝 注文ステータスを更新:', orderId, '→', newStatus, '(DB:', dbStatus, ')');
 
-    // データを再読み込み
-    loadOrders();
+        // Supabaseで更新（dbIdを使用）
+        if (order.dbId) {
+            await updateOrderStatus(order.dbId, dbStatus);
+            console.log('✅ Supabaseで注文ステータス更新完了:', order.dbId);
+        } else {
+            console.warn('⚠️ dbIdが見つかりません。Supabaseへの保存をスキップします');
+        }
 
-    // モーダルを閉じる
-    closeOrderDetailModal();
+        // メモリ上のステータスを更新
+        order.status = newStatus;
 
-    // 成功メッセージ
-    showAlertModal(`注文 #${orderId} のステータスを「${newStatus}」に更新しました`, 'success');
+        // データを再読み込み
+        await loadOrders();
+
+        // モーダルを閉じる
+        closeOrderDetailModal();
+
+        // 成功メッセージ
+        showAlertModal(`注文 #${orderId} のステータスを「${newStatus}」に更新しました`, 'success');
+
+    } catch (error) {
+        console.error('❌ 注文ステータス更新エラー:', error);
+        showAlertModal('ステータスの更新に失敗しました: ' + error.message, 'error');
+    }
 }
 
 // 注文詳細モーダルを閉じる

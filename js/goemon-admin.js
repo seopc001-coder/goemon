@@ -37,7 +37,7 @@ async function checkAdminAccess() {
 }
 
 // 統計データを読み込み
-function loadStatistics() {
+async function loadStatistics() {
     try {
         // 注文データを取得
         const orders = JSON.parse(localStorage.getItem('goemonorders')) || [];
@@ -82,8 +82,8 @@ function loadStatistics() {
         const usersChange = { value: 5, isPositive: true };
         updateStatCard('totalUsers', totalUsers, usersChange, 'totalUsersChange');
 
-        // 在庫アラート（デモデータ）
-        const lowStockCount = calculateLowStockCount();
+        // 在庫アラート（Supabaseから取得）
+        const lowStockCount = await calculateLowStockCount();
         document.getElementById('lowStockCount').textContent = lowStockCount;
 
         const lowStockChangeElem = document.getElementById('lowStockChange');
@@ -147,28 +147,19 @@ function calculateTotalUsers() {
 }
 
 // 在庫アラート数を計算
-function calculateLowStockCount() {
+async function calculateLowStockCount() {
     try {
-        // localStorageから商品データを取得（商品管理ページと同じデータ）
-        let products = localStorage.getItem('goemonproducts');
+        // Supabaseから商品データを取得
+        const products = await fetchAllProducts();
 
-        // データがない場合は0を返す
-        if (!products) {
+        if (!products || products.length === 0) {
             return 0;
         }
 
-        products = JSON.parse(products);
-
-        let lowStockCount = 0;
-
         // 在庫が10未満の商品をカウント（売り切れ確認済み商品を除外）
-        Object.keys(products).forEach(key => {
-            const product = products[key];
-            // 在庫が10未満かつ売り切れ確認済みでない商品のみカウント
-            if (product.stock < 10 && !product.soldOutConfirmed) {
-                lowStockCount++;
-            }
-        });
+        const lowStockCount = products.filter(product =>
+            product.stock < 10 && !product.sold_out_confirmed
+        ).length;
 
         return lowStockCount;
     } catch (error) {

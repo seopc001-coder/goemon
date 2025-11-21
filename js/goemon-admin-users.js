@@ -34,10 +34,43 @@ async function checkAdminAccess() {
 // ユーザーデータを読み込み
 async function loadUsers() {
     try {
-        // 実際の実装ではSupabase Admin APIを使用
-        // const { data: { users }, error } = await supabase.auth.admin.listUsers();
+        // RPC関数を使用して全ユーザーを取得（注文数込み）
+        const users = await fetchAllUsers();
 
-        // デモ実装: 注文データと退会ユーザーからユーザーを推定
+        // ユーザーデータをアプリ用フォーマットに変換
+        allUsers = users.map((user) => {
+            const metadata = user.user_metadata || {};
+
+            return {
+                userId: user.id,
+                email: user.email,
+                name: `${metadata.lastName || ''} ${metadata.firstName || ''}`.trim() || 'ゲスト',
+                status: metadata.status === 'withdrawn' ? 'withdrawn' : 'active',
+                registeredAt: user.created_at,
+                withdrawnAt: metadata.deleted_at || null,
+                orderCount: user.order_count || 0  // RPC関数から取得した注文数を使用
+            };
+        });
+
+        // 登録日でソート（新しい順）
+        allUsers.sort((a, b) => {
+            return new Date(b.registeredAt) - new Date(a.registeredAt);
+        });
+
+        filteredUsers = [...allUsers];
+        renderUsers(filteredUsers);
+        console.log('Loaded users from Supabase (RPC):', allUsers.length);
+    } catch (error) {
+        console.error('Error loading users from Supabase:', error);
+        showAlertModal('ユーザーデータの読み込みに失敗しました', 'error');
+        // エラー時はlocalStorageから読み込み（フォールバック）
+        loadUsersFromLocalStorage();
+    }
+}
+
+// localStorageからユーザーを読み込み（フォールバック）
+function loadUsersFromLocalStorage() {
+    try {
         const orders = JSON.parse(localStorage.getItem('goemonorders')) || [];
         const withdrawnUsers = JSON.parse(localStorage.getItem('goemonwithdrawnusers')) || [];
 
@@ -80,20 +113,6 @@ async function loadUsers() {
             });
         });
 
-        // 現在のログインユーザーを追加（まだリストにない場合）
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        if (currentUser && !userMap.has(currentUser.email)) {
-            const metadata = currentUser.user_metadata || {};
-            userMap.set(currentUser.email, {
-                userId: currentUser.id,
-                email: currentUser.email,
-                name: `${metadata.lastName || ''} ${metadata.firstName || ''}`.trim() || 'ゲスト',
-                status: metadata.status === 'withdrawn' ? 'withdrawn' : 'active',
-                registeredAt: currentUser.created_at,
-                orderCount: 0
-            });
-        }
-
         allUsers = Array.from(userMap.values());
 
         // 登録日でソート（新しい順）
@@ -103,8 +122,9 @@ async function loadUsers() {
 
         filteredUsers = [...allUsers];
         renderUsers(filteredUsers);
+        console.log('Loaded users from localStorage (fallback):', allUsers.length);
     } catch (error) {
-        console.error('Error loading users:', error);
+        console.error('Error loading users from localStorage:', error);
         showAlertModal('ユーザーデータの読み込みに失敗しました', 'error');
     }
 }

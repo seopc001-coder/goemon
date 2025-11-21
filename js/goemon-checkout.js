@@ -7,25 +7,20 @@
     let currentUser = null;
 
     // 商品データを初期化
-    function initializeProductsData() {
-        const savedProducts = localStorage.getItem('goemonproducts');
-        if (savedProducts) {
-            try {
-                const parsed = JSON.parse(savedProducts);
-                productsData = Array.isArray(parsed) ?
-                    parsed.reduce((acc, p) => ({ ...acc, [p.id]: p }), {}) : parsed;
-            } catch (error) {
-                console.error('Error parsing products:', error);
-                productsData = {};
-            }
-        } else {
+    async function initializeProductsData() {
+        try {
+            const products = await fetchPublishedProducts();
+            productsData = products.reduce((acc, p) => ({ ...acc, [p.id]: p }), {});
+            console.log('Loaded products from Supabase for checkout:', Object.keys(productsData).length);
+        } catch (error) {
+            console.error('Error loading products from Supabase:', error);
             productsData = {};
         }
     }
 
     document.addEventListener('DOMContentLoaded', async function() {
         // 商品データを初期化
-        initializeProductsData();
+        await initializeProductsData();
 
         // ログイン状態を確認
         await checkLoginStatus();
