@@ -12,21 +12,12 @@ async function initializeProductManagement() {
     // 管理者権限チェック
     await checkAdminAccess();
 
-    // デモ商品データを削除（1回のみ実行）
-    clearDemoProductsOnce();
-
-    // base64画像データをクリーンアップ（1回のみ実行）
-    cleanupBase64ImagesOnce();
-
-    // デフォルトデータを初期化（localStorageにない場合）
-    initializeDefaultDataIfNeeded();
-
-    // カテゴリーと商品タイプをlocalStorageから読み込み
+    // カテゴリーと商品タイプをSupabaseから読み込み
     loadCategoriesToSelect();
     loadProductTypesToSelect();
 
-    // 商品データを読み込み
-    loadProducts();
+    // 商品データをSupabaseから読み込み
+    await loadProducts();
 
     // 画像アップロード機能を初期化
     initializeImageUploads();
@@ -164,68 +155,50 @@ function initializeDefaultDataIfNeeded() {
 }
 
 // カテゴリーをlocalStorageから読み込んでセレクトボックスに設定
-function loadCategoriesToSelect() {
+async function loadCategoriesToSelect() {
     try {
-        const savedCategories = localStorage.getItem('goemoncategories');
+        const categories = await fetchAllCategories();
         const selectElement = document.getElementById('productCategory');
 
         if (!selectElement) return;
 
-        // 既存のオプションをクリア（最初の「選択してください」以外）
+        // 既存のオプションをクリア
         selectElement.innerHTML = '<option value="">カテゴリーを選択してください</option>';
 
-        if (savedCategories) {
-            const categories = JSON.parse(savedCategories);
+        // カテゴリーをオプションとして追加
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.name;
+            option.textContent = category.name;
+            selectElement.appendChild(option);
+        });
 
-            // orderでソート
-            categories.sort((a, b) => a.order - b.order);
-
-            // カテゴリーをオプションとして追加
-            categories.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category.slug;
-                option.textContent = category.name;
-                selectElement.appendChild(option);
-            });
-
-            console.log('Categories loaded to select:', categories.length);
-        } else {
-            console.log('No categories found in localStorage');
-        }
+        console.log('Categories loaded from Supabase:', categories.length);
     } catch (error) {
         console.error('Error loading categories:', error);
     }
 }
 
-// 商品タイプをlocalStorageから読み込んでセレクトボックスに設定
-function loadProductTypesToSelect() {
+// 商品タイプをSupabaseから読み込んでセレクトボックスに設定
+async function loadProductTypesToSelect() {
     try {
-        const savedProductTypes = localStorage.getItem('goemonproducttypes');
+        const productTypes = await fetchAllProductTypes();
         const selectElement = document.getElementById('productType');
 
         if (!selectElement) return;
 
-        // 既存のオプションをクリア（最初の「選択してください」以外）
+        // 既存のオプションをクリア
         selectElement.innerHTML = '<option value="">商品タイプを選択してください（任意）</option>';
 
-        if (savedProductTypes) {
-            const productTypes = JSON.parse(savedProductTypes);
+        // 商品タイプをオプションとして追加
+        productTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.name;
+            option.textContent = type.name;
+            selectElement.appendChild(option);
+        });
 
-            // orderでソート
-            productTypes.sort((a, b) => a.order - b.order);
-
-            // 商品タイプをオプションとして追加
-            productTypes.forEach(type => {
-                const option = document.createElement('option');
-                option.value = type.slug;
-                option.textContent = type.name;
-                selectElement.appendChild(option);
-            });
-
-            console.log('Product types loaded to select:', productTypes.length);
-        } else {
-            console.log('No product types found in localStorage');
-        }
+        console.log('Product types loaded from Supabase:', productTypes.length);
     } catch (error) {
         console.error('Error loading product types:', error);
     }
@@ -255,33 +228,31 @@ function setupDiscountCalculation() {
 }
 
 // 商品データを読み込み
-function loadProducts() {
+async function loadProducts() {
     try {
-        // localStorageから商品データを取得
-        let savedProducts = localStorage.getItem('goemonproducts');
+        // Supabaseから商品データを取得
+        const products = await fetchAllProducts();
 
-        if (savedProducts) {
-            // 保存済みデータを使用
-            allProducts = JSON.parse(savedProducts);
-            console.log('Loaded products from localStorage:', Object.keys(allProducts).length);
-        } else {
-            // デモデータは生成しない（ユーザーの要望により）
-            allProducts = {};
-            console.log('No products in localStorage - starting with empty data');
-        }
+        // オブジェクト形式に変換（既存コードとの互換性のため）
+        allProducts = {};
+        products.forEach(product => {
+            allProducts[product.id] = convertProductFromDB(product);
+        });
+
+        console.log('✅ Supabaseから商品を読み込みました:', Object.keys(allProducts).length, '件');
 
         filteredProducts = { ...allProducts };
 
         // フィルター用のセレクトボックスを初期化
-        initializeFilterSelects();
+        await initializeFilterSelects();
 
         // 商品総数を更新
         updateProductCount();
 
         renderProducts(filteredProducts);
     } catch (error) {
-        console.error('Error loading products:', error);
-        showAlertModal('商品データの読み込みに失敗しました', 'error');
+        console.error('❌ Supabaseからの商品読み込みエラー:', error);
+        showAlertModal('商品データの読み込みに失敗しました: ' + error.message, 'error');
     }
 }
 
@@ -432,31 +403,37 @@ function filterLowStockProducts() {
 }
 
 // フィルター用のセレクトボックスを初期化
-function initializeFilterSelects() {
-    // 商品タイプのセレクトボックスを初期化
-    const productTypeSelect = document.getElementById('filterProductType');
-    if (productTypeSelect) {
-        const productTypes = JSON.parse(localStorage.getItem('goemonproducttypes')) || [];
-        productTypeSelect.innerHTML = '<option value="">すべて</option>';
-        productTypes.forEach(type => {
-            const option = document.createElement('option');
-            option.value = type;
-            option.textContent = type;
-            productTypeSelect.appendChild(option);
-        });
-    }
+async function initializeFilterSelects() {
+    try {
+        // 商品タイプのセレクトボックスを初期化
+        const productTypeSelect = document.getElementById('filterProductType');
+        if (productTypeSelect) {
+            const productTypes = await fetchAllProductTypes();
+            productTypeSelect.innerHTML = '<option value="">すべて</option>';
+            productTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type.name;
+                option.textContent = type.name;
+                productTypeSelect.appendChild(option);
+            });
+            console.log('✅ フィルター用商品タイプ読み込み完了:', productTypes.length);
+        }
 
-    // カテゴリーのセレクトボックスを初期化
-    const categorySelect = document.getElementById('filterCategory');
-    if (categorySelect) {
-        const categories = JSON.parse(localStorage.getItem('goemoncategories')) || [];
-        categorySelect.innerHTML = '<option value="">すべて</option>';
-        categories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category;
-            option.textContent = category;
-            categorySelect.appendChild(option);
-        });
+        // カテゴリーのセレクトボックスを初期化
+        const categorySelect = document.getElementById('filterCategory');
+        if (categorySelect) {
+            const categories = await fetchAllCategories();
+            categorySelect.innerHTML = '<option value="">すべて</option>';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.name;
+                option.textContent = category.name;
+                categorySelect.appendChild(option);
+            });
+            console.log('✅ フィルター用カテゴリー読み込み完了:', categories.length);
+        }
+    } catch (error) {
+        console.error('❌ フィルター初期化エラー:', error);
     }
 }
 
@@ -670,7 +647,7 @@ function editProduct(productId) {
 }
 
 // 商品フォーム送信処理
-function handleProductFormSubmit(e) {
+async function handleProductFormSubmit(e) {
     e.preventDefault();
 
     const productId = document.getElementById('productId').value;
@@ -803,11 +780,10 @@ function handleProductFormSubmit(e) {
         console.log('=== 新規商品追加開始 ===');
         console.log('現在の商品数:', Object.keys(allProducts).length);
 
-        const ids = Object.keys(allProducts).map(id => parseInt(id) || 0);
-        const newId = String(Math.max(0, ...ids) + 1);
+        // UUIDを生成（Supabaseのスキーマに合わせる）
+        const newId = crypto.randomUUID();
 
-        console.log('既存のID一覧:', ids);
-        console.log('新しいID:', newId);
+        console.log('新しいUUID:', newId);
 
         const newProduct = {
             id: newId,
@@ -826,34 +802,39 @@ function handleProductFormSubmit(e) {
         showAlertModal('商品を追加しました', 'success');
     }
 
-    // localStorageに保存
-    console.log('localStorageに保存します。商品数:', Object.keys(allProducts).length);
+    // Supabaseに保存
+    console.log('📤 Supabaseに保存します。現在の商品数:', Object.keys(allProducts).length);
 
     try {
-        const dataToSave = JSON.stringify(allProducts);
-        const sizeInBytes = new Blob([dataToSave]).size;
-        const sizeInKB = (sizeInBytes / 1024).toFixed(2);
-        const sizeInMB = (sizeInBytes / 1024 / 1024).toFixed(2);
-
-        console.log('保存するデータサイズ:', sizeInKB, 'KB (', sizeInMB, 'MB)');
-
-        if (sizeInBytes > 5 * 1024 * 1024) {
-            showAlertModal('警告: データサイズが5MBを超えています。localStorageの容量制限により保存できない可能性があります。', 'warning');
-        }
-
-        localStorage.setItem('goemonproducts', dataToSave);
-
-        // 保存確認
-        const savedData = localStorage.getItem('goemonproducts');
-        const parsedData = JSON.parse(savedData);
-        console.log('localStorage保存後の商品数:', Object.keys(parsedData).length);
-    } catch (error) {
-        console.error('localStorage保存エラー:', error);
-        if (error.name === 'QuotaExceededError') {
-            showAlertModal('エラー: localStorageの容量制限を超えました。古い商品を削除するか、base64画像データがある場合は削除してください。', 'error');
+        if (editingProductId) {
+            // 更新
+            console.log('📝 商品を更新:', editingProductId);
+            console.log('📝 更新データ:', productData);
+            const updatedProduct = await updateProduct(editingProductId, productData);
+            console.log('✅ 商品更新完了:', updatedProduct);
         } else {
-            showAlertModal('エラー: 商品データの保存に失敗しました: ' + error.message, 'error');
+            // 新規追加
+            console.log('➕ 新規商品を追加（UUID使用）:', newId);
+            console.log('➕ 商品データ:', allProducts[newId]);
+            const savedProduct = await addProduct(allProducts[newId]);
+            console.log('✅ 商品追加完了 - 保存されたデータ:', savedProduct);
+
+            // 保存確認のため再度取得
+            const verifyProduct = await fetchProductById(newId);
+            console.log('🔍 保存確認 - データベースから取得:', verifyProduct);
         }
+
+        console.log('✅ Supabase保存完了');
+    } catch (error) {
+        console.error('❌ Supabase保存エラー:', error);
+        console.error('❌ エラー詳細:', {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint,
+            fullError: error
+        });
+        showAlertModal('エラー: 商品データの保存に失敗しました\n\n' + error.message, 'error');
         return;
     }
 
@@ -880,31 +861,27 @@ function deleteProduct(productId) {
 
     showConfirmModal(
         `「${product.name}」を削除してもよろしいですか？\n\nこの操作は取り消せません。`,
-        () => {
+        async () => {
             console.log('🟢 確認モーダルのOKボタンがクリックされました');
             console.log('=== 削除処理開始 ===');
             console.log('削除対象商品ID:', productId);
-            console.log('削除前のallProducts:', Object.keys(allProducts).length, '件');
-            console.log('削除前にこの商品が存在:', productId in allProducts);
 
-            // 商品を削除
-            delete allProducts[productId];
+            try {
+                // Supabaseから削除
+                await deleteProductFromDB(productId);
 
-            console.log('削除後のallProducts:', Object.keys(allProducts).length, '件');
-            console.log('削除後にこの商品が存在:', productId in allProducts);
+                // メモリ上からも削除
+                delete allProducts[productId];
 
-            // localStorageに保存
-            localStorage.setItem('goemonproducts', JSON.stringify(allProducts));
+                console.log('削除後のallProducts:', Object.keys(allProducts).length, '件');
+                console.log('=== 削除処理完了 ===');
 
-            // 保存直後に確認
-            const savedData = localStorage.getItem('goemonproducts');
-            const parsedData = JSON.parse(savedData);
-            console.log('localStorage保存後の商品数:', Object.keys(parsedData).length, '件');
-            console.log('localStorageにこの商品が存在:', productId in parsedData);
-            console.log('=== 削除処理完了 ===');
-
-            showAlertModal('商品を削除しました', 'success');
-            searchProducts();
+                showAlertModal('商品を削除しました', 'success');
+                searchProducts();
+            } catch (error) {
+                console.error('削除エラー:', error);
+                showAlertModal('商品の削除に失敗しました: ' + error.message, 'error');
+            }
         }
     );
 }
@@ -928,15 +905,20 @@ function confirmSoldOut(productId) {
 
     showConfirmModal(
         `「${product.name}」の売り切れを確認しますか？\n\n確認すると在庫アラートから除外されます。`,
-        () => {
-            // 売り切れ確認フラグを設定
-            allProducts[productId].soldOutConfirmed = true;
+        async () => {
+            try {
+                // 売り切れ確認フラグを設定
+                allProducts[productId].soldOutConfirmed = true;
 
-            // localStorageに保存
-            localStorage.setItem('goemonproducts', JSON.stringify(allProducts));
+                // Supabaseに保存
+                await updateProduct(productId, { soldOutConfirmed: true });
 
-            showAlertModal('売り切れを確認しました', 'success');
-            searchProducts();
+                showAlertModal('売り切れを確認しました', 'success');
+                searchProducts();
+            } catch (error) {
+                console.error('Error confirming sold out:', error);
+                showAlertModal('売り切れ確認の保存に失敗しました', 'error');
+            }
         }
     );
 }
