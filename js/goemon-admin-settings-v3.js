@@ -185,7 +185,8 @@ function renderCategories() {
 
     console.log(`✅ Rendering ${categories.length} categories`);
     const html = categories.map(cat => `
-        <div class="category-item" data-id="${cat.id}">
+        <div class="category-item" data-id="${cat.id}" draggable="true">
+            <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
             <div class="category-info">
                 <h3>${cat.name}</h3>
                 <p>表示順: ${cat.display_order || 0}</p>
@@ -203,10 +204,81 @@ function renderCategories() {
 
     list.innerHTML = html;
 
+    // ドラッグ&ドロップイベントを追加
+    setupCategoryDragAndDrop();
+
     // レンダリング後の内容を確認
     console.log('✨ Categories rendered successfully');
     console.log('📄 Actual innerHTML preview:', list.innerHTML.substring(0, 200));
     console.log('🔢 Child elements count:', list.children.length);
+}
+
+// カテゴリのドラッグ&ドロップ設定
+function setupCategoryDragAndDrop() {
+    const items = document.querySelectorAll('#categoriesList .category-item');
+    let draggedItem = null;
+
+    items.forEach(item => {
+        item.addEventListener('dragstart', function(e) {
+            draggedItem = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        item.addEventListener('dragend', function() {
+            this.classList.remove('dragging');
+            saveCategoryOrder();
+        });
+
+        item.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(document.getElementById('categoriesList'), e.clientY);
+            if (afterElement == null) {
+                document.getElementById('categoriesList').appendChild(draggedItem);
+            } else {
+                document.getElementById('categoriesList').insertBefore(draggedItem, afterElement);
+            }
+        });
+    });
+}
+
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.category-item:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+async function saveCategoryOrder() {
+    const items = document.querySelectorAll('#categoriesList .category-item');
+    const updates = [];
+
+    items.forEach((item, index) => {
+        const id = item.dataset.id;
+        updates.push(
+            supabase
+                .from('categories')
+                .update({ display_order: index })
+                .eq('id', id)
+        );
+    });
+
+    try {
+        await Promise.all(updates);
+        await loadCategories();
+        console.log('✅ Category order saved');
+    } catch (error) {
+        console.error('カテゴリ順序保存エラー:', error);
+        alert('並び順の保存に失敗しました');
+    }
 }
 
 window.openAddCategoryModal = function() {
@@ -319,11 +391,12 @@ function renderProductTypes() {
         return;
     }
 
-    list.innerHTML = productTypes.map((type, index) => `
-        <div class="product-type-item" data-id="${type.id}">
+    list.innerHTML = productTypes.map(type => `
+        <div class="product-type-item" data-id="${type.id}" draggable="true">
+            <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
             <div class="product-type-info">
                 <h3>${type.name}</h3>
-                <p>表示順: ${index}</p>
+                <p>表示順: ${type.display_order || 0}</p>
             </div>
             <div class="product-type-actions">
                 <button class="btn-small btn-edit" onclick="editProductType('${type.id}')">
@@ -335,6 +408,77 @@ function renderProductTypes() {
             </div>
         </div>
     `).join('');
+
+    // ドラッグ&ドロップイベントを追加
+    setupProductTypeDragAndDrop();
+}
+
+// 商品タイプのドラッグ&ドロップ設定
+function setupProductTypeDragAndDrop() {
+    const items = document.querySelectorAll('#productTypesList .product-type-item');
+    let draggedItem = null;
+
+    items.forEach(item => {
+        item.addEventListener('dragstart', function(e) {
+            draggedItem = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        item.addEventListener('dragend', function() {
+            this.classList.remove('dragging');
+            saveProductTypeOrder();
+        });
+
+        item.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            const afterElement = getDragAfterElementForProductType(document.getElementById('productTypesList'), e.clientY);
+            if (afterElement == null) {
+                document.getElementById('productTypesList').appendChild(draggedItem);
+            } else {
+                document.getElementById('productTypesList').insertBefore(draggedItem, afterElement);
+            }
+        });
+    });
+}
+
+function getDragAfterElementForProductType(container, y) {
+    const draggableElements = [...container.querySelectorAll('.product-type-item:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+async function saveProductTypeOrder() {
+    const items = document.querySelectorAll('#productTypesList .product-type-item');
+    const updates = [];
+
+    items.forEach((item, index) => {
+        const id = item.dataset.id;
+        updates.push(
+            supabase
+                .from('product_types')
+                .update({ display_order: index })
+                .eq('id', id)
+        );
+    });
+
+    try {
+        await Promise.all(updates);
+        await loadProductTypes();
+        console.log('✅ Product type order saved');
+    } catch (error) {
+        console.error('商品タイプ順序保存エラー:', error);
+        alert('並び順の保存に失敗しました');
+    }
 }
 
 window.openAddProductTypeModal = function() {
