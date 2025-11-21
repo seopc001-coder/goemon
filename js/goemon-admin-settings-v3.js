@@ -141,6 +141,7 @@ function closeAllModals() {
 
 async function loadCategories() {
     try {
+        console.log('🔍 Loading categories...');
         const { data, error } = await supabase
             .from('categories')
             .select('*')
@@ -148,6 +149,7 @@ async function loadCategories() {
 
         if (error) throw error;
         categories = data || [];
+        console.log('📦 Categories loaded:', categories);
         renderCategories();
     } catch (error) {
         console.error('カテゴリ読み込みエラー:', error);
@@ -155,14 +157,21 @@ async function loadCategories() {
 }
 
 function renderCategories() {
+    console.log('🎨 Rendering categories...');
     const list = document.getElementById('categoriesList');
-    if (!list) return;
+    console.log('📋 List element found:', list);
+    if (!list) {
+        console.error('❌ categoriesList element not found!');
+        return;
+    }
 
     if (categories.length === 0) {
+        console.log('⚠️ No categories to display');
         list.innerHTML = '<div class="empty-state"><i class="fas fa-tags"></i><p>カテゴリがありません</p></div>';
         return;
     }
 
+    console.log(`✅ Rendering ${categories.length} categories`);
     list.innerHTML = categories.map(cat => `
         <div class="category-item" data-id="${cat.id}">
             <div class="category-info">
@@ -179,6 +188,7 @@ function renderCategories() {
             </div>
         </div>
     `).join('');
+    console.log('✨ Categories rendered successfully');
 }
 
 window.openAddCategoryModal = function() {
