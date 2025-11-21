@@ -337,6 +337,7 @@ function renderProducts(products) {
                             <i class="fas fa-boxes"></i> 在庫: ${stock}
                             ${isSoldOut && !soldOutConfirmed ? '<span style="color: #ff4444; font-weight: bold; margin-left: 8px;">売り切れ</span>' : ''}
                             ${soldOutConfirmed ? '<span style="color: #999; margin-left: 8px;">確認済み</span>' : ''}
+                            ${product.showInRanking && product.rankingPosition ? '<span style="color: #ff6b00; font-weight: bold; margin-left: 12px;"><i class="fas fa-crown"></i> ランキング: ' + product.rankingPosition + '位</span>' : ''}
                         </span>
                         <span style="font-size: 12px; color: #999;">
                             ${product.category || '食品'}
