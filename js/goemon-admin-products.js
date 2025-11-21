@@ -823,8 +823,8 @@ async function handleProductFormSubmit(e) {
             console.log('✅ 商品追加完了 - 保存されたデータ:', savedProduct);
 
             // 保存確認のため再度取得
-            const verifyProduct = await fetchProductById(newId);
-            console.log('🔍 保存確認 - データベースから取得:', verifyProduct);
+            // const verifyProduct = await fetchProductById(newId);
+            // console.log('🔍 保存確認 - データベースから取得:', verifyProduct);
         }
 
         console.log('✅ Supabase保存完了');
