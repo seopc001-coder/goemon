@@ -459,7 +459,14 @@ async function submitRegistration() {
         }
 
         // 登録成功 - 完了ページにリダイレクト
-        window.location.href = 'goemon-register-complete.html';
+        // ログインページから来た場合は、returnUrlを引き継ぐ
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnUrl = urlParams.get('returnUrl');
+        if (returnUrl) {
+            window.location.href = `goemon-register-complete.html?returnUrl=${returnUrl}`;
+        } else {
+            window.location.href = 'goemon-register-complete.html';
+        }
 
     } catch (error) {
         console.error('Registration error:', error);

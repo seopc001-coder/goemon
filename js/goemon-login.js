@@ -8,6 +8,20 @@ function initializeLoginPage() {
     initializePasswordToggle();
     initializeLoginForm();
     initializeSNSLogin();
+    updateRegisterLink();
+}
+
+// 新規登録リンクにreturnUrlパラメータを追加
+function updateRegisterLink() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const returnUrl = urlParams.get('returnUrl');
+
+    if (returnUrl) {
+        const registerLink = document.querySelector('a[href="goemon-register.html"]');
+        if (registerLink) {
+            registerLink.href = `goemon-register.html?returnUrl=${returnUrl}`;
+        }
+    }
 }
 
 // パスワード表示切替
@@ -179,9 +193,13 @@ async function submitLogin(email, password) {
 
         localStorage.setItem('goemonloggedin', 'true');
 
+        // URLパラメータから戻り先URLを取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnUrl = urlParams.get('returnUrl') || 'goemon-index.html';
+
         showAlertModal('ログインしました！', 'success');
         setTimeout(() => {
-            window.location.href = 'goemon-index.html';
+            window.location.href = decodeURIComponent(returnUrl);
         }, 1500);
 
     } catch (error) {

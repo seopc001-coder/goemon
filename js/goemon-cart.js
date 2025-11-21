@@ -348,6 +348,30 @@ function renderCartSummary() {
     }
 }
 
+// レジに進む処理（認証チェック付き）
+async function proceedToCheckout() {
+    try {
+        // Supabaseで認証状態をチェック
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session) {
+            // 未ログインの場合、ログインページに遷移（戻り先URLを指定）
+            const returnUrl = encodeURIComponent('goemon-cart.html');
+            window.location.href = `goemon-login.html?returnUrl=${returnUrl}`;
+            return;
+        }
+
+        // ログイン済みの場合、チェックアウトページに遷移
+        window.location.href = 'goemon-checkout.html';
+
+    } catch (error) {
+        console.error('Auth check error:', error);
+        // エラー時もログインページに遷移
+        const returnUrl = encodeURIComponent('goemon-cart.html');
+        window.location.href = `goemon-login.html?returnUrl=${returnUrl}`;
+    }
+}
+
 // 小計計算
 function calculateSubtotal() {
     return cartItems.reduce((sum, item) => {

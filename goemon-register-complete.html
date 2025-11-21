@@ -68,7 +68,7 @@
                 <!-- ログインページリンク -->
                 <div class="auth-footer" style="margin-top: 20px;">
                     <p style="text-align: center;">
-                        <a href="goemon-login.html" class="link-text">ログインページへ</a>
+                        <a href="goemon-login.html" class="link-text" id="loginLink">ログインページへ</a>
                     </p>
                 </div>
             </div>
@@ -81,5 +81,21 @@
             <p>&copy; 2025 五右衛門 All Rights Reserved.</p>
         </div>
     </footer>
+
+    <script>
+        // URLパラメータから戻り先URLを取得してリンクに設定
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnUrl = urlParams.get('returnUrl');
+
+            if (returnUrl) {
+                // ログインページリンクにreturnUrlを追加
+                const loginLink = document.getElementById('loginLink');
+                if (loginLink) {
+                    loginLink.href = `goemon-login.html?returnUrl=${returnUrl}`;
+                }
+            }
+        });
+    </script>
 </body>
 </html>
