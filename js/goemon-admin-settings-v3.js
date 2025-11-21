@@ -188,8 +188,6 @@ window.editCategory = function(id) {
     editingCategoryId = id;
     document.getElementById('categoryModalTitle').textContent = 'カテゴリを編集';
     document.getElementById('categoryName').value = category.name;
-    document.getElementById('categorySlug').value = category.slug || '';
-    document.getElementById('categoryDescription').value = category.description || '';
     showModal('categoryModal');
 };
 
@@ -198,13 +196,11 @@ async function handleCategorySubmit(e) {
     console.log('handleCategorySubmit called');
 
     const name = document.getElementById('categoryName').value.trim();
-    const slug = document.getElementById('categorySlug').value.trim();
-    const description = document.getElementById('categoryDescription').value.trim();
 
-    console.log('Form data:', { name, slug, description });
+    console.log('Form data:', { name });
 
-    if (!name || !slug) {
-        alert('カテゴリ名とスラッグは必須です');
+    if (!name) {
+        alert('カテゴリ名は必須です');
         return;
     }
 
@@ -214,7 +210,7 @@ async function handleCategorySubmit(e) {
             console.log('Updating category:', editingCategoryId);
             const { error } = await supabase
                 .from('categories')
-                .update({ name, slug, description })
+                .update({ name })
                 .eq('id', editingCategoryId);
 
             if (error) throw error;
@@ -224,7 +220,7 @@ async function handleCategorySubmit(e) {
             console.log('Inserting new category');
             const { error } = await supabase
                 .from('categories')
-                .insert([{ name, slug, description, display_order: categories.length }]);
+                .insert([{ name, display_order: categories.length }]);
 
             if (error) throw error;
             alert('カテゴリを追加しました');
@@ -320,10 +316,6 @@ window.editProductType = function(id) {
     editingProductTypeId = id;
     document.getElementById('productTypeModalTitle').textContent = '商品タイプを編集';
     document.getElementById('productTypeName').value = type.name;
-    document.getElementById('productTypeSlug').value = type.slug || '';
-    document.getElementById('productTypeDescription').value = type.description || '';
-    document.getElementById('productTypeTag').value = type.tag_label || '';
-    document.getElementById('productTypeTagColor').value = type.tag_color || 'blue';
     showModal('productTypeModal');
 };
 
@@ -332,15 +324,11 @@ async function handleProductTypeSubmit(e) {
     console.log('handleProductTypeSubmit called');
 
     const name = document.getElementById('productTypeName').value.trim();
-    const slug = document.getElementById('productTypeSlug').value.trim();
-    const description = document.getElementById('productTypeDescription').value.trim();
-    const tag_label = document.getElementById('productTypeTag').value.trim();
-    const tag_color = document.getElementById('productTypeTagColor').value;
 
-    console.log('Form data:', { name, slug, description, tag_label, tag_color });
+    console.log('Form data:', { name });
 
-    if (!name || !slug) {
-        alert('タイプ名とスラッグは必須です');
+    if (!name) {
+        alert('タイプ名は必須です');
         return;
     }
 
@@ -350,7 +338,7 @@ async function handleProductTypeSubmit(e) {
             console.log('Updating product type:', editingProductTypeId);
             const { error } = await supabase
                 .from('product_types')
-                .update({ name, slug, description, tag_label, tag_color })
+                .update({ name })
                 .eq('id', editingProductTypeId);
 
             if (error) throw error;
@@ -360,14 +348,7 @@ async function handleProductTypeSubmit(e) {
             console.log('Inserting new product type');
             const { error } = await supabase
                 .from('product_types')
-                .insert([{
-                    name,
-                    slug,
-                    description,
-                    tag_label,
-                    tag_color,
-                    display_order: productTypes.length
-                }]);
+                .insert([{ name }]);
 
             if (error) throw error;
             alert('商品タイプを追加しました');
@@ -466,8 +447,6 @@ window.editHeroImage = function(id) {
     document.getElementById('heroImageModalTitle').textContent = 'ヒーロー画像を編集';
     document.getElementById('heroImageUrl').value = image.image_url || '';
     document.getElementById('heroImageLink').value = image.link_url || '';
-    document.getElementById('heroImageAlt').value = image.alt_text || '';
-    document.getElementById('heroImageTitle').value = image.title || '';
     showModal('heroImageModal');
 };
 
@@ -477,13 +456,11 @@ async function handleHeroImageSubmit(e) {
 
     const image_url = document.getElementById('heroImageUrl').value.trim();
     const link_url = document.getElementById('heroImageLink').value.trim();
-    const alt_text = document.getElementById('heroImageAlt').value.trim();
-    const title = document.getElementById('heroImageTitle').value.trim();
 
-    console.log('Form data:', { image_url, link_url, alt_text, title });
+    console.log('Form data:', { image_url, link_url });
 
-    if (!image_url || !alt_text) {
-        alert('画像URLと代替テキストは必須です');
+    if (!image_url) {
+        alert('画像URLは必須です');
         return;
     }
 
@@ -493,7 +470,7 @@ async function handleHeroImageSubmit(e) {
             console.log('Updating hero image:', editingHeroImageId);
             const { error } = await supabase
                 .from('hero_images')
-                .update({ image_url, link_url, alt_text, title, is_active: true })
+                .update({ image_url, link_url, is_active: true })
                 .eq('id', editingHeroImageId);
 
             if (error) throw error;
@@ -506,8 +483,6 @@ async function handleHeroImageSubmit(e) {
                 .insert([{
                     image_url,
                     link_url,
-                    alt_text,
-                    title,
                     is_active: true,
                     display_order: heroImages.length
                 }]);
