@@ -165,6 +165,18 @@ function renderCategories() {
         return;
     }
 
+    // まず既存のコンテンツをクリア
+    list.innerHTML = '';
+    console.log('🧹 Cleared existing content');
+
+    // JSONフォーマットの残骸を削除
+    document.querySelectorAll('.category-item').forEach(item => {
+        if (item.textContent.includes('{"display_order"')) {
+            console.log('🗑️ Removing malformed JSON element');
+            item.remove();
+        }
+    });
+
     if (categories.length === 0) {
         console.log('⚠️ No categories to display');
         list.innerHTML = '<div class="empty-state"><i class="fas fa-tags"></i><p>カテゴリがありません</p></div>';
@@ -172,7 +184,7 @@ function renderCategories() {
     }
 
     console.log(`✅ Rendering ${categories.length} categories`);
-    list.innerHTML = categories.map(cat => `
+    const html = categories.map(cat => `
         <div class="category-item" data-id="${cat.id}">
             <div class="category-info">
                 <h3>${cat.name}</h3>
@@ -188,7 +200,13 @@ function renderCategories() {
             </div>
         </div>
     `).join('');
+
+    list.innerHTML = html;
+
+    // レンダリング後の内容を確認
     console.log('✨ Categories rendered successfully');
+    console.log('📄 Actual innerHTML preview:', list.innerHTML.substring(0, 200));
+    console.log('🔢 Child elements count:', list.children.length);
 }
 
 window.openAddCategoryModal = function() {
