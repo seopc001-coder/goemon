@@ -25,7 +25,7 @@ async function fetchAllProducts() {
 }
 
 /**
- * 商品を追加
+ * 商品を追加（RPC関数を使用してスキーマキャッシュをバイパス）
  */
 async function addProduct(product) {
     try {
@@ -51,27 +51,25 @@ async function addProduct(product) {
             productTypeId = productTypes?.id || null;
         }
 
-        const { data, error } = await supabase
-            .from('products')
-            .insert([{
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                original_price: product.originalPrice || null,
-                category_id: categoryId,
-                product_type_id: productTypeId,
-                stock: product.stock || 0,
-                description: product.description || null,
-                image_url: product.image || null,
-                show_in_ranking: product.showInRanking || false,
-                ranking_position: product.rankingPosition || null,
-                is_published: product.isPublished !== false,
-                sold_out_confirmed: product.soldOutConfirmed || false
-            }])
-            .select();
+        // RPC関数を使用して商品を追加（スキーマキャッシュの問題を回避）
+        const { data, error } = await supabase.rpc('insert_product_with_uuid', {
+            p_id: product.id,
+            p_name: product.name,
+            p_price: product.price,
+            p_original_price: product.originalPrice || null,
+            p_category_id: categoryId,
+            p_product_type_id: productTypeId,
+            p_stock: product.stock || 0,
+            p_description: product.description || null,
+            p_image_url: product.image || null,
+            p_show_in_ranking: product.showInRanking || false,
+            p_ranking_position: product.rankingPosition || null,
+            p_is_published: product.isPublished !== false,
+            p_sold_out_confirmed: product.soldOutConfirmed || false
+        });
 
         if (error) throw error;
-        return data[0];
+        return data;
     } catch (error) {
         console.error('商品追加エラー:', error);
         throw error;
