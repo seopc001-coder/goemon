@@ -84,6 +84,13 @@ function setupEventListeners() {
         heroImageForm.addEventListener('submit', handleHeroImageSubmit);
         console.log('✅ Hero image form listener attached');
     }
+
+    // ヒーロー画像ファイル選択
+    const heroImageFile = document.getElementById('heroImageFile');
+    if (heroImageFile) {
+        heroImageFile.addEventListener('change', handleHeroImageFileSelect);
+        console.log('✅ Hero image file listener attached');
+    }
 }
 
 // ===================================
@@ -160,7 +167,7 @@ function renderCategories() {
         <div class="category-item" data-id="${cat.id}">
             <div class="category-info">
                 <h3>${cat.name}</h3>
-                <p>スラッグ: ${cat.slug || ''}</p>
+                <p>表示順: ${cat.display_order || 0}</p>
             </div>
             <div class="category-actions">
                 <button class="btn-small btn-edit" onclick="editCategory('${cat.id}')">
@@ -284,11 +291,11 @@ function renderProductTypes() {
         return;
     }
 
-    list.innerHTML = productTypes.map(type => `
+    list.innerHTML = productTypes.map((type, index) => `
         <div class="product-type-item" data-id="${type.id}">
             <div class="product-type-info">
                 <h3>${type.name}</h3>
-                <p>スラッグ: ${type.slug || ''}</p>
+                <p>表示順: ${index}</p>
             </div>
             <div class="product-type-actions">
                 <button class="btn-small btn-edit" onclick="editProductType('${type.id}')">
@@ -432,10 +439,70 @@ function renderHeroImages() {
     `).join('');
 }
 
+// ===================================
+// ヒーロー画像ファイル選択処理
+// ===================================
+
+async function handleHeroImageFileSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    console.log('File selected:', file.name, file.size, 'bytes');
+
+    // ファイルサイズチェック (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('ファイルサイズは5MB以下にしてください');
+        e.target.value = '';
+        return;
+    }
+
+    try {
+        // Supabase Storageにアップロード
+        const fileExt = file.name.split('.').pop();
+        const fileName = `hero-${Date.now()}.${fileExt}`;
+        const filePath = `hero-images/${fileName}`;
+
+        console.log('Uploading to:', filePath);
+
+        const { data, error } = await supabase.storage
+            .from('product-images')
+            .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false
+            });
+
+        if (error) throw error;
+
+        // 公開URLを取得
+        const { data: urlData } = supabase.storage
+            .from('product-images')
+            .getPublicUrl(filePath);
+
+        const publicUrl = urlData.publicUrl;
+        console.log('Upload success, URL:', publicUrl);
+
+        // URLをフィールドに設定
+        document.getElementById('heroImageUrl').value = publicUrl;
+
+        // プレビュー表示
+        const preview = document.getElementById('heroImagePreview');
+        preview.innerHTML = `<img src="${publicUrl}" style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 4px;">`;
+        preview.style.display = 'block';
+
+        alert('画像をアップロードしました');
+    } catch (error) {
+        console.error('画像アップロードエラー:', error);
+        alert('画像のアップロードに失敗しました: ' + error.message);
+        e.target.value = '';
+    }
+}
+
 window.openAddHeroImageModal = function() {
     editingHeroImageId = null;
     document.getElementById('heroImageModalTitle').textContent = 'ヒーロー画像を追加';
     document.getElementById('heroImageForm').reset();
+    document.getElementById('heroImageFile').value = '';
+    document.getElementById('heroImagePreview').style.display = 'none';
     showModal('heroImageModal');
 };
 
