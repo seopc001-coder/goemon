@@ -748,6 +748,9 @@ async function handleProductFormSubmit(e) {
         isPublished: isPublished
     };
 
+    // 新規追加時のIDを外側のスコープで宣言
+    let newId = null;
+
     if (editingProductId) {
         // 編集モード
         const existingProduct = allProducts[editingProductId];
@@ -781,7 +784,7 @@ async function handleProductFormSubmit(e) {
         console.log('現在の商品数:', Object.keys(allProducts).length);
 
         // UUIDを生成（Supabaseのスキーマに合わせる）
-        const newId = crypto.randomUUID();
+        newId = crypto.randomUUID();
 
         console.log('新しいUUID:', newId);
 
