@@ -46,9 +46,9 @@
                     これでログインしてサービスをご利用いただけます。
                 </p>
 
-                <!-- マイページボタン -->
+                <!-- マイページ/カートボタン -->
                 <div class="form-submit">
-                    <a href="goemon-mypage.html" class="btn-cmn-02" style="display: block; text-align: center; text-decoration: none;">
+                    <a href="goemon-mypage.html" class="btn-cmn-02" id="redirectButton" style="display: block; text-align: center; text-decoration: none;">
                         マイページへ
                     </a>
                 </div>
@@ -88,6 +88,19 @@
                     // user_metadataが空の場合、再度確認
                     if (!user.user_metadata || Object.keys(user.user_metadata).length === 0) {
                         console.warn('User metadata is empty. This may be a timing issue.');
+                    }
+
+                    // 保留中のリダイレクト先を確認
+                    const pendingRedirect = localStorage.getItem('goemon_pending_redirect');
+                    if (pendingRedirect) {
+                        // リダイレクトボタンを更新
+                        const redirectButton = document.getElementById('redirectButton');
+                        if (redirectButton) {
+                            redirectButton.href = decodeURIComponent(pendingRedirect);
+                            redirectButton.textContent = 'カートに戻る';
+                        }
+                        // 使用後は削除
+                        localStorage.removeItem('goemon_pending_redirect');
                     }
                 } else {
                     console.log('No user session found');

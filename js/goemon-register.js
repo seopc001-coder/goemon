@@ -463,6 +463,8 @@ async function submitRegistration() {
         const urlParams = new URLSearchParams(window.location.search);
         const returnUrl = urlParams.get('returnUrl');
         if (returnUrl) {
+            // returnUrlをlocalStorageに一時保存（メール認証後の遷移用）
+            localStorage.setItem('goemon_pending_redirect', returnUrl);
             window.location.href = `goemon-register-complete.html?returnUrl=${returnUrl}`;
         } else {
             window.location.href = 'goemon-register-complete.html';
