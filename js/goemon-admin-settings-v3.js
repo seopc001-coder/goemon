@@ -12,6 +12,39 @@ let editingProductTypeId = null;
 let editingHeroImageId = null;
 
 // ===================================
+// 管理者権限チェック
+// ===================================
+
+async function checkAdminAccess() {
+    const adminAuthenticated = sessionStorage.getItem('adminAuthenticated');
+
+    if (adminAuthenticated !== 'true') {
+        window.location.href = 'goemon-admin-login.html';
+        return;
+    }
+
+    const adminNameElem = document.getElementById('adminName');
+    const adminId = sessionStorage.getItem('adminId');
+    if (adminNameElem && adminId) {
+        adminNameElem.textContent = adminId;
+    }
+
+    console.log('Admin access granted for:', adminId);
+}
+
+// ===================================
+// ログアウト
+// ===================================
+
+window.logout = function() {
+    if (confirm('ログアウトしますか？')) {
+        sessionStorage.removeItem('adminAuthenticated');
+        sessionStorage.removeItem('adminId');
+        window.location.href = 'goemon-admin-login.html';
+    }
+};
+
+// ===================================
 // 初期化
 // ===================================
 
