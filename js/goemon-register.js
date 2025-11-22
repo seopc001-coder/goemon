@@ -456,6 +456,27 @@ async function submitRegistration() {
                 console.error('Failed to save user data:', dbError);
                 // 電話番号保存に失敗してもAuth登録は成功しているので続行
             }
+
+            // user_profilesテーブルにプロファイル情報を保存
+            try {
+                await createUserProfile(data.user.id, {
+                    email: email,
+                    familyName: lastName,
+                    givenName: firstName,
+                    familyNameKana: document.getElementById('lastNameKana').value,
+                    givenNameKana: document.getElementById('firstNameKana').value,
+                    phone: phone,
+                    postalCode: document.getElementById('postalCode').value,
+                    prefecture: document.getElementById('prefecture').value,
+                    city: document.getElementById('city').value,
+                    address1: document.getElementById('address1').value,
+                    address2: document.getElementById('address2').value
+                });
+                console.log('✅ User profile created successfully');
+            } catch (profileError) {
+                console.error('Failed to create user profile:', profileError);
+                // プロファイル作成に失敗してもAuth登録は成功しているので続行
+            }
         }
 
         // 登録成功 - 完了ページにリダイレクト
