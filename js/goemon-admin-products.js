@@ -307,7 +307,7 @@ function renderProducts(products) {
                         <span class="stock-info ${isLowStock ? 'stock-low' : ''}">
                             <i class="fas fa-boxes"></i> 在庫: ${stock}
                             ${isSoldOut && !soldOutConfirmed ? '<span style="color: #ff4444; font-weight: bold; margin-left: 8px;">売り切れ</span>' : ''}
-                            ${soldOutConfirmed ? '<span style="color: #999; margin-left: 8px;">確認済み</span>' : ''}
+                            ${soldOutConfirmed ? '<span style="color: #999; margin-left: 8px;">売切確認済み</span>' : ''}
                             ${product.showInRanking && product.rankingPosition ? '<span style="color: #ff6b00; font-weight: bold; margin-left: 12px;"><i class="fas fa-crown"></i> ランキング: ' + product.rankingPosition + '位</span>' : ''}
                         </span>
                         <span style="font-size: 12px; color: #999;">
@@ -730,6 +730,16 @@ async function handleProductFormSubmit(e) {
         // 一旦警告のみで保存は許可（デバッグ用）
     }
 
+    // 在庫数が変更された場合、売切確認済みフラグをクリア
+    let soldOutConfirmed = undefined; // デフォルトは未定義（更新しない）
+    if (editingProductId) {
+        const existingProduct = allProducts[editingProductId];
+        if (existingProduct && existingProduct.stock !== productStock) {
+            // 在庫数が変更された場合、売切確認済みフラグをクリア
+            soldOutConfirmed = false;
+        }
+    }
+
     // 商品データを構築
     const productData = {
         name: productName,
@@ -747,6 +757,11 @@ async function handleProductFormSubmit(e) {
         rankingPosition: showInRanking ? rankingPosition : null,
         isPublished: isPublished
     };
+
+    // 在庫数が変更された場合のみ soldOutConfirmed を追加
+    if (soldOutConfirmed !== undefined) {
+        productData.soldOutConfirmed = soldOutConfirmed;
+    }
 
     // 新規追加時のIDを外側のスコープで宣言
     let newId = null;
