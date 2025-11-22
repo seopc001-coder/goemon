@@ -525,24 +525,40 @@ async function updateOrderStatus(orderId, status) {
 async function fetchAllUsers() {
     try {
         // RPC関数を使用して全ユーザーと注文数を取得
-        const { data, error } = await supabase
+        const { data: usersData, error: usersError } = await supabase
             .rpc('get_all_users_with_orders');
 
-        if (error) throw error;
+        if (usersError) throw usersError;
 
-        // RPC結果をAdmin API形式に変換
-        return (data || []).map(user => ({
-            id: user.user_id,
-            email: user.email,
-            created_at: user.created_at,
-            user_metadata: {
-                lastName: user.last_name,
-                firstName: user.first_name,
-                status: user.status,
-                deleted_at: user.deleted_at
-            },
-            order_count: user.order_count
+        // 各ユーザーの住所情報を取得
+        const usersWithAddresses = await Promise.all((usersData || []).map(async (user) => {
+            // ユーザーの住所を取得
+            const { data: addresses, error: addressError } = await supabase
+                .from('user_addresses')
+                .select('*')
+                .eq('user_id', user.user_id)
+                .order('is_default', { ascending: false });
+
+            if (addressError) {
+                console.warn(`住所取得エラー (ユーザーID: ${user.user_id}):`, addressError);
+            }
+
+            return {
+                id: user.user_id,
+                email: user.email,
+                created_at: user.created_at,
+                user_metadata: {
+                    lastName: user.last_name,
+                    firstName: user.first_name,
+                    status: user.status,
+                    deleted_at: user.deleted_at
+                },
+                order_count: user.order_count,
+                addresses: addresses || []
+            };
         }));
+
+        return usersWithAddresses;
     } catch (error) {
         console.error('全ユーザー取得エラー:', error);
         throw error;

@@ -109,6 +109,25 @@ window.viewUserDetail = async function(userId) {
     const isWithdrawn = status === 'withdrawn';
     const displayName = `${user.user_metadata?.lastName || ''} ${user.user_metadata?.firstName || ''}`.trim() || '未設定';
 
+    // 住所情報のHTML生成
+    let addressesHtml = '';
+    if (user.addresses && user.addresses.length > 0) {
+        addressesHtml = user.addresses.map((addr, index) => `
+            <div style="margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 4px;">
+                <div style="font-weight: bold; margin-bottom: 5px;">
+                    ${addr.is_default ? '<span style="background: #4CAF50; color: white; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin-right: 5px;">デフォルト</span>' : ''}
+                    住所 ${index + 1}
+                </div>
+                <div>〒${addr.postal_code || ''}</div>
+                <div>${addr.prefecture || ''} ${addr.city || ''} ${addr.address_line1 || ''}</div>
+                ${addr.address_line2 ? `<div>${addr.address_line2}</div>` : ''}
+                <div>TEL: ${addr.phone_number || '未登録'}</div>
+            </div>
+        `).join('');
+    } else {
+        addressesHtml = '<p style="color: #999;">登録された住所がありません</p>';
+    }
+
     const detailHtml = `
         <div class="detail-section">
             <h3><i class="fas fa-user"></i> 基本情報</h3>
@@ -138,6 +157,11 @@ window.viewUserDetail = async function(userId) {
                     <div>${formatDateTime(user.user_metadata?.deleted_at)}</div>
                 ` : ''}
             </div>
+        </div>
+
+        <div class="detail-section">
+            <h3><i class="fas fa-map-marker-alt"></i> 登録住所</h3>
+            ${addressesHtml}
         </div>
 
         <div class="detail-section">
