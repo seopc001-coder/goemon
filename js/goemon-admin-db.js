@@ -537,7 +537,7 @@ async function fetchAllUsers() {
             // このユーザーの注文を取得して配送先住所を収集
             const { data: orders, error: ordersError } = await supabase
                 .from('orders')
-                .select('shipping_name, shipping_postal_code, shipping_prefecture, shipping_city, shipping_address_line1, shipping_address_line2, shipping_phone')
+                .select('shipping_postal_code, shipping_prefecture, shipping_city, shipping_address_line1, shipping_address_line2, shipping_phone')
                 .eq('user_id', user.user_id)
                 .order('created_at', { ascending: false });
 
