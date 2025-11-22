@@ -272,11 +272,38 @@ function renderProducts(products) {
         return;
     }
 
-    // 新しい商品が上に来るように並び替え（IDの降順）
+    // 並び替えを適用
+    const sortOrder = document.getElementById('sortOrder')?.value || 'newest';
     productsArray.sort((a, b) => {
-        const idA = parseInt(a.id) || 0;
-        const idB = parseInt(b.id) || 0;
-        return idB - idA; // 降順
+        switch (sortOrder) {
+            case 'newest':
+                // 新しい順（IDの降順）
+                return (parseInt(b.id) || 0) - (parseInt(a.id) || 0);
+            case 'oldest':
+                // 古い順（IDの昇順）
+                return (parseInt(a.id) || 0) - (parseInt(b.id) || 0);
+            case 'price-high':
+                // 価格が高い順
+                return (b.price || 0) - (a.price || 0);
+            case 'price-low':
+                // 価格が安い順
+                return (a.price || 0) - (b.price || 0);
+            case 'stock-high':
+                // 在庫が多い順
+                return (b.stock || 0) - (a.stock || 0);
+            case 'stock-low':
+                // 在庫が少ない順
+                return (a.stock || 0) - (b.stock || 0);
+            case 'name-asc':
+                // 名前 (A-Z)
+                return (a.name || '').localeCompare(b.name || '', 'ja');
+            case 'name-desc':
+                // 名前 (Z-A)
+                return (b.name || '').localeCompare(a.name || '', 'ja');
+            default:
+                // デフォルトは新しい順
+                return (parseInt(b.id) || 0) - (parseInt(a.id) || 0);
+        }
     });
 
     grid.innerHTML = productsArray.map(product => {
@@ -493,6 +520,7 @@ function resetFilters() {
     document.getElementById('filterRanking').value = '';
     document.getElementById('filterPublished').value = '';
     document.getElementById('searchInput').value = '';
+    document.getElementById('sortOrder').value = 'newest';
 
     filteredProducts = { ...allProducts };
     updateProductCount();

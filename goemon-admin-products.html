@@ -434,6 +434,19 @@
                             <option value="false">非公開</option>
                         </select>
                     </div>
+                    <div>
+                        <label style="display: block; font-size: 13px; margin-bottom: 5px; color: #666;">並び替え</label>
+                        <select id="sortOrder" onchange="applyFilters()" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="newest">新しい順</option>
+                            <option value="oldest">古い順</option>
+                            <option value="price-high">価格が高い順</option>
+                            <option value="price-low">価格が安い順</option>
+                            <option value="stock-high">在庫が多い順</option>
+                            <option value="stock-low">在庫が少ない順</option>
+                            <option value="name-asc">名前 (A-Z)</option>
+                            <option value="name-desc">名前 (Z-A)</option>
+                        </select>
+                    </div>
                 </div>
                 <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
                     <div id="productCount" style="font-size: 14px; color: #666;">
