@@ -578,6 +578,28 @@ async function updateOrderStatus(orderId, status) {
     }
 }
 
+/**
+ * ユーザーIDで注文を取得
+ */
+async function fetchOrdersByUserId(userId) {
+    try {
+        const { data, error } = await supabase
+            .from('orders')
+            .select(`
+                *,
+                order_items (*)
+            `)
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    } catch (error) {
+        console.error('ユーザー注文取得エラー:', error);
+        throw error;
+    }
+}
+
 // ===================================
 // ユーザー管理（管理者用）
 // ===================================

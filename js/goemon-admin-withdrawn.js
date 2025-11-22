@@ -120,7 +120,7 @@ async function displayUserInfo(user) {
         // Supabaseから注文履歴を取得
         let userOrders = [];
         try {
-            const dbOrders = await fetchOrders(user.id);
+            const dbOrders = await fetchOrdersByUserId(user.id);
             userOrders = dbOrders;
         } catch (error) {
             console.error('Error fetching orders from Supabase:', error);
