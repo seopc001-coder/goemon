@@ -530,31 +530,53 @@ async function fetchAllUsers() {
 
         if (usersError) throw usersError;
 
-        // 各ユーザーの住所情報を取得
-        const usersWithAddresses = await Promise.all((usersData || []).map(async (user) => {
-            // ユーザーの住所を取得
-            const { data: addresses, error: addressError } = await supabase
-                .from('user_addresses')
-                .select('*')
-                .eq('user_id', user.user_id)
-                .order('is_default', { ascending: false });
+        console.log('📊 RPC関数から取得したユーザーデータ:', usersData);
 
-            if (addressError) {
-                console.warn(`住所取得エラー (ユーザーID: ${user.user_id}):`, addressError);
+        // 各ユーザーの注文から配送先住所を取得
+        const usersWithAddresses = await Promise.all((usersData || []).map(async (user) => {
+            // このユーザーの注文を取得して配送先住所を収集
+            const { data: orders, error: ordersError } = await supabase
+                .from('orders')
+                .select('shipping_name, shipping_postal_code, shipping_prefecture, shipping_city, shipping_address_line1, shipping_address_line2, shipping_phone')
+                .eq('user_id', user.user_id)
+                .order('created_at', { ascending: false });
+
+            if (ordersError) {
+                console.warn(`注文取得エラー (ユーザーID: ${user.user_id}):`, ordersError);
             }
+
+            // 重複する住所を除去してユニークな住所リストを作成
+            const uniqueAddresses = [];
+            const addressSet = new Set();
+
+            (orders || []).forEach(order => {
+                const addressKey = `${order.shipping_postal_code}-${order.shipping_address_line1}`;
+                if (!addressSet.has(addressKey) && order.shipping_postal_code) {
+                    addressSet.add(addressKey);
+                    uniqueAddresses.push({
+                        postal_code: order.shipping_postal_code,
+                        prefecture: order.shipping_prefecture,
+                        city: order.shipping_city,
+                        address_line1: order.shipping_address_line1,
+                        address_line2: order.shipping_address_line2,
+                        phone_number: order.shipping_phone,
+                        is_default: uniqueAddresses.length === 0 // 最初の住所をデフォルトとする
+                    });
+                }
+            });
 
             return {
                 id: user.user_id,
                 email: user.email,
                 created_at: user.created_at,
                 user_metadata: {
-                    lastName: user.last_name,
-                    firstName: user.first_name,
+                    lastName: user.last_name || '',
+                    firstName: user.first_name || '',
                     status: user.status,
                     deleted_at: user.deleted_at
                 },
                 order_count: user.order_count,
-                addresses: addresses || []
+                addresses: uniqueAddresses
             };
         }));
 
