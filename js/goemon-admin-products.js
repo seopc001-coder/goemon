@@ -311,7 +311,7 @@ function renderProducts(products) {
                             ${product.showInRanking && product.rankingPosition ? '<span style="color: #ff6b00; font-weight: bold; margin-left: 12px;"><i class="fas fa-crown"></i> ランキング: ' + product.rankingPosition + '位</span>' : ''}
                         </span>
                         <span style="font-size: 12px; color: #999;">
-                            ${product.category || '食品'}
+                            ${product.productType ? `${product.productType} | ` : ''}${product.category || '食品'}
                         </span>
                     </div>
                     <div class="product-actions">
