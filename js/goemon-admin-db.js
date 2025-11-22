@@ -268,6 +268,19 @@ async function addCategory(name, displayOrder) {
  */
 async function deleteCategory(categoryId) {
     try {
+        // このカテゴリーを使用している商品があるかチェック
+        const { data: products, error: checkError } = await supabase
+            .from('products')
+            .select('id')
+            .eq('category_id', categoryId)
+            .limit(1);
+
+        if (checkError) throw checkError;
+
+        if (products && products.length > 0) {
+            throw new Error('このカテゴリーは商品で使用中のため削除できません');
+        }
+
         const { error } = await supabase
             .from('categories')
             .delete()
@@ -329,6 +342,19 @@ async function addProductType(name, displayOrder) {
  */
 async function deleteProductType(typeId) {
     try {
+        // この商品タイプを使用している商品があるかチェック
+        const { data: products, error: checkError } = await supabase
+            .from('products')
+            .select('id')
+            .eq('product_type_id', typeId)
+            .limit(1);
+
+        if (checkError) throw checkError;
+
+        if (products && products.length > 0) {
+            throw new Error('この商品タイプは商品で使用中のため削除できません');
+        }
+
         const { error } = await supabase
             .from('product_types')
             .delete()
