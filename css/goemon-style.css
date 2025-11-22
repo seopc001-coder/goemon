@@ -3699,11 +3699,18 @@ img[src*="unsplash"] {
     display: block;
 }
 
+/* コンテナ */
+.categories-container,
+.product-types-container,
+.hero-images-container {
+    max-width: 800px;
+}
+
 /* カテゴリリスト */
 .categories-list {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
 }
 
 .category-item {
@@ -3784,7 +3791,7 @@ img[src*="unsplash"] {
 .hero-images-list {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
 }
 
 .hero-image-item {
