@@ -592,7 +592,8 @@ function renderHeroImages() {
     }
 
     list.innerHTML = heroImages.map(img => `
-        <div class="hero-image-item" data-id="${img.id}">
+        <div class="hero-image-item" data-id="${img.id}" draggable="true">
+            <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
             <div class="hero-image-preview">
                 ${img.image_url ? `<img src="${img.image_url}" alt="Hero">` : '<div class="no-image"><i class="fas fa-image"></i></div>'}
             </div>
@@ -609,6 +610,76 @@ function renderHeroImages() {
             </div>
         </div>
     `).join('');
+
+    // ドラッグ&ドロップイベントを追加
+    setupHeroImageDragAndDrop();
+}
+
+// ヒーロー画像のドラッグ&ドロップ設定
+function setupHeroImageDragAndDrop() {
+    const items = document.querySelectorAll('#heroImagesList .hero-image-item');
+    let draggedItem = null;
+
+    items.forEach(item => {
+        item.addEventListener('dragstart', function(e) {
+            draggedItem = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        item.addEventListener('dragend', function() {
+            this.classList.remove('dragging');
+            saveHeroImageOrder();
+        });
+
+        item.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            const afterElement = getDragAfterElementForHeroImage(document.getElementById('heroImagesList'), e.clientY);
+            if (afterElement == null) {
+                document.getElementById('heroImagesList').appendChild(draggedItem);
+            } else {
+                document.getElementById('heroImagesList').insertBefore(draggedItem, afterElement);
+            }
+        });
+    });
+}
+
+function getDragAfterElementForHeroImage(container, y) {
+    const draggableElements = [...container.querySelectorAll('.hero-image-item:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+async function saveHeroImageOrder() {
+    const items = document.querySelectorAll('#heroImagesList .hero-image-item');
+    const updates = [];
+
+    items.forEach((item, index) => {
+        const id = item.dataset.id;
+        updates.push(
+            supabase
+                .from('hero_images')
+                .update({ display_order: index })
+                .eq('id', id)
+        );
+    });
+
+    try {
+        await Promise.all(updates);
+        await loadHeroImages();
+        console.log('✅ Hero image order saved');
+    } catch (error) {
+        console.error('ヒーロー画像順序保存エラー:', error);
+        alert('並び順の保存に失敗しました');
+    }
 }
 
 // ===================================
