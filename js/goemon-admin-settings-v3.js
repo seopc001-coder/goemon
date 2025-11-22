@@ -344,7 +344,8 @@ async function handleCategorySubmit(e) {
 window.deleteCategory = async function(id) {
     showConfirmModal('このカテゴリを削除しますか？', async () => {
         try {
-            await deleteCategory(id);
+            // goemon-admin-db.jsの削除関数を呼び出し(削除保護ロジック付き)
+            await window.deleteCategoryFromDB(id);
             showAlertModal('カテゴリを削除しました', 'success');
             await loadCategories();
         } catch (error) {
@@ -539,7 +540,8 @@ async function handleProductTypeSubmit(e) {
 window.deleteProductType = async function(id) {
     showConfirmModal('この商品タイプを削除しますか？', async () => {
         try {
-            await deleteProductType(id);
+            // goemon-admin-db.jsの削除関数を呼び出し(削除保護ロジック付き)
+            await window.deleteProductTypeFromDB(id);
             showAlertModal('商品タイプを削除しました', 'success');
             await loadProductTypes();
         } catch (error) {

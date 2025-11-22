@@ -305,6 +305,9 @@ async function deleteCategory(categoryId) {
     }
 }
 
+// 設定画面から呼び出すための別名エクスポート
+window.deleteCategoryFromDB = deleteCategory;
+
 // ===================================
 // 商品タイプ管理
 // ===================================
@@ -389,6 +392,9 @@ async function deleteProductType(typeId) {
         throw error;
     }
 }
+
+// 設定画面から呼び出すための別名エクスポート
+window.deleteProductTypeFromDB = deleteProductType;
 
 // ===================================
 // ヒーロー画像管理
