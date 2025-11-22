@@ -213,6 +213,7 @@ window.changeOrderStatus = async function(orderId) {
     const order = allOrders.find(o => o.id === orderId);
     if (!order) return;
 
+    // ステータス選択用のカスタムモーダルを作成
     const statuses = [
         { value: 'pending', label: '保留中' },
         { value: 'processing', label: '処理中' },
@@ -225,30 +226,85 @@ window.changeOrderStatus = async function(orderId) {
         `<option value="${s.value}" ${s.value === order.status ? 'selected' : ''}>${s.label}</option>`
     ).join('');
 
-    const html = `
-        <div class="status-change-form">
-            <p>注文番号: ${order.order_number}</p>
-            <label for="newStatus">新しいステータス:</label>
-            <select id="newStatus" class="form-control">
-                ${options}
-            </select>
+    // モーダルHTML
+    const modalHtml = `
+        <div id="statusChangeModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; border-radius: 8px; padding: 30px; max-width: 500px; width: 90%;">
+                <h3 style="margin-bottom: 20px; font-size: 18px;"><i class="fas fa-edit"></i> ステータス変更</h3>
+                <p style="margin-bottom: 15px;"><strong>注文番号:</strong> ${order.order_number}</p>
+                <p style="margin-bottom: 15px;"><strong>現在のステータス:</strong> <span class="status-badge status-${order.status}">${getStatusText(order.status)}</span></p>
+                <div style="margin-bottom: 20px;">
+                    <label for="newStatusSelect" style="display: block; margin-bottom: 8px; font-weight: 500;">新しいステータス:</label>
+                    <select id="newStatusSelect" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                        ${options}
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button id="cancelStatusChange" class="btn-cmn-01" style="padding: 10px 20px;">
+                        <i class="fas fa-times"></i> キャンセル
+                    </button>
+                    <button id="confirmStatusChange" class="btn-cmn-02" style="padding: 10px 20px;">
+                        <i class="fas fa-check"></i> 更新
+                    </button>
+                </div>
+            </div>
         </div>
     `;
 
-    if (confirm('ステータスを変更しますか？')) {
-        const newStatus = prompt('新しいステータスを入力してください\n(pending/processing/shipped/delivered/cancelled):', order.status);
+    // モーダルを表示
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHtml;
+    document.body.appendChild(modalContainer);
+
+    // イベントリスナー設定
+    const modal = document.getElementById('statusChangeModal');
+    const confirmBtn = document.getElementById('confirmStatusChange');
+    const cancelBtn = document.getElementById('cancelStatusChange');
+    const selectElement = document.getElementById('newStatusSelect');
+
+    // 更新ボタン
+    confirmBtn.addEventListener('click', async () => {
+        const newStatus = selectElement.value;
+
         if (newStatus && newStatus !== order.status) {
             try {
                 console.log('🔄 注文ステータスを更新中...', orderId, newStatus);
                 await updateOrderStatus(orderId, newStatus);
+
+                // モーダルを閉じる
+                if (modalContainer && modalContainer.parentNode) {
+                    modalContainer.parentNode.removeChild(modalContainer);
+                }
+
                 showAlertModal('ステータスを更新しました', 'success');
                 await loadOrders();
             } catch (error) {
                 console.error('ステータス更新エラー:', error);
                 showAlertModal('ステータスの更新に失敗しました: ' + error.message, 'error');
             }
+        } else {
+            // 変更なしの場合はモーダルを閉じる
+            if (modalContainer && modalContainer.parentNode) {
+                modalContainer.parentNode.removeChild(modalContainer);
+            }
         }
-    }
+    });
+
+    // キャンセルボタン
+    cancelBtn.addEventListener('click', () => {
+        if (modalContainer && modalContainer.parentNode) {
+            modalContainer.parentNode.removeChild(modalContainer);
+        }
+    });
+
+    // モーダル外クリックで閉じる
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            if (modalContainer && modalContainer.parentNode) {
+                modalContainer.parentNode.removeChild(modalContainer);
+            }
+        }
+    });
 };
 
 /**
