@@ -37,11 +37,11 @@ async function checkAdminAccess() {
 // ===================================
 
 window.logout = function() {
-    if (confirm('ログアウトしますか？')) {
+    showConfirmModal('ログアウトしますか？', () => {
         sessionStorage.removeItem('adminAuthenticated');
         sessionStorage.removeItem('adminId');
         window.location.href = 'goemon-admin-login.html';
-    }
+    });
 };
 
 // ===================================
@@ -277,7 +277,7 @@ async function saveCategoryOrder() {
         console.log('✅ Category order saved');
     } catch (error) {
         console.error('カテゴリ順序保存エラー:', error);
-        alert('並び順の保存に失敗しました');
+        showAlertModal('並び順の保存に失敗しました', 'error');
     }
 }
 
@@ -307,7 +307,7 @@ async function handleCategorySubmit(e) {
     console.log('Form data:', { name });
 
     if (!name) {
-        alert('カテゴリ名は必須です');
+        showAlertModal('カテゴリ名は必須です', 'error');
         return;
     }
 
@@ -321,7 +321,7 @@ async function handleCategorySubmit(e) {
                 .eq('id', editingCategoryId);
 
             if (error) throw error;
-            alert('カテゴリを更新しました');
+            showAlertModal('カテゴリを更新しました', 'success');
         } else {
             // 新規追加
             console.log('Inserting new category');
@@ -330,33 +330,28 @@ async function handleCategorySubmit(e) {
                 .insert([{ name, display_order: categories.length }]);
 
             if (error) throw error;
-            alert('カテゴリを追加しました');
+            showAlertModal('カテゴリを追加しました', 'success');
         }
 
         closeModal('categoryModal');
         await loadCategories();
     } catch (error) {
         console.error('カテゴリ保存エラー:', error);
-        alert('保存に失敗しました: ' + error.message);
+        showAlertModal('保存に失敗しました: ' + error.message, 'error');
     }
 }
 
 window.deleteCategory = async function(id) {
-    if (!confirm('このカテゴリを削除しますか？')) return;
-
-    try {
-        const { error } = await supabase
-            .from('categories')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
-        alert('カテゴリを削除しました');
-        await loadCategories();
-    } catch (error) {
-        console.error('カテゴリ削除エラー:', error);
-        alert('削除に失敗しました: ' + error.message);
-    }
+    showConfirmModal('このカテゴリを削除しますか？', async () => {
+        try {
+            await deleteCategory(id);
+            showAlertModal('カテゴリを削除しました', 'success');
+            await loadCategories();
+        } catch (error) {
+            console.error('カテゴリ削除エラー:', error);
+            showAlertModal('削除に失敗しました: ' + error.message, 'error');
+        }
+    });
 };
 
 window.closeCategoryModal = function() {
@@ -477,7 +472,7 @@ async function saveProductTypeOrder() {
         console.log('✅ Product type order saved');
     } catch (error) {
         console.error('商品タイプ順序保存エラー:', error);
-        alert('並び順の保存に失敗しました');
+        showAlertModal('並び順の保存に失敗しました', 'error');
     }
 }
 
@@ -507,7 +502,7 @@ async function handleProductTypeSubmit(e) {
     console.log('Form data:', { name });
 
     if (!name) {
-        alert('タイプ名は必須です');
+        showAlertModal('タイプ名は必須です', 'error');
         return;
     }
 
@@ -521,7 +516,7 @@ async function handleProductTypeSubmit(e) {
                 .eq('id', editingProductTypeId);
 
             if (error) throw error;
-            alert('商品タイプを更新しました');
+            showAlertModal('商品タイプを更新しました', 'success');
         } else {
             // 新規追加
             console.log('Inserting new product type');
@@ -530,33 +525,28 @@ async function handleProductTypeSubmit(e) {
                 .insert([{ name }]);
 
             if (error) throw error;
-            alert('商品タイプを追加しました');
+            showAlertModal('商品タイプを追加しました', 'success');
         }
 
         closeModal('productTypeModal');
         await loadProductTypes();
     } catch (error) {
         console.error('商品タイプ保存エラー:', error);
-        alert('保存に失敗しました: ' + error.message);
+        showAlertModal('保存に失敗しました: ' + error.message, 'error');
     }
 }
 
 window.deleteProductType = async function(id) {
-    if (!confirm('この商品タイプを削除しますか？')) return;
-
-    try {
-        const { error } = await supabase
-            .from('product_types')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
-        alert('商品タイプを削除しました');
-        await loadProductTypes();
-    } catch (error) {
-        console.error('商品タイプ削除エラー:', error);
-        alert('削除に失敗しました: ' + error.message);
-    }
+    showConfirmModal('この商品タイプを削除しますか？', async () => {
+        try {
+            await deleteProductType(id);
+            showAlertModal('商品タイプを削除しました', 'success');
+            await loadProductTypes();
+        } catch (error) {
+            console.error('商品タイプ削除エラー:', error);
+            showAlertModal('削除に失敗しました: ' + error.message, 'error');
+        }
+    });
 };
 
 window.closeProductTypeModal = function() {
@@ -678,7 +668,7 @@ async function saveHeroImageOrder() {
         console.log('✅ Hero image order saved');
     } catch (error) {
         console.error('ヒーロー画像順序保存エラー:', error);
-        alert('並び順の保存に失敗しました');
+        showAlertModal('並び順の保存に失敗しました', 'error');
     }
 }
 
@@ -694,7 +684,7 @@ async function handleHeroImageFileSelect(e) {
 
     // ファイルサイズチェック (5MB)
     if (file.size > 5 * 1024 * 1024) {
-        alert('ファイルサイズは5MB以下にしてください');
+        showAlertModal('ファイルサイズは5MB以下にしてください', 'error');
         e.target.value = '';
         return;
     }
@@ -732,10 +722,10 @@ async function handleHeroImageFileSelect(e) {
         preview.innerHTML = `<img src="${publicUrl}" style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 4px;">`;
         preview.style.display = 'block';
 
-        alert('画像をアップロードしました');
+        showAlertModal('画像をアップロードしました', 'success');
     } catch (error) {
         console.error('画像アップロードエラー:', error);
-        alert('画像のアップロードに失敗しました: ' + error.message);
+        showAlertModal('画像のアップロードに失敗しました: ' + error.message, 'error');
         e.target.value = '';
     }
 }
@@ -770,7 +760,7 @@ async function handleHeroImageSubmit(e) {
     console.log('Form data:', { image_url, link_url });
 
     if (!image_url) {
-        alert('画像URLは必須です');
+        showAlertModal('画像URLは必須です', 'error');
         return;
     }
 
@@ -784,7 +774,7 @@ async function handleHeroImageSubmit(e) {
                 .eq('id', editingHeroImageId);
 
             if (error) throw error;
-            alert('ヒーロー画像を更新しました');
+            showAlertModal('ヒーロー画像を更新しました', 'success');
         } else {
             // 新規追加
             console.log('Inserting new hero image');
@@ -798,33 +788,33 @@ async function handleHeroImageSubmit(e) {
                 }]);
 
             if (error) throw error;
-            alert('ヒーロー画像を追加しました');
+            showAlertModal('ヒーロー画像を追加しました', 'success');
         }
 
         closeModal('heroImageModal');
         await loadHeroImages();
     } catch (error) {
         console.error('ヒーロー画像保存エラー:', error);
-        alert('保存に失敗しました: ' + error.message);
+        showAlertModal('保存に失敗しました: ' + error.message, 'error');
     }
 }
 
 window.deleteHeroImage = async function(id) {
-    if (!confirm('このヒーロー画像を削除しますか？')) return;
+    showConfirmModal('このヒーロー画像を削除しますか？', async () => {
+        try {
+            const { error } = await supabase
+                .from('hero_images')
+                .delete()
+                .eq('id', id);
 
-    try {
-        const { error } = await supabase
-            .from('hero_images')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
-        alert('ヒーロー画像を削除しました');
-        await loadHeroImages();
-    } catch (error) {
-        console.error('ヒーロー画像削除エラー:', error);
-        alert('削除に失敗しました: ' + error.message);
-    }
+            if (error) throw error;
+            showAlertModal('ヒーロー画像を削除しました', 'success');
+            await loadHeroImages();
+        } catch (error) {
+            console.error('ヒーロー画像削除エラー:', error);
+            showAlertModal('削除に失敗しました: ' + error.message, 'error');
+        }
+    });
 };
 
 window.closeHeroImageModal = function() {
