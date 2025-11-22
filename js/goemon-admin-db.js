@@ -268,19 +268,30 @@ async function addCategory(name, displayOrder) {
  */
 async function deleteCategory(categoryId) {
     try {
-        // このカテゴリーを使用している商品があるかチェック
-        const { data: products, error: checkError } = await supabase
+        // このカテゴリーを使用している公開中の商品があるかチェック
+        const { data: publishedProducts, error: checkError } = await supabase
             .from('products')
             .select('id')
             .eq('category_id', categoryId)
+            .eq('is_published', true)
             .limit(1);
 
         if (checkError) throw checkError;
 
-        if (products && products.length > 0) {
-            throw new Error('このカテゴリーは商品で使用中のため削除できません');
+        if (publishedProducts && publishedProducts.length > 0) {
+            throw new Error('このカテゴリーは公開中の商品で使用中のため削除できません');
         }
 
+        // 非公開商品のカテゴリーをNULLに設定
+        const { error: updateError } = await supabase
+            .from('products')
+            .update({ category_id: null })
+            .eq('category_id', categoryId)
+            .eq('is_published', false);
+
+        if (updateError) throw updateError;
+
+        // カテゴリーを削除
         const { error } = await supabase
             .from('categories')
             .delete()
@@ -342,19 +353,30 @@ async function addProductType(name, displayOrder) {
  */
 async function deleteProductType(typeId) {
     try {
-        // この商品タイプを使用している商品があるかチェック
-        const { data: products, error: checkError } = await supabase
+        // この商品タイプを使用している公開中の商品があるかチェック
+        const { data: publishedProducts, error: checkError } = await supabase
             .from('products')
             .select('id')
             .eq('product_type_id', typeId)
+            .eq('is_published', true)
             .limit(1);
 
         if (checkError) throw checkError;
 
-        if (products && products.length > 0) {
-            throw new Error('この商品タイプは商品で使用中のため削除できません');
+        if (publishedProducts && publishedProducts.length > 0) {
+            throw new Error('この商品タイプは公開中の商品で使用中のため削除できません');
         }
 
+        // 非公開商品の商品タイプをNULLに設定
+        const { error: updateError } = await supabase
+            .from('products')
+            .update({ product_type_id: null })
+            .eq('product_type_id', typeId)
+            .eq('is_published', false);
+
+        if (updateError) throw updateError;
+
+        // 商品タイプを削除
         const { error } = await supabase
             .from('product_types')
             .delete()
