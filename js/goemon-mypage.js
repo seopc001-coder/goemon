@@ -176,7 +176,33 @@ async function loadAddresses(user) {
     try {
         const addresses = [];
 
-        // Supabaseから配送先住所を取得
+        // user_profilesテーブルから登録住所を取得
+        const { data: profile, error: profileError } = await supabase
+            .from('user_profiles')
+            .select('postal_code, prefecture, city, address1, address2, phone, family_name, given_name')
+            .eq('id', user.id)
+            .single();
+
+        if (profileError && profileError.code !== 'PGRST116') {
+            console.warn('プロファイル取得エラー:', profileError);
+        }
+
+        // プロファイルから登録住所を追加
+        if (profile && profile.postal_code) {
+            addresses.push({
+                id: 'profile',
+                name: `${profile.family_name || ''} ${profile.given_name || ''}`.trim() || '登録住所',
+                postalCode: profile.postal_code || '',
+                prefecture: profile.prefecture || '',
+                city: profile.city || '',
+                address1: profile.address1 || '',
+                address2: profile.address2 || '',
+                phone: profile.phone || '',
+                isDefault: true
+            });
+        }
+
+        // shipping_addressesテーブルから追加住所を取得
         const dbAddresses = await fetchShippingAddresses(user.id);
 
         if (dbAddresses && dbAddresses.length > 0) {
@@ -188,30 +214,12 @@ async function loadAddresses(user) {
                     postalCode: addr.postal_code || '',
                     prefecture: addr.prefecture || '',
                     city: addr.city || '',
-                    address1: addr.address || '',
-                    address2: addr.building || '',
+                    address1: addr.address1 || '',
+                    address2: addr.address2 || '',
                     phone: addr.phone || '',
                     isDefault: addr.is_default || false
                 });
             });
-        } else {
-            // DBに住所がない場合、user_metadataから表示用に取得
-            if (user.user_metadata) {
-                const metadata = user.user_metadata;
-                if (metadata.postalCode || metadata.prefecture || metadata.city || metadata.address1) {
-                    addresses.push({
-                        id: 'default',
-                        name: `${metadata.lastName || ''} ${metadata.firstName || ''}`.trim() || '登録住所',
-                        postalCode: metadata.postalCode || '',
-                        prefecture: metadata.prefecture || '',
-                        city: metadata.city || '',
-                        address1: metadata.address1 || '',
-                        address2: metadata.address2 || '',
-                        phone: metadata.phone || '',
-                        isDefault: true
-                    });
-                }
-            }
         }
 
         // 住所リストを表示
@@ -270,8 +278,8 @@ function displayAddresses(addresses) {
 async function deleteAddress(addressId) {
     showConfirmModal('この住所を削除しますか?', async () => {
         try {
-            // デフォルト住所（user_metadata由来）は削除不可
-            if (addressId === 'default') {
+            // プロファイル住所は削除不可
+            if (addressId === 'profile') {
                 showAlertModal('登録住所は削除できません', 'warning');
                 return;
             }
