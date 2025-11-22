@@ -13,16 +13,14 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function initializeUsers() {
-    // 管理者権限チェック
-    await checkAdminAccess();
-
     // Supabaseからユーザーを読み込み
     await loadUsers();
 
     // イベントリスナー設定
-    document.getElementById('userSearch')?.addEventListener('input', searchUsers);
-    document.getElementById('searchUserBtn')?.addEventListener('click', searchUsers);
-    document.getElementById('statusFilter')?.addEventListener('change', filterUsers);
+    document.getElementById('filterStatus')?.addEventListener('change', applyFilters);
+    document.getElementById('filterSearch')?.addEventListener('input', applyFilters);
+    document.getElementById('filterDateFrom')?.addEventListener('change', applyFilters);
+    document.getElementById('filterDateTo')?.addEventListener('change', applyFilters);
 
     console.log('Users management initialized');
 }
@@ -48,16 +46,17 @@ async function loadUsers() {
  * ユーザーを表示
  */
 function renderUsers() {
-    const list = document.getElementById('usersList');
-    if (!list) return;
+    const tbody = document.getElementById('usersTableBody');
+    if (!tbody) return;
 
     if (filteredUsers.length === 0) {
-        list.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-users"></i>
-                <h3>ユーザーがいません</h3>
-                <p>新規登録されたユーザーがここに表示されます</p>
-            </div>
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-state">
+                    <i class="fas fa-users"></i>
+                    <p>表示するユーザーがいません</p>
+                </td>
+            </tr>
         `;
         return;
     }
@@ -67,41 +66,31 @@ function renderUsers() {
         new Date(b.created_at) - new Date(a.created_at)
     );
 
-    list.innerHTML = sortedUsers.map(user => {
+    tbody.innerHTML = sortedUsers.map(user => {
         const status = user.user_metadata?.status || 'active';
         const isWithdrawn = status === 'withdrawn';
+        const displayName = `${user.user_metadata?.lastName || ''} ${user.user_metadata?.firstName || ''}`.trim() || '未設定';
 
         return `
-            <div class="user-item ${isWithdrawn ? 'withdrawn' : ''}" data-id="${user.id}">
-                <div class="user-header">
-                    <div class="user-info-main">
-                        <div class="user-name">
-                            ${user.user_metadata?.lastName || ''} ${user.user_metadata?.firstName || ''}
-                        </div>
-                        <div class="user-email">${user.email}</div>
-                    </div>
-                    <span class="user-status-badge ${isWithdrawn ? 'status-withdrawn' : 'status-active'}">
+            <tr>
+                <td>${user.id.substring(0, 8)}...</td>
+                <td>${user.email}</td>
+                <td>${displayName}</td>
+                <td>${formatDate(user.created_at)}</td>
+                <td>${user.order_count || 0}</td>
+                <td>
+                    <span class="status-badge ${isWithdrawn ? 'inactive' : 'active'}">
                         ${isWithdrawn ? '退会済み' : 'アクティブ'}
                     </span>
-                </div>
-                <div class="user-body">
-                    <div class="user-meta">
-                        <p><i class="fas fa-calendar"></i> 登録日: ${formatDate(user.created_at)}</p>
-                        <p><i class="fas fa-shopping-bag"></i> 注文数: ${user.order_count || 0}件</p>
-                        ${isWithdrawn ? `<p><i class="fas fa-user-times"></i> 退会日: ${formatDate(user.user_metadata?.deleted_at)}</p>` : ''}
-                    </div>
-                </div>
-                <div class="user-actions">
-                    <button class="btn-small btn-view" onclick="viewUserDetail('${user.id}')">
-                        <i class="fas fa-eye"></i> 詳細
-                    </button>
-                    ${!isWithdrawn ? `
-                        <button class="btn-small btn-orders" onclick="viewUserOrders('${user.id}')">
-                            <i class="fas fa-list"></i> 注文履歴
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-small btn-view" onclick="viewUserDetail('${user.id}')">
+                            <i class="fas fa-eye"></i> 詳細
                         </button>
-                    ` : ''}
-                </div>
-            </div>
+                    </div>
+                </td>
+            </tr>
         `;
     }).join('');
 }
@@ -118,34 +107,55 @@ window.viewUserDetail = async function(userId) {
 
     const status = user.user_metadata?.status || 'active';
     const isWithdrawn = status === 'withdrawn';
+    const displayName = `${user.user_metadata?.lastName || ''} ${user.user_metadata?.firstName || ''}`.trim() || '未設定';
 
     const detailHtml = `
-        <div class="user-detail-container">
-            <h2>ユーザー詳細</h2>
-
-            <div class="user-detail-section">
-                <h3><i class="fas fa-user"></i> 基本情報</h3>
-                <p>氏名: ${user.user_metadata?.lastName || ''} ${user.user_metadata?.firstName || ''}</p>
-                <p>メールアドレス: ${user.email}</p>
-                <p>ステータス: <span class="status-badge ${isWithdrawn ? 'status-withdrawn' : 'status-active'}">
-                    ${isWithdrawn ? '退会済み' : 'アクティブ'}
-                </span></p>
+        <div class="detail-section">
+            <h3><i class="fas fa-user"></i> 基本情報</h3>
+            <div class="detail-grid">
+                <div class="detail-label">ユーザーID</div>
+                <div>${user.id}</div>
+                <div class="detail-label">氏名</div>
+                <div>${displayName}</div>
+                <div class="detail-label">メールアドレス</div>
+                <div>${user.email}</div>
+                <div class="detail-label">ステータス</div>
+                <div>
+                    <span class="status-badge ${isWithdrawn ? 'inactive' : 'active'}">
+                        ${isWithdrawn ? '退会済み' : 'アクティブ'}
+                    </span>
+                </div>
             </div>
+        </div>
 
-            <div class="user-detail-section">
-                <h3><i class="fas fa-calendar"></i> 登録情報</h3>
-                <p>登録日時: ${formatDateTime(user.created_at)}</p>
-                ${isWithdrawn ? `<p>退会日時: ${formatDateTime(user.user_metadata?.deleted_at)}</p>` : ''}
+        <div class="detail-section">
+            <h3><i class="fas fa-calendar"></i> 登録情報</h3>
+            <div class="detail-grid">
+                <div class="detail-label">登録日時</div>
+                <div>${formatDateTime(user.created_at)}</div>
+                ${isWithdrawn ? `
+                    <div class="detail-label">退会日時</div>
+                    <div>${formatDateTime(user.user_metadata?.deleted_at)}</div>
+                ` : ''}
             </div>
+        </div>
 
-            <div class="user-detail-section">
-                <h3><i class="fas fa-shopping-bag"></i> 購入履歴</h3>
-                <p>注文数: ${user.order_count || 0}件</p>
+        <div class="detail-section">
+            <h3><i class="fas fa-shopping-bag"></i> 購入履歴</h3>
+            <div class="detail-grid">
+                <div class="detail-label">注文数</div>
+                <div>${user.order_count || 0}件</div>
             </div>
         </div>
     `;
 
-    showAlertModal(detailHtml, 'info', true);
+    // モーダルに表示
+    const modal = document.getElementById('userModal');
+    const modalBody = document.getElementById('userDetailBody');
+    if (modal && modalBody) {
+        modalBody.innerHTML = detailHtml;
+        modal.classList.add('active');
+    }
 };
 
 /**
@@ -200,57 +210,73 @@ window.viewUserOrders = async function(userId) {
 };
 
 /**
- * ユーザーを検索
+ * フィルターを適用
  */
-function searchUsers() {
-    const searchTerm = document.getElementById('userSearch')?.value.toLowerCase() || '';
+window.applyFilters = function() {
+    const statusFilter = document.getElementById('filterStatus')?.value || '';
+    const searchTerm = document.getElementById('filterSearch')?.value.toLowerCase() || '';
+    const dateFrom = document.getElementById('filterDateFrom')?.value || '';
+    const dateTo = document.getElementById('filterDateTo')?.value || '';
 
-    filteredUsers = allUsers.filter(user =>
-        user.email.toLowerCase().includes(searchTerm) ||
-        `${user.user_metadata?.lastName || ''} ${user.user_metadata?.firstName || ''}`.toLowerCase().includes(searchTerm)
-    );
+    filteredUsers = allUsers.filter(user => {
+        // ステータスフィルタ
+        if (statusFilter === 'active' && user.user_metadata?.status === 'withdrawn') return false;
+        if (statusFilter === 'withdrawn' && (!user.user_metadata || user.user_metadata.status !== 'withdrawn')) return false;
+
+        // 検索フィルタ（メールまたは名前）
+        if (searchTerm) {
+            const email = user.email.toLowerCase();
+            const name = `${user.user_metadata?.lastName || ''} ${user.user_metadata?.firstName || ''}`.toLowerCase();
+            if (!email.includes(searchTerm) && !name.includes(searchTerm)) return false;
+        }
+
+        // 日付フィルタ
+        if (dateFrom || dateTo) {
+            const createdDate = new Date(user.created_at);
+            if (dateFrom && createdDate < new Date(dateFrom)) return false;
+            if (dateTo && createdDate > new Date(dateTo + 'T23:59:59')) return false;
+        }
+
+        return true;
+    });
 
     renderUsers();
     updateStatistics();
-}
+};
 
 /**
- * ユーザーをフィルタ
+ * フィルターをリセット
  */
-function filterUsers() {
-    const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+window.resetFilters = function() {
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterSearch').value = '';
+    document.getElementById('filterDateFrom').value = '';
+    document.getElementById('filterDateTo').value = '';
 
-    if (statusFilter === 'all') {
-        filteredUsers = [...allUsers];
-    } else if (statusFilter === 'active') {
-        filteredUsers = allUsers.filter(user =>
-            !user.user_metadata || user.user_metadata.status !== 'withdrawn'
-        );
-    } else if (statusFilter === 'withdrawn') {
-        filteredUsers = allUsers.filter(user =>
-            user.user_metadata && user.user_metadata.status === 'withdrawn'
-        );
-    }
-
+    filteredUsers = [...allUsers];
     renderUsers();
     updateStatistics();
-}
+};
 
 /**
  * 統計情報を更新
  */
 function updateStatistics() {
+    // 今月の開始日
+    const now = new Date();
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
     const stats = {
         total: allUsers.length,
         active: allUsers.filter(u => !u.user_metadata || u.user_metadata.status !== 'withdrawn').length,
         withdrawn: allUsers.filter(u => u.user_metadata && u.user_metadata.status === 'withdrawn').length,
-        filtered: filteredUsers.length
+        newThisMonth: allUsers.filter(u => new Date(u.created_at) >= thisMonthStart).length
     };
 
-    document.getElementById('totalUsers')?.textContent = stats.total;
-    document.getElementById('activeUsers')?.textContent = stats.active;
-    document.getElementById('withdrawnUsers')?.textContent = stats.withdrawn;
-    document.getElementById('filteredCount')?.textContent = stats.filtered;
+    document.getElementById('totalUsers').textContent = stats.total;
+    document.getElementById('activeUsers').textContent = stats.active;
+    document.getElementById('withdrawnUsers').textContent = stats.withdrawn;
+    document.getElementById('newUsersThisMonth').textContent = stats.newThisMonth;
 }
 
 /**
@@ -290,3 +316,13 @@ function formatDateTime(dateString) {
         minute: '2-digit'
     });
 }
+
+/**
+ * ユーザー詳細モーダルを閉じる
+ */
+window.closeUserModal = function() {
+    const modal = document.getElementById('userModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+};
