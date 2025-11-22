@@ -186,20 +186,13 @@ function normalizeOrderStatus(order) {
 }
 
 // 最近の注文を表示
-function loadRecentOrders() {
+async function loadRecentOrders() {
     try {
-        const orders = JSON.parse(localStorage.getItem('goemonorders')) || [];
+        // Supabaseから注文データを取得
+        const orders = await fetchAllOrders();
 
-        // ステータスを日本語に正規化
-        orders.forEach(order => normalizeOrderStatus(order));
-
-        // 注文を日付順にソート（新しい順）
-        const sortedOrders = orders.sort((a, b) => {
-            return new Date(b.orderDate) - new Date(a.orderDate);
-        });
-
-        // 最新10件を取得
-        const recentOrders = sortedOrders.slice(0, 10);
+        // 最新10件を取得（すでにcreated_atでソート済み）
+        const recentOrders = orders.slice(0, 10);
 
         const tbody = document.getElementById('recentOrdersBody');
 
@@ -217,19 +210,25 @@ function loadRecentOrders() {
 
         tbody.innerHTML = recentOrders.map(order => {
             const statusInfo = getStatusInfo(order.status);
-            const orderDate = new Date(order.orderDate);
+            const orderDate = new Date(order.created_at);
+
+            // 顧客名を取得（shipping_addressから）
+            const customerName = order.shipping_name || '未設定';
+
+            // 合計金額を計算
+            const totalAmount = order.total_amount || 0;
 
             return `
                 <tr>
-                    <td><strong>#${order.orderId}</strong></td>
-                    <td>${getCustomerName(order)}</td>
+                    <td><strong>#${order.order_number || order.id.substring(0, 8)}</strong></td>
+                    <td>${customerName}</td>
                     <td>${formatDateTime(orderDate)}</td>
-                    <td><strong>¥${(order.totalAmount || 0).toLocaleString()}</strong></td>
+                    <td><strong>¥${totalAmount.toLocaleString()}</strong></td>
                     <td>
                         <span class="status-badge ${statusInfo.class}">${order.status}</span>
                     </td>
                     <td>
-                        <button class="btn-cmn-01" style="padding: 6px 15px; font-size: 14px;" onclick="viewOrderDetail('${order.orderId}')">
+                        <button class="btn-cmn-01" style="padding: 6px 15px; font-size: 14px;" onclick="viewOrderDetail('${order.id}')">
                             <i class="fas fa-eye"></i> 詳細
                         </button>
                     </td>
