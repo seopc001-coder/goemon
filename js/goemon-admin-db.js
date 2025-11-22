@@ -537,24 +537,24 @@ async function fetchAllUsers() {
             // ユーザープロファイルから住所情報を取得
             const { data: profile, error: profileError } = await supabase
                 .from('user_profiles')
-                .select('postal_code, prefecture, city, address_line1, address_line2, phone')
-                .eq('user_id', user.user_id)
+                .select('postal_code, prefecture, city, address1, address2, phone')
+                .eq('id', user.user_id)
                 .single();
 
             if (profileError && profileError.code !== 'PGRST116') {
                 console.warn(`プロファイル取得エラー (ユーザーID: ${user.user_id}):`, profileError);
             }
 
-            // マイページで追加登録した住所を取得
-            const { data: savedAddresses, error: addressError } = await supabase
-                .from('saved_addresses')
+            // マイページで追加登録した住所を取得（shipping_addressesテーブル）
+            const { data: shippingAddresses, error: addressError } = await supabase
+                .from('shipping_addresses')
                 .select('*')
                 .eq('user_id', user.user_id)
                 .order('is_default', { ascending: false })
                 .order('created_at', { ascending: false });
 
             if (addressError) {
-                console.warn(`保存済み住所取得エラー (ユーザーID: ${user.user_id}):`, addressError);
+                console.warn(`配送先住所取得エラー (ユーザーID: ${user.user_id}):`, addressError);
             }
 
             // 住所リストを作成
@@ -566,8 +566,8 @@ async function fetchAllUsers() {
                     postal_code: profile.postal_code,
                     prefecture: profile.prefecture,
                     city: profile.city,
-                    address_line1: profile.address_line1,
-                    address_line2: profile.address_line2,
+                    address_line1: profile.address1,
+                    address_line2: profile.address2,
                     phone_number: profile.phone,
                     is_default: true,
                     source: '登録時'
@@ -575,13 +575,13 @@ async function fetchAllUsers() {
             }
 
             // 追加登録された住所
-            (savedAddresses || []).forEach(addr => {
+            (shippingAddresses || []).forEach(addr => {
                 addresses.push({
                     postal_code: addr.postal_code,
                     prefecture: addr.prefecture,
                     city: addr.city,
-                    address_line1: addr.address_line1,
-                    address_line2: addr.address_line2,
+                    address_line1: addr.address1,
+                    address_line2: addr.address2,
                     phone_number: addr.phone,
                     is_default: addr.is_default || false,
                     source: '追加登録'
