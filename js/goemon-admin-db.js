@@ -88,45 +88,50 @@ async function addProduct(product) {
  */
 async function updateProduct(productId, updates) {
     try {
+        const updateData = {};
+
         // カテゴリー名からIDを取得
-        let categoryId = null;
-        if (updates.category) {
-            const { data: categories } = await supabase
-                .from('categories')
-                .select('id')
-                .eq('name', updates.category)
-                .single();
-            categoryId = categories?.id || null;
+        if (updates.category !== undefined) {
+            if (updates.category) {
+                const { data: categories } = await supabase
+                    .from('categories')
+                    .select('id')
+                    .eq('name', updates.category)
+                    .single();
+                updateData.category_id = categories?.id || null;
+            } else {
+                updateData.category_id = null;
+            }
         }
 
         // 商品タイプ名からIDを取得
-        let productTypeId = null;
-        if (updates.productType) {
-            const { data: productTypes } = await supabase
-                .from('product_types')
-                .select('id')
-                .eq('name', updates.productType)
-                .single();
-            productTypeId = productTypes?.id || null;
+        if (updates.productType !== undefined) {
+            if (updates.productType) {
+                const { data: productTypes } = await supabase
+                    .from('product_types')
+                    .select('id')
+                    .eq('name', updates.productType)
+                    .single();
+                updateData.product_type_id = productTypes?.id || null;
+            } else {
+                updateData.product_type_id = null;
+            }
         }
 
-        const updateData = {
-            name: updates.name,
-            price: updates.price,
-            original_price: updates.originalPrice || null,
-            category_id: categoryId,
-            product_type_id: productTypeId,
-            stock: updates.stock || 0,
-            description: updates.description || null,
-            image: updates.image || null,
-            image2: updates.image2 || null,
-            image3: updates.image3 || null,
-            image4: updates.image4 || null,
-            show_in_ranking: updates.showInRanking || false,
-            ranking_position: updates.rankingPosition || null,
-            is_published: updates.isPublished !== false,
-            sold_out_confirmed: updates.soldOutConfirmed || false
-        };
+        // 渡されたフィールドのみを更新データに追加
+        if (updates.name !== undefined) updateData.name = updates.name;
+        if (updates.price !== undefined) updateData.price = updates.price;
+        if (updates.originalPrice !== undefined) updateData.original_price = updates.originalPrice || null;
+        if (updates.stock !== undefined) updateData.stock = updates.stock;
+        if (updates.description !== undefined) updateData.description = updates.description || null;
+        if (updates.image !== undefined) updateData.image = updates.image || null;
+        if (updates.image2 !== undefined) updateData.image2 = updates.image2 || null;
+        if (updates.image3 !== undefined) updateData.image3 = updates.image3 || null;
+        if (updates.image4 !== undefined) updateData.image4 = updates.image4 || null;
+        if (updates.showInRanking !== undefined) updateData.show_in_ranking = updates.showInRanking;
+        if (updates.rankingPosition !== undefined) updateData.ranking_position = updates.rankingPosition || null;
+        if (updates.isPublished !== undefined) updateData.is_published = updates.isPublished;
+        if (updates.soldOutConfirmed !== undefined) updateData.sold_out_confirmed = updates.soldOutConfirmed;
 
         const { data, error } = await supabase
             .from('products')
