@@ -241,20 +241,32 @@ function displayAddresses(addresses) {
     if (!addressList) return;
 
     if (addresses.length === 0) {
-        noAddressMessage.style.display = 'block';
+        if (noAddressMessage) {
+            noAddressMessage.style.display = 'block';
+            noAddressMessage.textContent = '住所が登録されていません';
+        }
         addressList.innerHTML = '';
         return;
     }
 
-    noAddressMessage.style.display = 'none';
-    addressList.innerHTML = addresses.map((addr, index) => `
+    // 住所が1件以上ある場合
+    if (noAddressMessage) {
+        noAddressMessage.style.display = 'block';
+        noAddressMessage.textContent = `登録住所: ${addresses.length}件`;
+        noAddressMessage.style.color = '#333';
+        noAddressMessage.style.fontWeight = '500';
+    }
+
+    // マイページトップでは最初の1件のみ表示
+    const displayAddrs = addresses.slice(0, 1);
+
+    addressList.innerHTML = displayAddrs.map((addr, index) => `
         <div class="address-item" style="padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; background: #fff;">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
                 <strong style="font-size: 16px;">
                     ${addr.name || '配送先' + (index + 1)}
                     ${addr.isDefault ? '<span style="background: #4CAF50; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px;">登録住所</span>' : ''}
                 </strong>
-                ${!addr.isDefault ? `<button class="btn-delete-address" data-id="${addr.id}" style="color: #f44336; background: none; border: none; cursor: pointer; font-size: 14px;"><i class="fas fa-trash"></i> 削除</button>` : ''}
             </div>
             <p style="margin: 5px 0; color: #666;">
                 〒${addr.postalCode}<br>
@@ -263,15 +275,6 @@ function displayAddresses(addresses) {
             </p>
         </div>
     `).join('');
-
-    // 削除ボタンのイベントリスナーを追加
-    const deleteButtons = document.querySelectorAll('.btn-delete-address');
-    deleteButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const addressId = this.getAttribute('data-id');
-            deleteAddress(addressId);
-        });
-    });
 }
 
 // 住所を削除
