@@ -277,11 +277,15 @@ function renderProducts(products) {
     productsArray.sort((a, b) => {
         switch (sortOrder) {
             case 'newest':
-                // 新しい順（IDの降順）
-                return (parseInt(b.id) || 0) - (parseInt(a.id) || 0);
+                // 新しい順（作成日時の降順）
+                const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                return timeB - timeA;
             case 'oldest':
-                // 古い順（IDの昇順）
-                return (parseInt(a.id) || 0) - (parseInt(b.id) || 0);
+                // 古い順（作成日時の昇順）
+                const timeA2 = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const timeB2 = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                return timeA2 - timeB2;
             case 'price-high':
                 // 価格が高い順
                 return (b.price || 0) - (a.price || 0);
@@ -302,7 +306,9 @@ function renderProducts(products) {
                 return (b.name || '').localeCompare(a.name || '', 'ja');
             default:
                 // デフォルトは新しい順
-                return (parseInt(b.id) || 0) - (parseInt(a.id) || 0);
+                const timeA3 = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const timeB3 = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                return timeB3 - timeA3;
         }
     });
 
