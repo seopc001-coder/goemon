@@ -13,7 +13,11 @@ async function fetchAllProducts() {
     try {
         const { data, error } = await supabase
             .from('products')
-            .select('*')
+            .select(`
+                *,
+                categories(name),
+                product_types(name)
+            `)
             .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -442,8 +446,8 @@ function convertProductFromDB(dbProduct) {
         name: dbProduct.name,
         price: dbProduct.price,
         originalPrice: dbProduct.original_price,
-        category: dbProduct.category,
-        productType: dbProduct.product_type,
+        category: dbProduct.categories?.name || null,
+        productType: dbProduct.product_types?.name || null,
         stock: dbProduct.stock,
         description: dbProduct.description,
         image: dbProduct.image,
