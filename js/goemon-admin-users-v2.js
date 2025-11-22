@@ -116,6 +116,7 @@ window.viewUserDetail = async function(userId) {
             <div style="margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 4px;">
                 <div style="font-weight: bold; margin-bottom: 5px;">
                     ${addr.is_default ? '<span style="background: #4CAF50; color: white; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin-right: 5px;">デフォルト</span>' : ''}
+                    ${addr.source ? `<span style="background: #2196F3; color: white; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin-right: 5px;">${addr.source}</span>` : ''}
                     住所 ${index + 1}
                 </div>
                 <div>〒${addr.postal_code || ''}</div>

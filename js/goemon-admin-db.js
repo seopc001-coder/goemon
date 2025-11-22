@@ -532,37 +532,60 @@ async function fetchAllUsers() {
 
         console.log('📊 RPC関数から取得したユーザーデータ:', usersData);
 
-        // 各ユーザーの注文から配送先住所を取得
+        // 各ユーザーの登録住所を取得（user_profilesテーブルから）
         const usersWithAddresses = await Promise.all((usersData || []).map(async (user) => {
-            // このユーザーの注文を取得して配送先住所を収集
-            const { data: orders, error: ordersError } = await supabase
-                .from('orders')
-                .select('shipping_postal_code, shipping_prefecture, shipping_city, shipping_address_line1, shipping_address_line2, shipping_phone')
+            // ユーザープロファイルから住所情報を取得
+            const { data: profile, error: profileError } = await supabase
+                .from('user_profiles')
+                .select('postal_code, prefecture, city, address_line1, address_line2, phone')
                 .eq('user_id', user.user_id)
-                .order('created_at', { ascending: false });
+                .single();
 
-            if (ordersError) {
-                console.warn(`注文取得エラー (ユーザーID: ${user.user_id}):`, ordersError);
+            if (profileError && profileError.code !== 'PGRST116') {
+                console.warn(`プロファイル取得エラー (ユーザーID: ${user.user_id}):`, profileError);
             }
 
-            // 重複する住所を除去してユニークな住所リストを作成
-            const uniqueAddresses = [];
-            const addressSet = new Set();
+            // マイページで追加登録した住所を取得
+            const { data: savedAddresses, error: addressError } = await supabase
+                .from('saved_addresses')
+                .select('*')
+                .eq('user_id', user.user_id)
+                .order('is_default', { ascending: false })
+                .order('created_at', { ascending: false });
 
-            (orders || []).forEach(order => {
-                const addressKey = `${order.shipping_postal_code}-${order.shipping_address_line1}`;
-                if (!addressSet.has(addressKey) && order.shipping_postal_code) {
-                    addressSet.add(addressKey);
-                    uniqueAddresses.push({
-                        postal_code: order.shipping_postal_code,
-                        prefecture: order.shipping_prefecture,
-                        city: order.shipping_city,
-                        address_line1: order.shipping_address_line1,
-                        address_line2: order.shipping_address_line2,
-                        phone_number: order.shipping_phone,
-                        is_default: uniqueAddresses.length === 0 // 最初の住所をデフォルトとする
-                    });
-                }
+            if (addressError) {
+                console.warn(`保存済み住所取得エラー (ユーザーID: ${user.user_id}):`, addressError);
+            }
+
+            // 住所リストを作成
+            const addresses = [];
+
+            // プロファイルの住所（登録時の住所）
+            if (profile && profile.postal_code) {
+                addresses.push({
+                    postal_code: profile.postal_code,
+                    prefecture: profile.prefecture,
+                    city: profile.city,
+                    address_line1: profile.address_line1,
+                    address_line2: profile.address_line2,
+                    phone_number: profile.phone,
+                    is_default: true,
+                    source: '登録時'
+                });
+            }
+
+            // 追加登録された住所
+            (savedAddresses || []).forEach(addr => {
+                addresses.push({
+                    postal_code: addr.postal_code,
+                    prefecture: addr.prefecture,
+                    city: addr.city,
+                    address_line1: addr.address_line1,
+                    address_line2: addr.address_line2,
+                    phone_number: addr.phone,
+                    is_default: addr.is_default || false,
+                    source: '追加登録'
+                });
             });
 
             return {
@@ -576,7 +599,7 @@ async function fetchAllUsers() {
                     deleted_at: user.deleted_at
                 },
                 order_count: user.order_count,
-                addresses: uniqueAddresses
+                addresses: addresses
             };
         }));
 
