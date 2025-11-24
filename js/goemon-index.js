@@ -355,8 +355,8 @@ function loadProductsForType(typeName, sectionElement) {
         return idB - idA;
     });
 
-    // 上位3件を表示
-    typeProducts.slice(0, 3).forEach(product => {
+    // 上位5件を表示
+    typeProducts.slice(0, 5).forEach(product => {
         const card = createProductCard(product);
         container.appendChild(card);
     });
