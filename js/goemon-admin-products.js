@@ -233,10 +233,14 @@ async function loadProducts() {
         // Supabaseから商品データを取得
         const products = await fetchAllProducts();
 
+        console.log('🔍 取得した商品データ（最初の1件）:', products[0]);
+
         // オブジェクト形式に変換（既存コードとの互換性のため）
         allProducts = {};
         products.forEach(product => {
-            allProducts[product.id] = convertProductFromDB(product);
+            const converted = convertProductFromDB(product);
+            console.log('🔄 変換後の商品データ:', product.id, 'variants:', converted.variants);
+            allProducts[product.id] = converted;
         });
 
         console.log('✅ Supabaseから商品を読み込みました:', Object.keys(allProducts).length, '件');
