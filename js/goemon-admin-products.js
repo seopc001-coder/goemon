@@ -722,6 +722,11 @@ async function handleProductFormSubmit(e) {
         return;
     }
 
+    if (!productDescription) {
+        showAlertModal('商品説明を入力してください', 'warning');
+        return;
+    }
+
     if (productStock < 0) {
         showAlertModal('在庫数は0以上で入力してください', 'warning');
         return;
