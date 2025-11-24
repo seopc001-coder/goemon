@@ -586,6 +586,9 @@ function openAddProductModal() {
         }
     });
 
+    // バリエーションデータをクリア
+    clearVariantsData();
+
     // 新規商品はデフォルトで公開状態なので、ランキングチェックボックスを有効化
     const showInRankingCheckbox = document.getElementById('showInRanking');
     if (showInRankingCheckbox) {
@@ -672,6 +675,13 @@ function editProduct(productId) {
     document.getElementById('productImage2').value = product.image2 || '';
     document.getElementById('productImage3').value = product.image3 || '';
     document.getElementById('productImage4').value = product.image4 || '';
+
+    // バリエーションデータを設定
+    if (product.variants) {
+        setVariantsData(product.variants);
+    } else {
+        clearVariantsData();
+    }
 
     // ランキングチェックボックスのイベントリスナーを設定
     setupRankingCheckbox();
@@ -779,6 +789,9 @@ async function handleProductFormSubmit(e) {
         }
     }
 
+    // バリエーションデータを取得
+    const variants = getVariantsData();
+
     // 商品データを構築
     const productData = {
         name: productName,
@@ -794,7 +807,8 @@ async function handleProductFormSubmit(e) {
         image4: productImage4 || null,
         showInRanking: showInRanking,
         rankingPosition: showInRanking ? rankingPosition : null,
-        isPublished: isPublished
+        isPublished: isPublished,
+        variants: variants // バリエーションデータを追加
     };
 
     // 在庫数が変更された場合のみ soldOutConfirmed を追加

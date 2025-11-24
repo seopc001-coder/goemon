@@ -154,50 +154,20 @@
                         <p>軽やかなコットン素材を使用したカジュアルブラウス。ゆったりとしたシルエットで、リラックス感のある着心地が魅力です。オフィスカジュアルからデイリーまで幅広く活躍します。</p>
                     </div>
 
-                    <!-- カラー選択 -->
-                    <div class="product-option">
+                    <!-- カラー選択（動的に生成） -->
+                    <div class="product-option" id="colorSelectionContainer" style="display: none;">
                         <label class="option-label">カラー</label>
-                        <div class="color-options">
-                            <label class="color-option">
-                                <input type="radio" name="color" value="white" checked>
-                                <span class="color-swatch" style="background-color: #fff; border: 1px solid #ddd;"></span>
-                                <span class="color-name">ホワイト</span>
-                            </label>
-                            <label class="color-option">
-                                <input type="radio" name="color" value="black">
-                                <span class="color-swatch" style="background-color: #000;"></span>
-                                <span class="color-name">ブラック</span>
-                            </label>
-                            <label class="color-option">
-                                <input type="radio" name="color" value="pink">
-                                <span class="color-swatch" style="background-color: #c691a5;"></span>
-                                <span class="color-name">ピンク</span>
-                            </label>
+                        <div class="color-options" id="colorOptions">
+                            <!-- 色オプションが動的に生成されます -->
                         </div>
                     </div>
 
-                    <!-- サイズ選択 -->
-                    <div class="product-option">
+                    <!-- サイズ選択（動的に生成） -->
+                    <div class="product-option" id="sizeSelectionContainer" style="display: none;">
                         <label class="option-label">サイズ</label>
-                        <div class="size-options">
-                            <label class="size-option">
-                                <input type="radio" name="size" value="S">
-                                <span class="size-label">S</span>
-                            </label>
-                            <label class="size-option">
-                                <input type="radio" name="size" value="M" checked>
-                                <span class="size-label">M</span>
-                            </label>
-                            <label class="size-option">
-                                <input type="radio" name="size" value="L">
-                                <span class="size-label">L</span>
-                            </label>
-                            <label class="size-option">
-                                <input type="radio" name="size" value="XL">
-                                <span class="size-label">XL</span>
-                            </label>
+                        <div class="size-options" id="sizeOptions">
+                            <!-- サイズオプションが動的に生成されます -->
                         </div>
-                        <a href="#" class="size-guide-link">サイズガイド</a>
                     </div>
 
                     <!-- 数量選択 -->

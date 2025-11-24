@@ -131,6 +131,9 @@ function updateProductDisplay() {
         descriptionElement.textContent = productData.description;
     }
 
+    // バリエーション選択UIを生成
+    setupProductVariants();
+
     // 商品画像を更新
     updateProductImages();
 
@@ -780,4 +783,218 @@ function initializeShareButtons() {
             });
         });
     }
+}
+
+// ===================================
+// 商品バリエーション機能
+// ===================================
+
+let selectedColor = null;
+let selectedSize = null;
+
+/**
+ * 商品バリエーションのUIをセットアップ
+ */
+function setupProductVariants() {
+    if (!productData || !productData.variants) {
+        // バリエーションがない場合は非表示
+        document.getElementById('colorSelectionContainer').style.display = 'none';
+        document.getElementById('sizeSelectionContainer').style.display = 'none';
+        return;
+    }
+
+    const variants = productData.variants;
+    const colors = variants.colors || [];
+    const sizes = variants.sizes || [];
+
+    // 色の選択UIを生成
+    if (colors.length > 0) {
+        setupColorSelection(colors);
+        selectedColor = colors[0]; // 最初の色を選択
+    }
+
+    // サイズの選択UIを生成
+    if (sizes.length > 0) {
+        setupSizeSelection(sizes);
+        selectedSize = sizes[0]; // 最初のサイズを選択
+    }
+
+    // 在庫状況を更新
+    updateStockStatus();
+}
+
+/**
+ * 色選択UIを生成
+ */
+function setupColorSelection(colors) {
+    const container = document.getElementById('colorSelectionContainer');
+    const optionsContainer = document.getElementById('colorOptions');
+
+    if (!container || !optionsContainer) return;
+
+    container.style.display = 'block';
+    optionsContainer.innerHTML = '';
+
+    colors.forEach((color, index) => {
+        const label = document.createElement('label');
+        label.className = 'color-option';
+
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'color';
+        input.value = color;
+        input.checked = index === 0;
+
+        input.addEventListener('change', function() {
+            if (this.checked) {
+                selectedColor = color;
+                updateStockStatus();
+            }
+        });
+
+        const swatch = document.createElement('span');
+        swatch.className = 'color-swatch';
+        swatch.style.backgroundColor = getColorCode(color);
+        if (color === 'ホワイト' || color === '白' || color === 'white') {
+            swatch.style.border = '1px solid #ddd';
+        }
+
+        const name = document.createElement('span');
+        name.className = 'color-name';
+        name.textContent = color;
+
+        label.appendChild(input);
+        label.appendChild(swatch);
+        label.appendChild(name);
+        optionsContainer.appendChild(label);
+    });
+}
+
+/**
+ * サイズ選択UIを生成
+ */
+function setupSizeSelection(sizes) {
+    const container = document.getElementById('sizeSelectionContainer');
+    const optionsContainer = document.getElementById('sizeOptions');
+
+    if (!container || !optionsContainer) return;
+
+    container.style.display = 'block';
+    optionsContainer.innerHTML = '';
+
+    sizes.forEach((size, index) => {
+        const label = document.createElement('label');
+        label.className = 'size-option';
+
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'size';
+        input.value = size;
+        input.checked = index === 0;
+
+        input.addEventListener('change', function() {
+            if (this.checked) {
+                selectedSize = size;
+                updateStockStatus();
+            }
+        });
+
+        const sizeLabel = document.createElement('span');
+        sizeLabel.className = 'size-label';
+        sizeLabel.textContent = size;
+
+        label.appendChild(input);
+        label.appendChild(sizeLabel);
+        optionsContainer.appendChild(label);
+    });
+}
+
+/**
+ * 在庫状況を更新（バリエーションに応じて）
+ */
+function updateStockStatus() {
+    if (!productData || !productData.variants) {
+        // バリエーションがない場合は基本在庫を使用
+        return;
+    }
+
+    const variants = productData.variants;
+    const variantsStock = variants.stock || {};
+
+    // 選択されたバリエーションの在庫キーを生成
+    let stockKey = '';
+    if (selectedColor && selectedSize) {
+        stockKey = `${selectedColor}-${selectedSize}`;
+    } else if (selectedColor) {
+        stockKey = selectedColor;
+    } else if (selectedSize) {
+        stockKey = selectedSize;
+    }
+
+    // 在庫数を取得
+    const stock = variantsStock[stockKey] || 0;
+
+    // 在庫状況の表示を更新（ただし非表示のまま、管理用）
+    console.log(`Selected variant: ${stockKey}, Stock: ${stock}`);
+
+    // カートボタンの有効/無効を切り替え
+    const addToCartBtn = document.querySelector('.btn-add-to-cart');
+    if (addToCartBtn) {
+        if (stock <= 0) {
+            addToCartBtn.disabled = true;
+            addToCartBtn.textContent = '在庫切れ';
+            addToCartBtn.style.background = '#ccc';
+            addToCartBtn.style.cursor = 'not-allowed';
+        } else {
+            addToCartBtn.disabled = false;
+            addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> カートに追加';
+            addToCartBtn.style.background = '';
+            addToCartBtn.style.cursor = 'pointer';
+        }
+    }
+}
+
+/**
+ * 色名から色コードを取得（簡易マッピング）
+ */
+function getColorCode(colorName) {
+    const colorMap = {
+        'レッド': '#ff0000',
+        '赤': '#ff0000',
+        'red': '#ff0000',
+        'ブルー': '#0000ff',
+        '青': '#0000ff',
+        'blue': '#0000ff',
+        'グリーン': '#00ff00',
+        '緑': '#00ff00',
+        'green': '#00ff00',
+        'ブラック': '#000000',
+        '黒': '#000000',
+        'black': '#000000',
+        'ホワイト': '#ffffff',
+        '白': '#ffffff',
+        'white': '#ffffff',
+        'イエロー': '#ffff00',
+        '黄色': '#ffff00',
+        'yellow': '#ffff00',
+        'ピンク': '#ffc0cb',
+        'pink': '#ffc0cb',
+        'オレンジ': '#ffa500',
+        'orange': '#ffa500',
+        'パープル': '#800080',
+        '紫': '#800080',
+        'purple': '#800080',
+        'グレー': '#808080',
+        '灰色': '#808080',
+        'gray': '#808080',
+        'ブラウン': '#a52a2a',
+        '茶色': '#a52a2a',
+        'brown': '#a52a2a',
+        'ベージュ': '#f5f5dc',
+        'beige': '#f5f5dc',
+        'ネイビー': '#000080',
+        'navy': '#000080'
+    };
+
+    return colorMap[colorName] || '#cccccc'; // デフォルトはグレー
 }

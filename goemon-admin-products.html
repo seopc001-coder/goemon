@@ -547,11 +547,58 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="productStock">在庫数 <span style="color: #f44336;">*</span></label>
+                        <label for="productStock">基本在庫数 <span style="color: #f44336;">*</span></label>
                         <input type="number" id="productStock" min="0" value="0" required>
                         <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
-                            在庫が0の場合、ECサイトでは「売り切れ」として表示されます
+                            バリエーションなしの場合、または全バリエーションの合計在庫数
                         </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">
+                            色・サイズバリエーション（任意）
+                        </label>
+                        <small style="color: #666; font-size: 12px; display: block; margin-bottom: 10px;">
+                            商品に色やサイズのバリエーションがある場合に設定してください
+                        </small>
+
+                        <div id="variantsContainer" style="border: 1px solid #ddd; border-radius: 4px; padding: 15px; background: #f9f9f9;">
+                            <!-- 色の管理 -->
+                            <div style="margin-bottom: 15px;">
+                                <label style="font-size: 13px; font-weight: 500; margin-bottom: 5px; display: block;">色</label>
+                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                    <input type="text" id="newColorInput" placeholder="例: レッド" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                                    <button type="button" onclick="addColor()" style="padding: 8px 15px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+                                        <i class="fas fa-plus"></i> 追加
+                                    </button>
+                                </div>
+                                <div id="colorsList" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    <!-- 色タグが動的に追加されます -->
+                                </div>
+                            </div>
+
+                            <!-- サイズの管理 -->
+                            <div style="margin-bottom: 15px;">
+                                <label style="font-size: 13px; font-weight: 500; margin-bottom: 5px; display: block;">サイズ</label>
+                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                    <input type="text" id="newSizeInput" placeholder="例: M" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                                    <button type="button" onclick="addSize()" style="padding: 8px 15px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+                                        <i class="fas fa-plus"></i> 追加
+                                    </button>
+                                </div>
+                                <div id="sizesList" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    <!-- サイズタグが動的に追加されます -->
+                                </div>
+                            </div>
+
+                            <!-- 在庫管理テーブル -->
+                            <div id="variantsStockSection" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                                <label style="font-size: 13px; font-weight: 500; margin-bottom: 10px; display: block;">各バリエーションの在庫数</label>
+                                <div id="variantsStockTable" style="overflow-x: auto;">
+                                    <!-- 在庫テーブルが動的に生成されます -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -649,6 +696,7 @@
     <script src="./js/goemon-image-upload.js?v=20251122163000"></script>
     <script src="./js/goemon-modal.js?v=20251122163000"></script>
     <script src="./js/goemon-products-data.js?v=20251122163000"></script>
+    <script src="./js/goemon-variants.js?v=20251125001"></script>
     <script src="./js/goemon-admin-products.js?v=20251122163000"></script>
 </body>
 </html>
