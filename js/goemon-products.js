@@ -255,6 +255,9 @@ function resetFilters() {
 
 // フィルターを適用
 function applyFilters() {
+    console.log('🔍 Applying filters:', filters);
+    console.log('📦 Total products before filtering:', allProducts.length);
+
     filteredProducts = allProducts.filter(product => {
         // 非公開商品を除外（最優先）
         if (product.isPublished === false) {
@@ -263,11 +266,13 @@ function applyFilters() {
 
         // カテゴリーフィルター
         if (filters.category !== 'all' && product.category !== filters.category) {
+            console.log(`❌ Product "${product.name}" filtered out by category: ${product.category} !== ${filters.category}`);
             return false;
         }
 
         // 商品タイプフィルター
         if (filters.productType !== 'all' && product.productType !== filters.productType) {
+            console.log(`❌ Product "${product.name}" filtered out by type: ${product.productType} !== ${filters.productType}`);
             return false;
         }
 
@@ -295,6 +300,11 @@ function applyFilters() {
 
         return true;
     });
+
+    console.log('✅ Filtered products count:', filteredProducts.length);
+    if (filteredProducts.length > 0) {
+        console.log('📋 Sample filtered products:', filteredProducts.slice(0, 3).map(p => ({ name: p.name, category: p.category, productType: p.productType })));
+    }
 
     applySorting();
     currentPage = 1;
