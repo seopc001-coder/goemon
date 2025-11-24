@@ -300,16 +300,34 @@ async function deleteAddress(addressId) {
     });
 }
 
-// 注文履歴を読み込み
-function loadOrderHistory() {
+// 注文履歴を読み込み（Supabase連携）
+async function loadOrderHistory() {
     const orderHistoryMessage = document.getElementById('orderHistoryMessage');
     if (!orderHistoryMessage) return;
 
     try {
-        // localStorageから注文履歴を取得
-        const orders = JSON.parse(localStorage.getItem('goemonorders')) || [];
+        // 現在のユーザーを取得
+        const { data: { user } } = await supabase.auth.getUser();
 
-        if (orders.length === 0) {
+        if (!user) {
+            orderHistoryMessage.textContent = 'まだ注文がありません';
+            return;
+        }
+
+        // Supabaseから該当ユーザーの注文履歴を取得
+        const { data: orders, error } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching orders:', error);
+            orderHistoryMessage.textContent = 'まだ注文がありません';
+            return;
+        }
+
+        if (!orders || orders.length === 0) {
             orderHistoryMessage.textContent = 'まだ注文がありません';
             return;
         }
