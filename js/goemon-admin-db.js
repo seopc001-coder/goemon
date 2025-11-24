@@ -529,8 +529,6 @@ function convertHeroImageFromDB(dbImage) {
     return {
         id: dbImage.id,
         imageUrl: dbImage.image_url,
-        title: dbImage.title,
-        subtitle: dbImage.subtitle,
         linkUrl: dbImage.link_url,
         displayOrder: dbImage.display_order,
         isActive: dbImage.is_active,

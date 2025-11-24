@@ -85,16 +85,12 @@ async function loadHeroImages() {
             slide.innerHTML = `
                 <a href="${link}" class="hero-slide-link">
                     <div class="hero-slide" style="background-image: url('${image.imageUrl}'); background-size: cover; background-position: center;">
-                        <div class="hero-content">
-                            <h2>${image.title}</h2>
-                            <p>${image.subtitle || ''}</p>
-                        </div>
                     </div>
                 </a>
             `;
 
             swiperWrapper.appendChild(slide);
-            console.log(`Added slide ${index + 1}:`, image.title);
+            console.log(`Added slide ${index + 1}:`, image.imageUrl);
         });
 
         // 短い遅延の後にSwiperを初期化

@@ -778,7 +778,6 @@ window.editHeroImage = function(id) {
     document.getElementById('heroImageUrl').value = image.image_url || '';
     document.getElementById('heroImageLink').value = image.link_url || '';
     document.getElementById('heroImageAlt').value = image.alt || '';
-    document.getElementById('heroImageTitle').value = image.title || '';
 
     // 画像プレビューを表示
     if (image.image_url) {
@@ -797,9 +796,8 @@ async function handleHeroImageSubmit(e) {
     const image_url = document.getElementById('heroImageUrl').value.trim();
     const link_url = document.getElementById('heroImageLink').value.trim();
     const alt = document.getElementById('heroImageAlt').value.trim();
-    const title = document.getElementById('heroImageTitle').value.trim();
 
-    console.log('Form data:', { image_url, link_url, alt, title });
+    console.log('Form data:', { image_url, link_url, alt });
 
     if (!image_url) {
         showAlertModal('画像URLは必須です', 'error');
@@ -811,7 +809,6 @@ async function handleHeroImageSubmit(e) {
             image_url,
             link_url: link_url || null,
             alt: alt || null,
-            title: title || null,
             is_active: true
         };
 
