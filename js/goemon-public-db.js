@@ -14,7 +14,15 @@ async function fetchPublishedProducts() {
     try {
         const { data, error } = await supabase
             .from('products')
-            .select('*')
+            .select(`
+                *,
+                product_types (
+                    name
+                ),
+                categories (
+                    name
+                )
+            `)
             .eq('is_published', true)
             .order('created_at', { ascending: false });
 
@@ -36,7 +44,15 @@ async function fetchProductById(productId) {
     try {
         const { data, error } = await supabase
             .from('products')
-            .select('*')
+            .select(`
+                *,
+                product_types (
+                    name
+                ),
+                categories (
+                    name
+                )
+            `)
             .eq('id', productId)
             .eq('is_published', true)
             .single();
@@ -54,10 +70,27 @@ async function fetchProductById(productId) {
  */
 async function fetchProductsByCategory(category) {
     try {
+        // カテゴリー名からIDを取得
+        const { data: categoryData, error: categoryError } = await supabase
+            .from('categories')
+            .select('id')
+            .eq('name', category)
+            .single();
+
+        if (categoryError) throw categoryError;
+
         const { data, error } = await supabase
             .from('products')
-            .select('*')
-            .eq('category', category)
+            .select(`
+                *,
+                product_types (
+                    name
+                ),
+                categories (
+                    name
+                )
+            `)
+            .eq('category_id', categoryData.id)
             .eq('is_published', true)
             .order('created_at', { ascending: false });
 
@@ -76,7 +109,15 @@ async function fetchRankingProducts() {
     try {
         const { data, error } = await supabase
             .from('products')
-            .select('*')
+            .select(`
+                *,
+                product_types (
+                    name
+                ),
+                categories (
+                    name
+                )
+            `)
             .eq('is_published', true)
             .eq('show_in_ranking', true)
             .not('ranking_position', 'is', null)
@@ -280,8 +321,8 @@ function convertProductFromDB(dbProduct) {
         name: dbProduct.name,
         price: dbProduct.price,
         originalPrice: dbProduct.original_price,
-        category: dbProduct.category,
-        productType: dbProduct.product_type,
+        category: dbProduct.categories?.name || null,
+        productType: dbProduct.product_types?.name || null,
         stock: dbProduct.stock,
         description: dbProduct.description,
         image: dbProduct.image,
