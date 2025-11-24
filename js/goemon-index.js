@@ -208,7 +208,7 @@ async function loadCategories() {
         // カテゴリを動的に生成
         categories.forEach(category => {
             const li = document.createElement('li');
-            li.innerHTML = `<a href="goemon-products.html?category=${category.name}">${category.name}</a>`;
+            li.innerHTML = `<a href="goemon-products.html?category=${encodeURIComponent(category.name)}">${category.name}</a>`;
             categoryList.appendChild(li);
         });
 
@@ -256,7 +256,7 @@ async function loadProductTypes() {
         // 商品タイプを動的に生成
         productTypes.forEach(type => {
             const li = document.createElement('li');
-            li.innerHTML = `<a href="goemon-products.html?type=${type.name}">${type.name}</a>`;
+            li.innerHTML = `<a href="goemon-products.html?type=${encodeURIComponent(type.name)}">${type.name}</a>`;
             productTypeList.appendChild(li);
         });
 
