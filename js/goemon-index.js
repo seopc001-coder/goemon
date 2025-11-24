@@ -255,6 +255,8 @@ async function loadProductTypes() {
 // 新着商品を読み込み
 function loadNewArrivals() {
     const container = document.querySelector('.box-category-discount .list-products-01');
+    const viewAllButton = document.querySelector('.box-category-discount .view-all-link');
+
     if (!container) {
         console.error('New arrivals container not found');
         return;
@@ -286,6 +288,11 @@ function loadNewArrivals() {
         const card = createProductCard(product);
         container.appendChild(card);
     });
+
+    // 「すべて見る」ボタンを商品タイプでフィルタリングするように更新
+    if (viewAllButton) {
+        viewAllButton.href = 'goemon-products.html?type=new-arrivals';
+    }
 
     console.log('New arrivals loaded:', newArrivalsProducts.length);
 }
@@ -406,6 +413,8 @@ function createProductCard(product) {
 // セール商品を読み込み
 function loadSaleItems() {
     const container = document.getElementById('saleProducts');
+    const viewAllButton = document.querySelector('.box-category-sale .view-all-link');
+
     if (!container) return;
 
     // 全商品を配列に変換
@@ -434,6 +443,11 @@ function loadSaleItems() {
         const card = createProductCard(product);
         container.appendChild(card);
     });
+
+    // 「すべて見る」ボタンを商品タイプでフィルタリングするように更新
+    if (viewAllButton) {
+        viewAllButton.href = 'goemon-products.html?type=sale';
+    }
 
     console.log('Sale items loaded:', saleProducts.length);
 }

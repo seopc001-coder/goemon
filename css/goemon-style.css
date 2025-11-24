@@ -1289,9 +1289,13 @@ img[src*="unsplash"] {
         letter-spacing: 4px;
     }
 
-    .btn-menu-sp,
     .btn-search-sp {
         display: flex;
+    }
+
+    /* ハンバーガーメニューを非表示 */
+    .btn-menu-sp {
+        display: none !important;
     }
 
     .header-search {

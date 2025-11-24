@@ -48,15 +48,25 @@ async function loadCoupons() {
  * クーポンを表示
  */
 function renderCoupons() {
-    const list = document.getElementById('couponsList');
-    if (!list) return;
+    const grid = document.getElementById('couponsGrid');
+    const countElem = document.getElementById('couponCount');
+
+    if (!grid) {
+        console.error('couponsGrid element not found');
+        return;
+    }
+
+    // カウント更新
+    if (countElem) {
+        countElem.textContent = allCoupons.length;
+    }
 
     if (allCoupons.length === 0) {
-        list.innerHTML = `
+        grid.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-ticket-alt"></i>
                 <h3>クーポンがありません</h3>
-                <p>「クーポンを追加」ボタンから作成してください</p>
+                <p>新規クーポン作成ボタンからクーポンを追加してください</p>
             </div>
         `;
         return;
@@ -67,37 +77,66 @@ function renderCoupons() {
         new Date(b.created_at) - new Date(a.created_at)
     );
 
-    list.innerHTML = sortedCoupons.map(coupon => {
+    grid.innerHTML = sortedCoupons.map(coupon => {
         const isExpired = coupon.expiry_date && new Date(coupon.expiry_date) < new Date();
         const isUsageLimitReached = coupon.usage_limit && coupon.used_count >= coupon.usage_limit;
-        const status = isExpired ? 'expired' : isUsageLimitReached ? 'limit-reached' : 'active';
+        const isActive = !isExpired && !isUsageLimitReached;
+
+        const discountText = coupon.type === 'percentage' ?
+            `${coupon.value}% OFF` :
+            `¥${coupon.value.toLocaleString()} OFF`;
 
         return `
-            <div class="coupon-item ${status}" data-id="${coupon.id}">
+            <div class="coupon-card">
                 <div class="coupon-header">
                     <div class="coupon-code">${coupon.code}</div>
-                    <span class="coupon-status-badge ${status}">
-                        ${isExpired ? '期限切れ' : isUsageLimitReached ? '使用上限' : '有効'}
+                    <div class="coupon-discount">${discountText}</div>
+                    <span class="status-badge ${isActive ? 'active' : 'expired'}" style="position: absolute; top: 15px; right: 15px;">
+                        ${isActive ? '有効' : '無効'}
                     </span>
                 </div>
                 <div class="coupon-body">
+                    ${coupon.description ? `
+                        <p style="color: #666; margin-bottom: 15px; font-size: 14px;">${coupon.description}</p>
+                    ` : ''}
+
                     <div class="coupon-info">
-                        <p class="coupon-type">
-                            <i class="fas fa-tag"></i>
-                            ${coupon.discount_type === 'percentage' ? `${coupon.discount_value}% 割引` : `¥${coupon.discount_value.toLocaleString()} 割引`}
-                        </p>
-                        ${coupon.min_purchase_amount ? `<p class="coupon-condition">最小購入額: ¥${coupon.min_purchase_amount.toLocaleString()}</p>` : ''}
-                        ${coupon.description ? `<p class="coupon-desc">${coupon.description}</p>` : ''}
+                        ${coupon.min_purchase || coupon.minPurchase ? `
+                            <div class="coupon-info-item">
+                                <span class="coupon-info-label">最小購入金額:</span>
+                                <span class="coupon-info-value">¥${(coupon.min_purchase || coupon.minPurchase).toLocaleString()}</span>
+                            </div>
+                        ` : ''}
+
+                        ${coupon.max_discount || coupon.maxDiscount ? `
+                            <div class="coupon-info-item">
+                                <span class="coupon-info-label">最大割引:</span>
+                                <span class="coupon-info-value">¥${(coupon.max_discount || coupon.maxDiscount).toLocaleString()}</span>
+                            </div>
+                        ` : ''}
+
+                        <div class="coupon-info-item">
+                            <span class="coupon-info-label">有効期限:</span>
+                            <span class="coupon-info-value">${formatDate(new Date(coupon.expiry_date))}</span>
+                        </div>
+
+                        ${coupon.usage_limit || coupon.usageLimit ? `
+                            <div class="coupon-info-item">
+                                <span class="coupon-info-label">使用状況:</span>
+                                <span class="coupon-info-value">${coupon.used_count || 0} / ${coupon.usage_limit || coupon.usageLimit}</span>
+                            </div>
+                        ` : `
+                            <div class="coupon-info-item">
+                                <span class="coupon-info-label">使用回数:</span>
+                                <span class="coupon-info-value">${coupon.used_count || 0} 回</span>
+                            </div>
+                        `}
                     </div>
-                    <div class="coupon-meta">
-                        <p><i class="fas fa-calendar"></i> ${coupon.valid_from ? formatDate(coupon.valid_from) : '制限なし'} 〜 ${coupon.valid_until ? formatDate(coupon.valid_until) : '無期限'}</p>
-                        <p><i class="fas fa-users"></i> 使用回数: ${coupon.used_count || 0}${coupon.usage_limit ? ` / ${coupon.usage_limit}` : ' / 無制限'}</p>
-                    </div>
-                </div>
-                <div class="coupon-actions">
-                    <button class="btn-small btn-edit" onclick="editCoupon('${coupon.id}')">
-                        <i class="fas fa-edit"></i> 編集
-                    </button>
+
+                    <div class="coupon-actions">
+                        <button class="btn-small btn-edit" onclick="editCoupon('${coupon.id}')">
+                            <i class="fas fa-edit"></i> 編集
+                        </button>
                     <button class="btn-small btn-delete" onclick="confirmDeleteCoupon('${coupon.id}')">
                         <i class="fas fa-trash"></i> 削除
                     </button>
