@@ -338,9 +338,14 @@ function createProductTypeSection(productType, index) {
     const sectionClasses = ['box-category-discount', 'box-category-ranking', 'box-category-sale'];
     section.className = sectionClasses[index % sectionClasses.length];
 
+    // タイトルとサブタイトルを設定（説明がタイトル、名前がサブタイトル）
+    const mainTitle = productType.description || productType.name;
+    const subTitle = productType.description ? productType.name : '';
+
     section.innerHTML = `
         <div class="section-header-top">
-            <h2 class="section-title-top">${productType.name}</h2>
+            <h2 class="section-title-top">${mainTitle}</h2>
+            ${subTitle ? `<p class="section-subtitle" style="text-align: center; color: #666; font-size: 14px; margin-top: 5px;">${subTitle}</p>` : ''}
         </div>
         <div class="list-products-01" data-product-type="${productType.name}">
             <!-- 商品カード（自動生成） -->
