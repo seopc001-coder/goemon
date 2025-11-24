@@ -517,6 +517,7 @@ function convertProductFromDB(dbProduct) {
         rankingPosition: dbProduct.ranking_position,
         isPublished: dbProduct.is_published,
         soldOutConfirmed: dbProduct.sold_out_confirmed,
+        variants: dbProduct.variants, // バリエーションデータを追加
         createdAt: dbProduct.created_at,
         updatedAt: dbProduct.updated_at
     };

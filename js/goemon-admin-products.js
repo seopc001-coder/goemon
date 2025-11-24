@@ -325,32 +325,91 @@ function renderProducts(products) {
 
         if (product.variants && product.variants.stock) {
             // バリエーションがある場合
-            const variantStock = product.variants.stock;
+            const variants = product.variants;
+            const colors = variants.colors || [];
+            const variantStock = variants.stock;
 
-            // 在庫詳細を生成
-            const stockDetails = [];
-            for (const [key, stockValue] of Object.entries(variantStock)) {
-                if (stockValue < 10) {
-                    isLowStock = true;
+            // 色が複数ある場合：色ごとに在庫をまとめて表示
+            if (colors.length > 1) {
+                const colorStockMap = {};
+
+                // 色ごとに在庫情報を集計
+                for (const [key, stockValue] of Object.entries(variantStock)) {
+                    if (stockValue < 10) {
+                        isLowStock = true;
+                    }
+                    if (stockValue === 0) {
+                        isSoldOut = true;
+                    }
+
+                    // キーから色を抽出（例: "レッド-M" → "レッド"）
+                    const color = key.split('-')[0];
+
+                    if (!colorStockMap[color]) {
+                        colorStockMap[color] = {
+                            items: [],
+                            hasLowStock: false,
+                            minStock: Infinity
+                        };
+                    }
+
+                    colorStockMap[color].items.push({ key, stock: stockValue });
+                    if (stockValue < 10) {
+                        colorStockMap[color].hasLowStock = true;
+                    }
+                    if (stockValue < colorStockMap[color].minStock) {
+                        colorStockMap[color].minStock = stockValue;
+                    }
                 }
-                if (stockValue === 0) {
-                    isSoldOut = true;
+
+                // 色ごとの在庫表示を生成
+                const colorStockDetails = [];
+                for (const [color, data] of Object.entries(colorStockMap)) {
+                    const colorStyle = data.hasLowStock ? 'color: #ff4444; font-weight: bold;' : '';
+                    const itemsText = data.items.map(item => {
+                        const sizeText = item.key.includes('-') ? item.key.split('-')[1] : '';
+                        return sizeText ? `${sizeText}:${item.stock}` : item.stock;
+                    }).join(' / ');
+
+                    colorStockDetails.push(`<span style="${colorStyle}"><strong>${color}</strong>: ${itemsText}</span>`);
                 }
-                // 在庫が少ないものを強調表示
-                const lowStockStyle = stockValue < 10 ? 'color: #ff4444; font-weight: bold;' : '';
-                stockDetails.push(`<span style="${lowStockStyle}">${key}: ${stockValue}</span>`);
+
+                stockDisplay = `
+                    <span class="stock-info ${isLowStock ? 'stock-low' : ''}">
+                        <i class="fas fa-boxes"></i> バリエーション在庫（色別）
+                        <div style="font-size: 11px; margin-top: 4px; line-height: 1.6;">
+                            ${colorStockDetails.join('<br>')}
+                        </div>
+                        ${isSoldOut && !soldOutConfirmed ? '<span style="color: #ff4444; font-weight: bold; margin-left: 8px; display: block; margin-top: 4px;">一部売り切れ</span>' : ''}
+                        ${soldOutConfirmed ? '<span style="color: #999; margin-left: 8px; display: block; margin-top: 4px;">売切確認済み</span>' : ''}
+                    </span>
+                `;
+            } else {
+                // 色が1つまたは0の場合：従来通り表示
+                const stockDetails = [];
+                for (const [key, stockValue] of Object.entries(variantStock)) {
+                    if (stockValue < 10) {
+                        isLowStock = true;
+                    }
+                    if (stockValue === 0) {
+                        isSoldOut = true;
+                    }
+                    // 在庫が少ないものを強調表示
+                    const lowStockStyle = stockValue < 10 ? 'color: #ff4444; font-weight: bold;' : '';
+                    stockDetails.push(`<span style="${lowStockStyle}">${key}: ${stockValue}</span>`);
+                }
+
+                stockDisplay = `
+                    <span class="stock-info ${isLowStock ? 'stock-low' : ''}">
+                        <i class="fas fa-boxes"></i> バリエーション在庫
+                        <div style="font-size: 11px; margin-top: 4px; line-height: 1.6;">
+                            ${stockDetails.join('<br>')}
+                        </div>
+                        ${isSoldOut && !soldOutConfirmed ? '<span style="color: #ff4444; font-weight: bold; margin-left: 8px; display: block; margin-top: 4px;">一部売り切れ</span>' : ''}
+                        ${soldOutConfirmed ? '<span style="color: #999; margin-left: 8px; display: block; margin-top: 4px;">売切確認済み</span>' : ''}
+                    </span>
+                `;
             }
-
-            stockDisplay = `
-                <span class="stock-info ${isLowStock ? 'stock-low' : ''}">
-                    <i class="fas fa-boxes"></i> バリエーション在庫
-                    <div style="font-size: 11px; margin-top: 4px; line-height: 1.6;">
-                        ${stockDetails.join('<br>')}
-                    </div>
-                    ${isSoldOut && !soldOutConfirmed ? '<span style="color: #ff4444; font-weight: bold; margin-left: 8px; display: block; margin-top: 4px;">一部売り切れ</span>' : ''}
-                    ${soldOutConfirmed ? '<span style="color: #999; margin-left: 8px; display: block; margin-top: 4px;">売切確認済み</span>' : ''}
-                </span>
-            `;
         } else {
             // バリエーションがない場合は基本在庫表示
             isLowStock = stock < 10;
@@ -750,10 +809,16 @@ function editProduct(productId) {
     document.getElementById('productImage3').value = product.image3 || '';
     document.getElementById('productImage4').value = product.image4 || '';
 
+    // デバッグ: 商品オブジェクトを確認
+    console.log('🔍 編集する商品オブジェクト:', product);
+    console.log('🔍 バリエーションデータ:', product.variants);
+
     // バリエーションデータを設定
     if (product.variants) {
+        console.log('✅ バリエーションデータをセット:', product.variants);
         setVariantsData(product.variants);
     } else {
+        console.log('❌ バリエーションなし、クリアします');
         clearVariantsData();
     }
 

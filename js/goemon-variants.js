@@ -297,12 +297,15 @@ function getVariantsData() {
  * バリエーションデータをセット（読み込み用）
  */
 function setVariantsData(variants) {
+    console.log('📦 setVariantsData が呼ばれました:', variants);
+
     // リセット
     productColors = [];
     productSizes = [];
     variantsStock = {};
 
     if (!variants) {
+        console.log('⚠️ variants が null/undefined です');
         renderColorsList();
         renderSizesList();
         updateVariantsStockTable();
@@ -313,6 +316,10 @@ function setVariantsData(variants) {
     productColors = variants.colors || [];
     productSizes = variants.sizes || [];
     variantsStock = variants.stock || {};
+
+    console.log('🎨 セットした色:', productColors);
+    console.log('📏 セットしたサイズ:', productSizes);
+    console.log('📊 セットした在庫:', variantsStock);
 
     // UIを更新
     renderColorsList();

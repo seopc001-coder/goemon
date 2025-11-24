@@ -146,7 +146,7 @@ function calculateTotalUsers() {
     return uniqueEmails.size + withdrawnUsers.length;
 }
 
-// 在庫アラート数を計算（バリエーション対応）
+// 在庫アラート数を計算（バリエーション対応 - 色ごとにカウント）
 async function calculateLowStockCount() {
     try {
         // Supabaseから商品データを取得
@@ -166,11 +166,31 @@ async function calculateLowStockCount() {
 
             // バリエーションがある場合
             if (product.variants && product.variants.stock) {
-                const variantStock = product.variants.stock;
-                // 各バリエーションの在庫をチェック
-                for (const stock of Object.values(variantStock)) {
-                    if (stock < 10) {
-                        lowStockCount++;
+                const variants = product.variants;
+                const colors = variants.colors || [];
+                const variantStock = variants.stock;
+
+                // 色が複数ある場合：色ごとに在庫をチェック
+                if (colors.length > 1) {
+                    const lowStockColors = new Set();
+
+                    for (const [key, stock] of Object.entries(variantStock)) {
+                        if (stock < 10) {
+                            // キーから色を抽出（例: "レッド-M" → "レッド"）
+                            const color = key.split('-')[0];
+                            lowStockColors.add(color);
+                        }
+                    }
+
+                    // 在庫が少ない色の数をカウント
+                    lowStockCount += lowStockColors.size;
+                } else {
+                    // 色が1つまたは0の場合：従来通り各バリエーションをカウント
+                    for (const stock of Object.values(variantStock)) {
+                        if (stock < 10) {
+                            lowStockCount++;
+                            break; // 1つでも在庫が少なければカウント（重複を避ける）
+                        }
                     }
                 }
             } else {
