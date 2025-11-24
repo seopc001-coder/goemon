@@ -296,6 +296,14 @@ async function loadProductTypeSections() {
             }
         });
 
+        // ランキングセクションを固定で追加
+        const rankingSection = createRankingSection();
+        if (instagramSection) {
+            mainContent.insertBefore(rankingSection, instagramSection);
+        } else {
+            mainContent.appendChild(rankingSection);
+        }
+
         console.log('Product type sections loaded:', topThreeTypes.length, 'of', productTypes.length);
     } catch (error) {
         console.error('Error loading product type sections:', error);
@@ -365,6 +373,93 @@ function loadProductsForType(typeName, sectionElement) {
     });
 
     console.log(`Loaded ${typeProducts.length} products for type: ${typeName}`);
+}
+
+/**
+ * ランキングセクションを生成
+ */
+function createRankingSection() {
+    const section = document.createElement('section');
+    section.className = 'box-category-ranking';
+
+    section.innerHTML = `
+        <div class="section-header-top">
+            <h2 class="section-title-top">人気ランキング</h2>
+        </div>
+        <div class="list-products-01" id="rankingProducts">
+            <!-- ランキング商品（自動生成） -->
+        </div>
+        <div class="view-all-wrapper">
+            <a href="goemon-products.html?type=ranking" class="view-all-link">すべて見る <i class="fas fa-chevron-right"></i></a>
+        </div>
+    `;
+
+    // ランキング商品を読み込んで表示
+    loadRankingIntoSection(section);
+
+    return section;
+}
+
+/**
+ * セクションにランキング商品を読み込み
+ */
+function loadRankingIntoSection(sectionElement) {
+    const container = sectionElement.querySelector('.list-products-01');
+    if (!container) return;
+
+    // 全商品を配列に変換（公開中のみ）
+    const productsArray = Object.values(allProducts).filter(p => p.isPublished !== false);
+
+    // 手動設定の商品と自動の商品を分離
+    const manualRankingProducts = productsArray.filter(p => p.showInRanking && p.rankingPosition);
+    const autoRankingProducts = productsArray.filter(p => !p.showInRanking || !p.rankingPosition);
+
+    // 手動設定商品を順位でソート
+    manualRankingProducts.sort((a, b) => {
+        const posA = a.rankingPosition || 999;
+        const posB = b.rankingPosition || 999;
+        return posA - posB;
+    });
+
+    // 自動商品を閲覧数順でソート（閲覧数が同じ場合はIDの降順）
+    autoRankingProducts.sort((a, b) => {
+        const viewCountA = a.viewCount || 0;
+        const viewCountB = b.viewCount || 0;
+        if (viewCountB !== viewCountA) {
+            return viewCountB - viewCountA; // 閲覧数降順
+        }
+        const idA = parseInt(a.id) || 0;
+        const idB = parseInt(b.id) || 0;
+        return idB - idA; // ID降順（新しい順）
+    });
+
+    // ランキング配列を構築（上位5件のみ表示）
+    const rankingProducts = [];
+    const maxRanking = 5;
+
+    // 1-5の順位を埋める
+    for (let position = 1; position <= maxRanking; position++) {
+        // この順位に手動設定された商品があるか確認
+        const manualProduct = manualRankingProducts.find(p => p.rankingPosition === position);
+
+        if (manualProduct) {
+            rankingProducts.push(manualProduct);
+        } else {
+            // 手動設定がない場合、自動商品から追加
+            if (autoRankingProducts.length > 0) {
+                rankingProducts.push(autoRankingProducts.shift());
+            }
+        }
+    }
+
+    // ランキングを表示
+    rankingProducts.forEach((product, index) => {
+        product.rank = index + 1;
+        const card = createProductCard(product);
+        container.appendChild(card);
+    });
+
+    console.log('Ranking section loaded:', rankingProducts.length, 'products');
 }
 
 // 新着商品を読み込み（フォールバック用）
