@@ -267,6 +267,9 @@ async function loadProductTypeSections() {
         // 表示順でソート
         productTypes.sort((a, b) => a.display_order - b.display_order);
 
+        // 上から3つの商品タイプのみを使用
+        const topThreeTypes = productTypes.slice(0, 3);
+
         // メインコンテンツエリアを取得
         const mainContent = document.querySelector('.contents-main');
         if (!mainContent) {
@@ -281,8 +284,8 @@ async function loadProductTypeSections() {
         const oldSections = mainContent.querySelectorAll('.box-category-discount, .box-category-ranking, .box-category-sale');
         oldSections.forEach(section => section.remove());
 
-        // 各商品タイプのセクションを生成
-        productTypes.forEach((type, index) => {
+        // 上から3つの商品タイプのセクションを生成
+        topThreeTypes.forEach((type, index) => {
             const section = createProductTypeSection(type, index);
 
             // Instagramセクションの前に挿入
@@ -293,7 +296,7 @@ async function loadProductTypeSections() {
             }
         });
 
-        console.log('Product type sections loaded:', productTypes.length);
+        console.log('Product type sections loaded:', topThreeTypes.length, 'of', productTypes.length);
     } catch (error) {
         console.error('Error loading product type sections:', error);
         // エラー時はデフォルトのセクションを読み込み
