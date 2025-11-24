@@ -90,6 +90,8 @@ function showProductNotFound() {
 }
 
 function updateProductDisplay() {
+    console.log('🔄 updateProductDisplay called with product:', productData);
+
     // ページを表示（フェードイン）
     const mainPage = document.querySelector('.product-detail-page');
     if (mainPage) {
@@ -98,6 +100,7 @@ function updateProductDisplay() {
 
     // 商品タイトル
     const titleElement = document.querySelector('.product-title');
+    console.log('📝 Updating title element:', titleElement, 'with name:', productData.name);
     if (titleElement) {
         titleElement.textContent = productData.name;
     }
@@ -120,6 +123,12 @@ function updateProductDisplay() {
         if (priceElement && !document.querySelector('.price-detail-original')) {
             priceElement.insertAdjacentHTML('afterend', originalPriceHTML + discountHTML);
         }
+    }
+
+    // 商品説明を更新
+    const descriptionElement = document.querySelector('.product-description p');
+    if (descriptionElement && productData.description) {
+        descriptionElement.textContent = productData.description;
     }
 
     // 商品画像を更新
