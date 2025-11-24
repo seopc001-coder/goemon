@@ -30,41 +30,52 @@ async function initializeProductsPage() {
 }
 
 // URLパラメータからフィルターを適用
-function applyURLFilters() {
+async function applyURLFilters() {
     const urlParams = new URLSearchParams(window.location.search);
     const categoryParam = urlParams.get('category');
     const typeParam = urlParams.get('type');
 
     if (categoryParam) {
-        // カテゴリーフィルターを適用
-        filters.category = categoryParam;
+        // slugまたはnameからnameを取得
+        const categories = await fetchCategories();
+        const category = categories.find(c => c.slug === categoryParam || c.name === categoryParam);
 
-        // カテゴリーリンクのアクティブ状態を更新
-        const categoryLinks = document.querySelectorAll('.category-list a');
-        categoryLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.dataset.category === categoryParam) {
-                link.classList.add('active');
-            }
-        });
+        if (category) {
+            // カテゴリーフィルターを適用（nameを使用）
+            filters.category = category.name;
 
-        // ページタイトルを更新
-        updatePageTitle(categoryParam, 'category');
+            // カテゴリーリンクのアクティブ状態を更新
+            const categoryLinks = document.querySelectorAll('.category-list a');
+            categoryLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.dataset.category === category.name) {
+                    link.classList.add('active');
+                }
+            });
 
-        console.log('Applied category filter from URL:', categoryParam);
+            // ページタイトルを更新
+            updatePageTitle(categoryParam, 'category');
+
+            console.log('Applied category filter from URL:', categoryParam, '→', category.name);
+        }
     }
 
     if (typeParam) {
-        // 商品タイプでフィルター（カテゴリーと同じロジックで処理）
-        filters.productType = typeParam;
+        // slugまたはnameからnameを取得
+        const productTypes = await fetchProductTypes();
+        const productType = productTypes.find(t => t.slug === typeParam || t.name === typeParam);
 
-        // カテゴリが指定されていない場合のみタイトルを更新
-        // （カテゴリ指定時は、updatePageTitle(categoryParam, 'category')内でtypeParamをチェックして2行表示を行うため）
-        if (!categoryParam) {
-            updatePageTitle(typeParam, 'type');
+        if (productType) {
+            // 商品タイプでフィルター（nameを使用）
+            filters.productType = productType.name;
+
+            // カテゴリが指定されていない場合のみタイトルを更新
+            if (!categoryParam) {
+                updatePageTitle(typeParam, 'type');
+            }
+
+            console.log('Applied product type filter from URL:', typeParam, '→', productType.name);
         }
-
-        console.log('Applied product type filter from URL:', typeParam);
     }
 
     // フィルターを適用して再表示
@@ -86,16 +97,16 @@ async function updatePageTitle(slug, filterType) {
 
     try {
         if (filterType === 'category') {
-            // カテゴリー名をSupabaseから取得
+            // カテゴリー名をSupabaseから取得（slugまたはnameで検索）
             const categories = await fetchCategories();
             if (categories && categories.length > 0) {
-                const category = categories.find(c => c.name === slug);
+                const category = categories.find(c => c.slug === slug || c.name === slug);
                 if (category) {
                     // 商品タイプとカテゴリの両方が指定されている場合
                     if (typeParam) {
                         const productTypes = await fetchProductTypes();
                         if (productTypes && productTypes.length > 0) {
-                            const productType = productTypes.find(t => t.name === typeParam);
+                            const productType = productTypes.find(t => t.slug === typeParam || t.name === typeParam);
                             if (productType) {
                                 titleElement.innerHTML = `${productType.name}<br>↪${category.name}`;
                                 if (descriptionElement) {
@@ -113,10 +124,10 @@ async function updatePageTitle(slug, filterType) {
                 }
             }
         } else if (filterType === 'type') {
-            // 商品タイプ名をSupabaseから取得
+            // 商品タイプ名をSupabaseから取得（slugまたはnameで検索）
             const productTypes = await fetchProductTypes();
             if (productTypes && productTypes.length > 0) {
-                const productType = productTypes.find(t => t.name === slug);
+                const productType = productTypes.find(t => t.slug === slug || t.name === slug);
                 if (productType) {
                     titleElement.textContent = productType.name;
                     if (descriptionElement && productType.description) {
@@ -161,9 +172,10 @@ async function loadCategories() {
             categories.forEach(category => {
                 const li = document.createElement('li');
                 // 商品タイプパラメータがあれば保持
+                const categorySlug = category.slug || encodeURIComponent(category.name);
                 const categoryUrl = currentType
-                    ? `goemon-products.html?type=${currentType}&category=${category.name}`
-                    : `goemon-products.html?category=${category.name}`;
+                    ? `goemon-products.html?type=${currentType}&category=${categorySlug}`
+                    : `goemon-products.html?category=${categorySlug}`;
                 li.innerHTML = `<a href="${categoryUrl}" data-category="${category.name}">${category.name}</a>`;
                 categoryList.appendChild(li);
             });

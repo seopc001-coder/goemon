@@ -204,7 +204,7 @@ async function loadCategories() {
         // カテゴリを動的に生成
         categories.forEach(category => {
             const li = document.createElement('li');
-            li.innerHTML = `<a href="goemon-products.html?category=${encodeURIComponent(category.name)}">${category.name}</a>`;
+            li.innerHTML = `<a href="goemon-products.html?category=${category.slug || encodeURIComponent(category.name)}">${category.name}</a>`;
             categoryList.appendChild(li);
         });
 
@@ -252,7 +252,7 @@ async function loadProductTypes() {
         // 商品タイプを動的に生成
         productTypes.forEach(type => {
             const li = document.createElement('li');
-            li.innerHTML = `<a href="goemon-products.html?type=${encodeURIComponent(type.name)}">${type.name}</a>`;
+            li.innerHTML = `<a href="goemon-products.html?type=${type.slug || encodeURIComponent(type.name)}">${type.name}</a>`;
             productTypeList.appendChild(li);
         });
 
@@ -347,7 +347,7 @@ function createProductTypeSection(productType, index) {
             <!-- 商品カード（自動生成） -->
         </div>
         <div class="view-all-wrapper">
-            <a href="goemon-products.html?type=${encodeURIComponent(productType.name)}" class="view-all-link">すべて見る <i class="fas fa-chevron-right"></i></a>
+            <a href="goemon-products.html?type=${productType.slug || encodeURIComponent(productType.name)}" class="view-all-link">すべて見る <i class="fas fa-chevron-right"></i></a>
         </div>
     `;
 
