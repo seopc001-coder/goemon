@@ -29,7 +29,7 @@ async function fetchAllProducts() {
 }
 
 /**
- * 商品を追加（RPC関数を使用してスキーマキャッシュをバイパス）
+ * 商品を追加（直接INSERT）
  */
 async function addProduct(product) {
     try {
@@ -55,28 +55,35 @@ async function addProduct(product) {
             productTypeId = productTypes?.id || null;
         }
 
-        // RPC関数を使用して商品を追加（スキーマキャッシュの問題を回避）
-        const { data, error } = await supabase.rpc('insert_product_with_uuid', {
-            p_id: product.id,
-            p_name: product.name,
-            p_price: product.price,
-            p_original_price: product.originalPrice || null,
-            p_category_id: categoryId,
-            p_product_type_id: productTypeId,
-            p_stock: product.stock || 0,
-            p_description: product.description || null,
-            p_image: product.image || null,
-            p_image2: product.image2 || null,
-            p_image3: product.image3 || null,
-            p_image4: product.image4 || null,
-            p_show_in_ranking: product.showInRanking || false,
-            p_ranking_position: product.rankingPosition || null,
-            p_is_published: product.isPublished !== false,
-            p_sold_out_confirmed: product.soldOutConfirmed || false
-        });
+        // 商品データを構築
+        const productData = {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            original_price: product.originalPrice || null,
+            category_id: categoryId,
+            product_type_id: productTypeId,
+            stock: product.stock || 0,
+            description: product.description || null,
+            image: product.image || null,
+            image2: product.image2 || null,
+            image3: product.image3 || null,
+            image4: product.image4 || null,
+            show_in_ranking: product.showInRanking || false,
+            ranking_position: product.rankingPosition || null,
+            is_published: product.isPublished !== false,
+            sold_out_confirmed: product.soldOutConfirmed || false,
+            variants: product.variants || null
+        };
+
+        // 直接INSERTで商品を追加
+        const { data, error } = await supabase
+            .from('products')
+            .insert([productData])
+            .select();
 
         if (error) throw error;
-        return data;
+        return data[0];
     } catch (error) {
         console.error('商品追加エラー:', error);
         throw error;
@@ -132,6 +139,7 @@ async function updateProduct(productId, updates) {
         if (updates.rankingPosition !== undefined) updateData.ranking_position = updates.rankingPosition || null;
         if (updates.isPublished !== undefined) updateData.is_published = updates.isPublished;
         if (updates.soldOutConfirmed !== undefined) updateData.sold_out_confirmed = updates.soldOutConfirmed;
+        if (updates.variants !== undefined) updateData.variants = updates.variants || null;
 
         const { data, error } = await supabase
             .from('products')
