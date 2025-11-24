@@ -305,8 +305,10 @@ async function handleCategorySubmit(e) {
     console.log('handleCategorySubmit called');
 
     const name = document.getElementById('categoryName').value.trim();
+    const slug = document.getElementById('categorySlug').value.trim();
+    const description = document.getElementById('categoryDescription').value.trim();
 
-    console.log('Form data:', { name });
+    console.log('Form data:', { name, slug, description });
 
     if (!name) {
         showAlertModal('カテゴリ名は必須です', 'error');
@@ -314,12 +316,18 @@ async function handleCategorySubmit(e) {
     }
 
     try {
+        const categoryData = {
+            name,
+            slug: slug || null,
+            description: description || null
+        };
+
         if (editingCategoryId) {
             // 更新
             console.log('Updating category:', editingCategoryId);
             const { error } = await supabase
                 .from('categories')
-                .update({ name })
+                .update(categoryData)
                 .eq('id', editingCategoryId);
 
             if (error) throw error;
@@ -327,9 +335,10 @@ async function handleCategorySubmit(e) {
         } else {
             // 新規追加
             console.log('Inserting new category');
+            categoryData.display_order = categories.length;
             const { error } = await supabase
                 .from('categories')
-                .insert([{ name, display_order: categories.length }]);
+                .insert([categoryData]);
 
             if (error) throw error;
             showAlertModal('カテゴリを追加しました', 'success');
@@ -505,8 +514,12 @@ async function handleProductTypeSubmit(e) {
     console.log('handleProductTypeSubmit called');
 
     const name = document.getElementById('productTypeName').value.trim();
+    const slug = document.getElementById('productTypeSlug').value.trim();
+    const description = document.getElementById('productTypeDescription').value.trim();
+    const tag = document.getElementById('productTypeTag').value.trim();
+    const tag_color = document.getElementById('productTypeTagColor').value.trim();
 
-    console.log('Form data:', { name });
+    console.log('Form data:', { name, slug, description, tag, tag_color });
 
     if (!name) {
         showAlertModal('タイプ名は必須です', 'error');
@@ -514,12 +527,20 @@ async function handleProductTypeSubmit(e) {
     }
 
     try {
+        const productTypeData = {
+            name,
+            slug: slug || null,
+            description: description || null,
+            tag: tag || null,
+            tag_color: tag_color || '#ff6b00'
+        };
+
         if (editingProductTypeId) {
             // 更新
             console.log('Updating product type:', editingProductTypeId);
             const { error } = await supabase
                 .from('product_types')
-                .update({ name })
+                .update(productTypeData)
                 .eq('id', editingProductTypeId);
 
             if (error) throw error;
@@ -527,9 +548,10 @@ async function handleProductTypeSubmit(e) {
         } else {
             // 新規追加
             console.log('Inserting new product type');
+            productTypeData.display_order = productTypes.length;
             const { error } = await supabase
                 .from('product_types')
-                .insert([{ name }]);
+                .insert([productTypeData]);
 
             if (error) throw error;
             showAlertModal('商品タイプを追加しました', 'success');
@@ -774,8 +796,10 @@ async function handleHeroImageSubmit(e) {
 
     const image_url = document.getElementById('heroImageUrl').value.trim();
     const link_url = document.getElementById('heroImageLink').value.trim();
+    const alt = document.getElementById('heroImageAlt').value.trim();
+    const title = document.getElementById('heroImageTitle').value.trim();
 
-    console.log('Form data:', { image_url, link_url });
+    console.log('Form data:', { image_url, link_url, alt, title });
 
     if (!image_url) {
         showAlertModal('画像URLは必須です', 'error');
@@ -783,12 +807,20 @@ async function handleHeroImageSubmit(e) {
     }
 
     try {
+        const heroImageData = {
+            image_url,
+            link_url: link_url || null,
+            alt: alt || null,
+            title: title || null,
+            is_active: true
+        };
+
         if (editingHeroImageId) {
             // 更新
             console.log('Updating hero image:', editingHeroImageId);
             const { error } = await supabase
                 .from('hero_images')
-                .update({ image_url, link_url, is_active: true })
+                .update(heroImageData)
                 .eq('id', editingHeroImageId);
 
             if (error) throw error;
@@ -796,14 +828,10 @@ async function handleHeroImageSubmit(e) {
         } else {
             // 新規追加
             console.log('Inserting new hero image');
+            heroImageData.display_order = heroImages.length;
             const { error } = await supabase
                 .from('hero_images')
-                .insert([{
-                    image_url,
-                    link_url,
-                    is_active: true,
-                    display_order: heroImages.length
-                }]);
+                .insert([heroImageData]);
 
             if (error) throw error;
             showAlertModal('ヒーロー画像を追加しました', 'success');

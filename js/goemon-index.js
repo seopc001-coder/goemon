@@ -10,11 +10,27 @@ document.addEventListener('DOMContentLoaded', function() {
 async function initializeIndexPage() {
     try {
         // 商品データをSupabaseから読み込み
+        console.log('🔄 Fetching products from Supabase...');
         const products = await fetchPublishedProducts();
-        allProducts = products.reduce((acc, p) => ({ ...acc, [p.id]: p }), {});
-        console.log('Loaded products from Supabase:', Object.keys(allProducts).length);
+        console.log('📦 Received products:', products ? products.length : 0);
+
+        if (products && products.length > 0) {
+            allProducts = products.reduce((acc, p) => ({ ...acc, [p.id]: p }), {});
+            console.log('✅ Loaded products from Supabase:', Object.keys(allProducts).length);
+
+            // 商品タイプの分布を表示
+            const typeCount = {};
+            products.forEach(p => {
+                const type = p.productType || 'undefined';
+                typeCount[type] = (typeCount[type] || 0) + 1;
+            });
+            console.log('📊 Products by type:', typeCount);
+        } else {
+            console.warn('⚠️ No products received from Supabase');
+            allProducts = {};
+        }
     } catch (error) {
-        console.error('Error loading products from Supabase:', error);
+        console.error('❌ Error loading products from Supabase:', error);
         allProducts = {};
     }
 
@@ -347,11 +363,22 @@ function loadProductsForType(typeName, sectionElement) {
 
     // 全商品を配列に変換
     const productsArray = Object.values(allProducts);
+    console.log('📦 Total products available:', productsArray.length);
+    console.log('🔍 Looking for products with productType:', typeName);
+
+    // デバッグ: 商品タイプの分布を確認
+    const typeDistribution = {};
+    productsArray.forEach(p => {
+        const type = p.productType || 'null';
+        typeDistribution[type] = (typeDistribution[type] || 0) + 1;
+    });
+    console.log('📊 Product type distribution:', typeDistribution);
 
     // 指定された商品タイプかつ公開中の商品のみフィルタリング
     const typeProducts = productsArray.filter(product =>
         product.productType === typeName && product.isPublished !== false
     );
+    console.log(`✅ Found ${typeProducts.length} products for type "${typeName}"`);
 
     // 作成日時の降順（新しい順）にソート
     typeProducts.sort((a, b) => {
