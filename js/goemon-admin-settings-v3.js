@@ -295,6 +295,8 @@ window.editCategory = function(id) {
     editingCategoryId = id;
     document.getElementById('categoryModalTitle').textContent = 'カテゴリを編集';
     document.getElementById('categoryName').value = category.name;
+    document.getElementById('categorySlug').value = category.slug || '';
+    document.getElementById('categoryDescription').value = category.description || '';
     showModal('categoryModal');
 };
 
@@ -491,6 +493,10 @@ window.editProductType = function(id) {
     editingProductTypeId = id;
     document.getElementById('productTypeModalTitle').textContent = '商品タイプを編集';
     document.getElementById('productTypeName').value = type.name;
+    document.getElementById('productTypeSlug').value = type.slug || '';
+    document.getElementById('productTypeDescription').value = type.description || '';
+    document.getElementById('productTypeTag').value = type.tag || '';
+    document.getElementById('productTypeTagColor').value = type.tag_color || '#ff6b00';
     showModal('productTypeModal');
 };
 
@@ -749,6 +755,16 @@ window.editHeroImage = function(id) {
     document.getElementById('heroImageModalTitle').textContent = 'ヒーロー画像を編集';
     document.getElementById('heroImageUrl').value = image.image_url || '';
     document.getElementById('heroImageLink').value = image.link_url || '';
+    document.getElementById('heroImageAlt').value = image.alt || '';
+    document.getElementById('heroImageTitle').value = image.title || '';
+
+    // 画像プレビューを表示
+    if (image.image_url) {
+        const preview = document.getElementById('heroImagePreview');
+        preview.innerHTML = `<img src="${image.image_url}" style="max-width: 200px; height: auto; border-radius: 4px;" alt="プレビュー">`;
+        preview.style.display = 'block';
+    }
+
     showModal('heroImageModal');
 };
 
