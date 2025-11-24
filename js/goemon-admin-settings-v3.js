@@ -192,10 +192,10 @@ function renderCategories() {
                 <p>表示順: ${cat.display_order || 0}</p>
             </div>
             <div class="category-actions">
-                <button class="btn-small btn-edit" onclick="editCategory('${cat.id}')">
+                <button class="btn-small btn-edit" onclick="editCategory('${cat.id}')" draggable="false">
                     <i class="fas fa-edit"></i> 編集
                 </button>
-                <button class="btn-small btn-delete" onclick="deleteCategory('${cat.id}')">
+                <button class="btn-small btn-delete" onclick="deleteCategory('${cat.id}')" draggable="false">
                     <i class="fas fa-trash"></i> 削除
                 </button>
             </div>
@@ -395,10 +395,10 @@ function renderProductTypes() {
                 <p>表示順: ${type.display_order || 0}</p>
             </div>
             <div class="product-type-actions">
-                <button class="btn-small btn-edit" onclick="editProductType('${type.id}')">
+                <button class="btn-small btn-edit" onclick="editProductType('${type.id}')" draggable="false">
                     <i class="fas fa-edit"></i> 編集
                 </button>
-                <button class="btn-small btn-delete" onclick="deleteProductType('${type.id}')">
+                <button class="btn-small btn-delete" onclick="deleteProductType('${type.id}')" draggable="false">
                     <i class="fas fa-trash"></i> 削除
                 </button>
             </div>
@@ -593,10 +593,10 @@ function renderHeroImages() {
                 <p>${img.image_url || 'URLなし'}</p>
             </div>
             <div class="hero-image-actions">
-                <button class="btn-small btn-edit" onclick="editHeroImage('${img.id}')">
+                <button class="btn-small btn-edit" onclick="editHeroImage('${img.id}')" draggable="false">
                     <i class="fas fa-edit"></i> 編集
                 </button>
-                <button class="btn-small btn-delete" onclick="deleteHeroImage('${img.id}')">
+                <button class="btn-small btn-delete" onclick="deleteHeroImage('${img.id}')" draggable="false">
                     <i class="fas fa-trash"></i> 削除
                 </button>
             </div>
