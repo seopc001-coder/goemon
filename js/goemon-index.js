@@ -29,9 +29,8 @@ async function initializeIndexPage() {
         console.error('Swiper library not loaded');
     }
 
-    loadNewArrivals();
-    loadRanking();
-    loadSaleItems();
+    // 商品タイプ別のセクションを動的に生成
+    await loadProductTypeSections();
 }
 
 // ヒーロー画像をSupabaseから読み込んで表示
@@ -252,7 +251,120 @@ async function loadProductTypes() {
     }
 }
 
-// 新着商品を読み込み
+// 商品タイプ別のセクションを動的に生成
+async function loadProductTypeSections() {
+    try {
+        // 商品タイプをSupabaseから取得
+        const productTypes = await fetchProductTypes();
+        if (!productTypes || productTypes.length === 0) {
+            console.log('No product types found, loading default sections');
+            loadNewArrivals();
+            loadRanking();
+            loadSaleItems();
+            return;
+        }
+
+        // 表示順でソート
+        productTypes.sort((a, b) => a.display_order - b.display_order);
+
+        // メインコンテンツエリアを取得
+        const mainContent = document.querySelector('.contents-main');
+        if (!mainContent) {
+            console.error('Main content area not found');
+            return;
+        }
+
+        // Instagram セクションを保存（最後に再追加するため）
+        const instagramSection = document.querySelector('.box-instagram');
+
+        // 既存の商品セクションをクリア
+        const oldSections = mainContent.querySelectorAll('.box-category-discount, .box-category-ranking, .box-category-sale');
+        oldSections.forEach(section => section.remove());
+
+        // 各商品タイプのセクションを生成
+        productTypes.forEach((type, index) => {
+            const section = createProductTypeSection(type, index);
+
+            // Instagramセクションの前に挿入
+            if (instagramSection) {
+                mainContent.insertBefore(section, instagramSection);
+            } else {
+                mainContent.appendChild(section);
+            }
+        });
+
+        console.log('Product type sections loaded:', productTypes.length);
+    } catch (error) {
+        console.error('Error loading product type sections:', error);
+        // エラー時はデフォルトのセクションを読み込み
+        loadNewArrivals();
+        loadRanking();
+        loadSaleItems();
+    }
+}
+
+// 商品タイプのセクションを生成
+function createProductTypeSection(productType, index) {
+    const section = document.createElement('section');
+
+    // セクションのクラスを割り当て（スタイリングのため）
+    const sectionClasses = ['box-category-discount', 'box-category-ranking', 'box-category-sale'];
+    section.className = sectionClasses[index % sectionClasses.length];
+
+    section.innerHTML = `
+        <div class="section-header-top">
+            <h2 class="section-title-top">${productType.name}</h2>
+        </div>
+        <div class="list-products-01" data-product-type="${productType.name}">
+            <!-- 商品カード（自動生成） -->
+        </div>
+        <div class="view-all-wrapper">
+            <a href="goemon-products.html?type=${encodeURIComponent(productType.name)}" class="view-all-link">すべて見る <i class="fas fa-chevron-right"></i></a>
+        </div>
+    `;
+
+    // 商品を読み込んで表示
+    loadProductsForType(productType.name, section);
+
+    return section;
+}
+
+// 特定の商品タイプの商品を読み込み
+function loadProductsForType(typeName, sectionElement) {
+    const container = sectionElement.querySelector('.list-products-01');
+    if (!container) return;
+
+    // 全商品を配列に変換
+    const productsArray = Object.values(allProducts);
+
+    // 指定された商品タイプかつ公開中の商品のみフィルタリング
+    const typeProducts = productsArray.filter(product =>
+        product.productType === typeName && product.isPublished !== false
+    );
+
+    // 作成日時の降順（新しい順）にソート
+    typeProducts.sort((a, b) => {
+        const createdAtA = new Date(a.createdAt || 0).getTime();
+        const createdAtB = new Date(b.createdAt || 0).getTime();
+        if (createdAtB !== createdAtA) {
+            return createdAtB - createdAtA;
+        }
+        // 作成日時が同じ場合はIDで降順
+        const idA = parseInt(a.id) || 0;
+        const idB = parseInt(b.id) || 0;
+        return idB - idA;
+    });
+
+    // 上位3件を表示
+    typeProducts.slice(0, 3).forEach(product => {
+        const card = createProductCard(product);
+        container.appendChild(card);
+    });
+
+    console.log(`Loaded ${typeProducts.length} products for type: ${typeName}`);
+}
+
+// 新着商品を読み込み（フォールバック用）
 function loadNewArrivals() {
     const container = document.querySelector('.box-category-discount .list-products-01');
     const viewAllButton = document.querySelector('.box-category-discount .view-all-link');
