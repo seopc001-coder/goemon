@@ -146,7 +146,7 @@ function calculateTotalUsers() {
     return uniqueEmails.size + withdrawnUsers.length;
 }
 
-// 在庫アラート数を計算
+// 在庫アラート数を計算（バリエーション対応）
 async function calculateLowStockCount() {
     try {
         // Supabaseから商品データを取得
@@ -156,10 +156,30 @@ async function calculateLowStockCount() {
             return 0;
         }
 
-        // 在庫が10未満の商品をカウント（売り切れ確認済み商品を除外）
-        const lowStockCount = products.filter(product =>
-            product.stock < 10 && !product.sold_out_confirmed
-        ).length;
+        let lowStockCount = 0;
+
+        products.forEach(product => {
+            // 売り切れ確認済み商品は除外
+            if (product.sold_out_confirmed) {
+                return;
+            }
+
+            // バリエーションがある場合
+            if (product.variants && product.variants.stock) {
+                const variantStock = product.variants.stock;
+                // 各バリエーションの在庫をチェック
+                for (const stock of Object.values(variantStock)) {
+                    if (stock < 10) {
+                        lowStockCount++;
+                    }
+                }
+            } else {
+                // バリエーションがない場合は基本在庫をチェック
+                if (product.stock < 10) {
+                    lowStockCount++;
+                }
+            }
+        });
 
         return lowStockCount;
     } catch (error) {
