@@ -504,39 +504,52 @@ async function toggleWishlist(button) {
 // カートに追加
 function initializeAddToCart() {
     const addToCartBtn = document.getElementById('addToCartBtn');
-    if (!addToCartBtn) return;
+    if (!addToCartBtn) {
+        console.error('カートに追加ボタンが見つかりません');
+        return;
+    }
+
+    console.log('カートに追加ボタンのイベントリスナーを登録しました');
 
     addToCartBtn.addEventListener('click', async function() {
-        // 商品が削除されていないか再確認(Supabaseから取得)
-        let currentProduct = null;
+        console.log('=== カートに追加ボタンがクリックされました ===');
+        console.log('現在の選択: color =', selectedColor, ', size =', selectedSize, ', quantity =', quantity);
 
         try {
-            currentProduct = await fetchProductById(productData.id);
+            // 商品が削除されていないか再確認(Supabaseから取得)
+            let currentProduct = null;
+
+            try {
+                currentProduct = await fetchProductById(productData.id);
+            } catch (error) {
+                console.error('Error checking product status:', error);
+            }
+
+            // 商品が存在しないか、非公開の場合はエラー
+            if (!currentProduct || currentProduct.is_published === false) {
+                alert('この商品は現在ご購入いただけません。商品が削除されたか、公開が停止されています。');
+                // ページをリロードして最新の状態を表示
+                window.location.reload();
+                return;
+            }
+
+            const product = {
+                id: productData.id,
+                name: productData.name,
+                price: productData.price,
+                quantity: quantity,
+                color: getColorName(selectedColor),
+                size: selectedSize
+            };
+
+            console.log('カートに追加しようとしている商品:', product);
+            await addToCart(product);
+            showModal();
+            updateModalContent(product);
         } catch (error) {
-            console.error('Error checking product status:', error);
+            console.error('カート追加処理中にエラーが発生しました:', error);
+            alert('カートへの追加に失敗しました。もう一度お試しください。');
         }
-
-        // 商品が存在しないか、非公開の場合はエラー
-        if (!currentProduct || currentProduct.is_published === false) {
-            alert('この商品は現在ご購入いただけません。商品が削除されたか、公開が停止されています。');
-            // ページをリロードして最新の状態を表示
-            window.location.reload();
-            return;
-        }
-
-        const product = {
-            id: productData.id,
-            name: productData.name,
-            price: productData.price,
-            quantity: quantity,
-            color: getColorName(selectedColor),
-            size: selectedSize
-        };
-
-        console.log('カートに追加しようとしている商品:', product);
-        await addToCart(product);
-        showModal();
-        updateModalContent(product);
     });
 }
 
