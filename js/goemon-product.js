@@ -770,15 +770,41 @@ function createProductCard(product) {
 
 
 // カート数を更新
-function updateCartCount() {
-    const cart = JSON.parse(localStorage.getItem('goemoncart')) || [];
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-
+async function updateCartCount() {
     const countElements = document.querySelectorAll('.header-utility a[href*="cart"] .txt-noti');
-    countElements.forEach(el => {
-        el.textContent = totalItems;
-        el.style.display = totalItems > 0 ? 'flex' : 'none';
-    });
+
+    try {
+        // 認証状態をチェック
+        const { data: { session } } = await supabase.auth.getSession();
+
+        let totalItems = 0;
+
+        if (session?.user) {
+            // ログインユーザー: Supabaseから取得
+            const userId = session.user.id;
+            const cartItems = await fetchCartItems(userId);
+            totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+        } else {
+            // ゲストユーザー: localStorageから取得
+            const localCart = JSON.parse(localStorage.getItem('goemoncart')) || [];
+            totalItems = localCart.reduce((sum, item) => sum + item.quantity, 0);
+        }
+
+        countElements.forEach(el => {
+            el.textContent = totalItems;
+            el.style.display = totalItems > 0 ? 'flex' : 'none';
+        });
+    } catch (error) {
+        console.error('カート数更新エラー:', error);
+        // エラー時はlocalStorageから取得
+        const localCart = JSON.parse(localStorage.getItem('goemoncart')) || [];
+        const totalItems = localCart.reduce((sum, item) => sum + item.quantity, 0);
+
+        countElements.forEach(el => {
+            el.textContent = totalItems;
+            el.style.display = totalItems > 0 ? 'flex' : 'none';
+        });
+    }
 }
 
 // 価格フォーマット
