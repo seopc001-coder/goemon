@@ -5,6 +5,7 @@ let cartItems = [];
 let productsData = {};
 let availableCoupons = [];
 let selectedCoupon = null;
+let pointAwardRate = 100; // デフォルト: 100円 = 1pt
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeCartPage();
@@ -19,6 +20,9 @@ async function initializeCartPage() {
         console.error('Error loading products from Supabase:', error);
         productsData = {};
     }
+
+    // ポイント付与レートを読み込み
+    await loadPointAwardRate();
 
     // 有効なクーポンを読み込み
     await loadAvailableCoupons();
@@ -419,9 +423,22 @@ function renderCartSummary() {
     }
 }
 
-// 獲得ポイント計算（合計金額の1%）
+// ポイント付与レートを読み込み
+async function loadPointAwardRate() {
+    try {
+        const rateSetting = await fetchSiteSetting('point_award_rate');
+        pointAwardRate = rateSetting ? parseInt(rateSetting.value) : 100;
+        console.log('Point award rate loaded:', pointAwardRate);
+    } catch (error) {
+        console.error('Error loading point award rate:', error);
+        pointAwardRate = 100; // デフォルト値
+    }
+}
+
+// 獲得ポイント計算（設定に基づく）
 function calculateEarnPoints(total) {
-    return Math.floor(total * 0.01);
+    // pointAwardRate円につき1ポイント
+    return Math.floor(total / pointAwardRate);
 }
 
 // レジに進む処理（認証チェック付き）
