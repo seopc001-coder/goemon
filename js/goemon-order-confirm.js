@@ -238,6 +238,20 @@
             // createOrder関数を使用してSupabaseに保存
             const result = await createOrder(currentUser.id, orderData);
             console.log('Order saved to Supabase:', result);
+
+            // ポイント付与（送料別の購入金額に対して500円ごとに1ポイント）
+            try {
+                const pointsAwarded = await awardPurchasePoints(
+                    currentUser.id,
+                    order.subtotal, // 送料別の金額
+                    result.id // 注文ID
+                );
+                console.log(`ポイント付与: ${pointsAwarded}pt`);
+            } catch (pointError) {
+                console.error('ポイント付与エラー:', pointError);
+                // ポイント付与失敗は注文完了を妨げない
+            }
+
             return result;
 
         } catch (error) {
