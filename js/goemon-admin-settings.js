@@ -767,6 +767,12 @@ window.openAddHeroImageModal = function() {
     editingHeroImageId = null;
     document.getElementById('heroImageModalTitle').innerHTML = '<i class="fas fa-plus"></i> ヒーロー画像を追加';
     document.getElementById('heroImageForm').reset();
+
+    // URLフィールドを有効化
+    const urlField = document.getElementById('heroImageUrl');
+    if (urlField) {
+        urlField.disabled = false;
+    }
     document.getElementById('heroImageId').value = '';
 
     const modal = document.getElementById('heroImageModal');
@@ -798,9 +804,20 @@ window.editHeroImage = function(id) {
 
     document.getElementById('heroImageModalTitle').innerHTML = '<i class="fas fa-edit"></i> ヒーロー画像を編集';
     document.getElementById('heroImageId').value = id;
-    document.getElementById('heroImageUrl').value = image.url;
+
+    // URLフィールドを有効化してから値を設定
+    const urlField = document.getElementById('heroImageUrl');
+    urlField.disabled = false;
+    urlField.value = image.url;
+
     document.getElementById('heroImageLink').value = image.link || '';
     document.getElementById('heroImageAlt').value = image.alt;
+
+    // ファイル選択をクリア
+    const fileField = document.getElementById('heroImageFile');
+    if (fileField) {
+        fileField.value = '';
+    }
 
     const modal = document.getElementById('heroImageModal');
     if (modal) {
@@ -934,7 +951,16 @@ window.closeHeroImageModal = function() {
     if (container) {
         container.classList.remove('active');
     }
+
+    // フォームをリセット
     document.getElementById('heroImageForm').reset();
+
+    // URLフィールドを有効化
+    const urlField = document.getElementById('heroImageUrl');
+    if (urlField) {
+        urlField.disabled = false;
+    }
+
     editingHeroImageId = null;
 }
 
