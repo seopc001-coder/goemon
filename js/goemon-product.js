@@ -532,7 +532,7 @@ function initializeAddToCart() {
             size: selectedSize
         };
 
-        addToCart(product);
+        await addToCart(product);
         showModal();
         updateModalContent(product);
     });
@@ -549,23 +549,80 @@ function getColorName(colorValue) {
 }
 
 // カートに追加
-function addToCart(product) {
-    let cart = JSON.parse(localStorage.getItem('goemoncart')) || [];
+async function addToCart(product) {
+    try {
+        // Supabaseで認証状態をチェック
+        const { data: { session } } = await supabase.auth.getSession();
 
-    const existingItem = cart.find(item =>
-        item.id === product.id &&
-        item.color === product.color &&
-        item.size === product.size
-    );
+        if (session?.user) {
+            // 認証ユーザー: Supabaseに追加
+            const userId = session.user.id;
 
-    if (existingItem) {
-        existingItem.quantity += product.quantity;
-    } else {
-        cart.push(product);
+            // 既存のカートアイテムを取得
+            const cartItems = await fetchCartItems(userId);
+
+            // 同じ商品・色・サイズのアイテムを探す
+            const existingItem = cartItems.find(item =>
+                item.product_id == product.id &&
+                (item.color || '') === (product.color || '') &&
+                (item.size || '') === (product.size || '')
+            );
+
+            if (existingItem) {
+                // 既存アイテムの数量を更新
+                const newQuantity = existingItem.quantity + product.quantity;
+                await updateCartItemQuantity(existingItem.id, newQuantity);
+                console.log('カート数量を更新:', existingItem.id, newQuantity);
+            } else {
+                // 新しいアイテムを追加
+                await window.addToCart(userId, {
+                    productId: product.id,
+                    quantity: product.quantity,
+                    color: product.color,
+                    size: product.size
+                });
+                console.log('カートに新規追加:', product);
+            }
+        } else {
+            // ゲストユーザー: localStorageに追加
+            let cart = JSON.parse(localStorage.getItem('goemoncart')) || [];
+
+            const existingItem = cart.find(item =>
+                item.id === product.id &&
+                item.color === product.color &&
+                item.size === product.size
+            );
+
+            if (existingItem) {
+                existingItem.quantity += product.quantity;
+            } else {
+                cart.push(product);
+            }
+
+            localStorage.setItem('goemoncart', JSON.stringify(cart));
+        }
+
+        updateCartCount();
+    } catch (error) {
+        console.error('カート追加エラー:', error);
+        // エラー時はlocalStorageにフォールバック
+        let cart = JSON.parse(localStorage.getItem('goemoncart')) || [];
+
+        const existingItem = cart.find(item =>
+            item.id === product.id &&
+            item.color === product.color &&
+            item.size === product.size
+        );
+
+        if (existingItem) {
+            existingItem.quantity += product.quantity;
+        } else {
+            cart.push(product);
+        }
+
+        localStorage.setItem('goemoncart', JSON.stringify(cart));
+        updateCartCount();
     }
-
-    localStorage.setItem('goemoncart', JSON.stringify(cart));
-    updateCartCount();
 }
 
 // モーダル表示

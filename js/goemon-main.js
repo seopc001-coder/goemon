@@ -324,7 +324,7 @@ function initializeProductCards() {
     // カートに追加ボタン
     const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
     addToCartButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
+        btn.addEventListener('click', async function(e) {
             e.preventDefault();
             e.stopPropagation();
 
@@ -337,7 +337,7 @@ function initializeProductCards() {
                 const priceText = priceElement?.textContent.replace('¥', '').replace(',', '') || '0';
                 const price = parseInt(priceText);
 
-                addToCart({
+                await addToCart({
                     id: productId,
                     name: productName,
                     price: price,
@@ -369,21 +369,89 @@ function initializeProductCards() {
 }
 
 // カートに追加
-function addToCart(product) {
-    const existingItem = cart.find(item =>
-        item.id === product.id &&
-        item.color === product.color &&
-        item.size === product.size
-    );
+async function addToCart(product) {
+    try {
+        // Supabaseで認証状態をチェック
+        const { data: { session } } = await supabase.auth.getSession();
 
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push(product);
+        if (session?.user) {
+            // 認証ユーザー: Supabaseに追加
+            const userId = session.user.id;
+
+            // 既存のカートアイテムを取得
+            const cartItems = await fetchCartItems(userId);
+
+            // 同じ商品・色・サイズのアイテムを探す
+            const existingItem = cartItems.find(item =>
+                item.product_id == product.id &&
+                (item.color || '') === (product.color || '') &&
+                (item.size || '') === (product.size || '')
+            );
+
+            if (existingItem) {
+                // 既存アイテムの数量を更新
+                const newQuantity = existingItem.quantity + 1;
+                await updateCartItemQuantity(existingItem.id, newQuantity);
+                console.log('カート数量を更新:', existingItem.id, newQuantity);
+            } else {
+                // 新しいアイテムを追加
+                await window.addToCart(userId, {
+                    productId: product.id,
+                    quantity: 1,
+                    color: product.color,
+                    size: product.size
+                });
+                console.log('カートに新規追加:', product);
+            }
+
+            // ローカルのcart配列も更新（カートカウント表示用）
+            const localExisting = cart.find(item =>
+                item.id === product.id &&
+                item.color === product.color &&
+                item.size === product.size
+            );
+
+            if (localExisting) {
+                localExisting.quantity += 1;
+            } else {
+                cart.push(product);
+            }
+        } else {
+            // ゲストユーザー: localStorageに追加
+            const existingItem = cart.find(item =>
+                item.id === product.id &&
+                item.color === product.color &&
+                item.size === product.size
+            );
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push(product);
+            }
+
+            localStorage.setItem('goemoncart', JSON.stringify(cart));
+        }
+
+        updateCartCount();
+    } catch (error) {
+        console.error('カート追加エラー:', error);
+        // エラー時はlocalStorageにフォールバック
+        const existingItem = cart.find(item =>
+            item.id === product.id &&
+            item.color === product.color &&
+            item.size === product.size
+        );
+
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            cart.push(product);
+        }
+
+        localStorage.setItem('goemoncart', JSON.stringify(cart));
+        updateCartCount();
     }
-
-    localStorage.setItem('goemoncart', JSON.stringify(cart));
-    updateCartCount();
 }
 
 // モーダルの商品情報を更新
