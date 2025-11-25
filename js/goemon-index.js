@@ -614,9 +614,6 @@ function createProductCard(product) {
     // 画像URLを確認
     const imageUrl = product.image || '';
 
-    // 在庫チェック
-    const isSoldOut = product.stock === 0;
-
     card.innerHTML = `
         <div class="product-image">
             <div class="product-img-wrapper">
@@ -625,7 +622,6 @@ function createProductCard(product) {
                     <i class="fas fa-tshirt fa-3x"></i>
                 </div>
                 `}
-                ${isSoldOut ? `<div class="sold-out-badge">売り切れ</div>` : ''}
             </div>
         </div>
         <div class="product-info">
