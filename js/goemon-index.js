@@ -340,8 +340,8 @@ function createProductTypeSection(productType, index) {
 
     section.innerHTML = `
         <div class="section-header-top">
-            <h2 class="section-title-top">${mainTitle}</h2>
-            ${subTitle ? `<p class="section-subtitle" style="text-align: center; color: #666; font-size: 14px; margin-top: 5px;">${subTitle}</p>` : ''}
+            <h2 class="section-title-top section-title-top-en">${mainTitle}</h2>
+            ${subTitle ? `<p class="section-subtitle-top">${subTitle}</p>` : ''}
         </div>
         <div class="list-products-01" data-product-type="${productType.name}">
             <!-- 商品カード（自動生成） -->
