@@ -985,8 +985,21 @@ function checkAndDisplaySoldOutStatus() {
         stockStatusDisplay.style.display = 'none';
     }
 
-    // 売り切れの場合、カートボタンを無効化
+    // 売り切れの場合、取り消し線を追加してカートボタンを無効化
     if (isAllSoldOut) {
+        // 商品名、価格、カラー、サイズ、数量に取り消し線を追加
+        const productName = document.querySelector('.product-name-detail');
+        const productPrice = document.querySelector('.product-price-detail');
+        const colorContainer = document.getElementById('colorSelectionContainer');
+        const sizeContainer = document.getElementById('sizeSelectionContainer');
+        const quantityContainer = document.querySelector('.product-option');
+
+        if (productName) productName.style.textDecoration = 'line-through';
+        if (productPrice) productPrice.style.textDecoration = 'line-through';
+        if (colorContainer) colorContainer.style.textDecoration = 'line-through';
+        if (sizeContainer) sizeContainer.style.textDecoration = 'line-through';
+        if (quantityContainer) quantityContainer.style.textDecoration = 'line-through';
+
         const addToCartBtn = document.querySelector('.btn-add-to-cart-large');
         if (addToCartBtn) {
             addToCartBtn.disabled = true;
@@ -994,6 +1007,19 @@ function checkAndDisplaySoldOutStatus() {
             addToCartBtn.style.background = '#ccc';
             addToCartBtn.style.cursor = 'not-allowed';
         }
+    } else {
+        // 売り切れでない場合は取り消し線を解除
+        const productName = document.querySelector('.product-name-detail');
+        const productPrice = document.querySelector('.product-price-detail');
+        const colorContainer = document.getElementById('colorSelectionContainer');
+        const sizeContainer = document.getElementById('sizeSelectionContainer');
+        const quantityContainer = document.querySelector('.product-option');
+
+        if (productName) productName.style.textDecoration = 'none';
+        if (productPrice) productPrice.style.textDecoration = 'none';
+        if (colorContainer) colorContainer.style.textDecoration = 'none';
+        if (sizeContainer) sizeContainer.style.textDecoration = 'none';
+        if (quantityContainer) quantityContainer.style.textDecoration = 'none';
     }
 }
 
