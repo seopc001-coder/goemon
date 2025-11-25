@@ -836,14 +836,15 @@ window.editHeroImage = function(id) {
 async function handleHeroImageFormSubmit(e) {
     e.preventDefault();
 
-    const url = document.getElementById('heroImageUrl').value.trim();
+    let url = document.getElementById('heroImageUrl').value.trim();
     const link = document.getElementById('heroImageLink').value.trim();
     const alt = document.getElementById('heroImageAlt').value.trim();
     const title = alt; // 代替テキストをサブタイトルとして使用
+    const fileInput = document.getElementById('heroImageFile');
 
     // バリデーション
-    if (!url) {
-        showAlertModal('画像URLを入力してください', 'warning');
+    if (!url && !fileInput.files[0]) {
+        showAlertModal('画像URLまたはファイルを入力してください', 'warning');
         return;
     }
 
@@ -853,6 +854,36 @@ async function handleHeroImageFormSubmit(e) {
     }
 
     try {
+        // ファイルがアップロードされた場合、Supabase Storageにアップロード
+        if (fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+            const filePath = `hero-images/${fileName}`;
+
+            // Supabase Storageにアップロード
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('images')
+                .upload(filePath, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+
+            if (uploadError) {
+                console.error('File upload error:', uploadError);
+                showAlertModal('画像のアップロードに失敗しました: ' + uploadError.message, 'error');
+                return;
+            }
+
+            // アップロードされた画像の公開URLを取得
+            const { data: publicUrlData } = supabase.storage
+                .from('images')
+                .getPublicUrl(filePath);
+
+            url = publicUrlData.publicUrl;
+            console.log('File uploaded successfully:', url);
+        }
+
         if (editingHeroImageId) {
             // 編集モード
             const index = heroImages.findIndex(img => String(img.id) === String(editingHeroImageId));
