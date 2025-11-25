@@ -326,6 +326,9 @@ function renderProducts(products) {
         let isLowStock = false;
         let hasAnyStock = stock > 0; // 在庫があるかどうか（バリエーション含む）
 
+        // 商品レベルの売り切れ状態を判定
+        let productSoldOutStatus = ''; // '', '1部売り切れ', '売り切れ'
+
         if (product.variants && product.variants.stock) {
             // バリエーションがある場合
             const variants = product.variants;
@@ -334,6 +337,17 @@ function renderProducts(products) {
 
             // バリエーション在庫があるかチェック
             hasAnyStock = Object.values(variantStock).some(s => s > 0);
+
+            // 商品レベルの売り切れ判定
+            const allStockValues = Object.values(variantStock);
+            const hasZeroStock = allStockValues.some(s => s === 0);
+            const allZeroStock = allStockValues.every(s => s === 0);
+
+            if (allZeroStock) {
+                productSoldOutStatus = '売り切れ';
+            } else if (hasZeroStock) {
+                productSoldOutStatus = '1部売り切れ';
+            }
 
             // 色が複数ある場合：色ごとに在庫をまとめて表示
             if (colors.length > 1) {
@@ -393,6 +407,7 @@ function renderProducts(products) {
                 stockDisplay = `
                     <span class="stock-info ${isLowStock ? 'stock-low' : ''}">
                         <i class="fas fa-boxes"></i> バリエーション在庫（色別）
+                        ${productSoldOutStatus ? '<span style="color: #ff4444; font-weight: bold; margin-left: 8px; background: #fff0f0; padding: 2px 8px; border-radius: 3px; font-size: 12px;">' + productSoldOutStatus + '</span>' : ''}
                         <div style="font-size: 11px; margin-top: 4px; line-height: 1.6;">
                             ${colorStockDetails.join('<br>')}
                         </div>
@@ -415,6 +430,7 @@ function renderProducts(products) {
                 stockDisplay = `
                     <span class="stock-info ${isLowStock ? 'stock-low' : ''}">
                         <i class="fas fa-boxes"></i> バリエーション在庫
+                        ${productSoldOutStatus ? '<span style="color: #ff4444; font-weight: bold; margin-left: 8px; background: #fff0f0; padding: 2px 8px; border-radius: 3px; font-size: 12px;">' + productSoldOutStatus + '</span>' : ''}
                         <div style="font-size: 11px; margin-top: 4px; line-height: 1.6;">
                             ${stockDetails.join('<br>')}
                         </div>
@@ -425,6 +441,11 @@ function renderProducts(products) {
             // バリエーションがない場合は基本在庫表示
             isLowStock = stock < 10;
             const isSoldOut = stock === 0;
+
+            if (isSoldOut) {
+                productSoldOutStatus = '売り切れ';
+            }
+
             stockDisplay = `
                 <span class="stock-info ${isLowStock ? 'stock-low' : ''}">
                     <i class="fas fa-boxes"></i> 在庫: ${stock}
