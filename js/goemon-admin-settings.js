@@ -32,9 +32,13 @@ async function initializeSettings() {
     document.getElementById('categoryForm').addEventListener('submit', handleCategoryFormSubmit);
     document.getElementById('productTypeForm').addEventListener('submit', handleProductTypeFormSubmit);
     document.getElementById('heroImageForm').addEventListener('submit', handleHeroImageFormSubmit);
+    document.getElementById('pointSettingsForm').addEventListener('submit', handlePointSettingsFormSubmit);
 
     // 画像アップロード機能を初期化
     initializeImageUploads();
+
+    // システム設定を読み込み
+    loadSystemSettings();
 
     console.log('initializeSettings completed - Global functions available:', {
         openAddCategoryModal: typeof window.openAddCategoryModal,
@@ -152,6 +156,9 @@ window.switchTab = function(tabName) {
     } else if (tabName === 'hero') {
         document.querySelectorAll('.settings-tab')[2].classList.add('active');
         document.getElementById('heroTab').classList.add('active');
+    } else if (tabName === 'system') {
+        document.querySelectorAll('.settings-tab')[3].classList.add('active');
+        document.getElementById('systemTab').classList.add('active');
     }
 }
 
@@ -930,6 +937,73 @@ function initializeImageUploads() {
     setupFileInput('heroImageFile', 'heroImagePreview', 'heroImageUrl');
 
     console.log('Image upload functionality initialized for hero images');
+}
+
+// ========================================
+// システム設定管理
+// ========================================
+
+/**
+ * システム設定を読み込み
+ */
+async function loadSystemSettings() {
+    try {
+        // ポイント付与レートを取得
+        const pointRateSetting = await fetchSiteSetting('point_award_rate');
+        const pointRate = pointRateSetting ? parseInt(pointRateSetting.value) : 500;
+
+        // フォームに値をセット
+        const pointRateInput = document.getElementById('pointAwardRate');
+        const currentPointRateSpan = document.getElementById('currentPointRate');
+
+        if (pointRateInput) {
+            pointRateInput.value = pointRate;
+        }
+        if (currentPointRateSpan) {
+            currentPointRateSpan.textContent = pointRate;
+        }
+
+        console.log('システム設定を読み込みました:', { pointRate });
+    } catch (error) {
+        console.error('システム設定読み込みエラー:', error);
+        // エラー時はデフォルト値を設定
+        const pointRateInput = document.getElementById('pointAwardRate');
+        if (pointRateInput) {
+            pointRateInput.value = 500;
+        }
+    }
+}
+
+/**
+ * ポイント設定フォーム送信処理
+ */
+async function handlePointSettingsFormSubmit(e) {
+    e.preventDefault();
+
+    const pointRate = parseInt(document.getElementById('pointAwardRate').value);
+
+    // バリデーション
+    if (!pointRate || pointRate < 1 || pointRate > 10000) {
+        showAlertModal('ポイント付与レートは1〜10000の範囲で入力してください', 'warning');
+        return;
+    }
+
+    try {
+        // サイト設定を更新
+        await updateSiteSetting('point_award_rate', pointRate.toString());
+
+        // 現在の設定表示を更新
+        const currentPointRateSpan = document.getElementById('currentPointRate');
+        if (currentPointRateSpan) {
+            currentPointRateSpan.textContent = pointRate;
+        }
+
+        showAlertModal(`ポイント付与レートを更新しました（${pointRate}円 = 1pt）`, 'success');
+        console.log('ポイント付与レート更新:', pointRate);
+    } catch (error) {
+        console.error('ポイント設定保存エラー:', error);
+        showAlertModal('設定の保存に失敗しました: ' + error.message, 'error');
+    }
 }
 
 // モーダル外クリックで閉じる

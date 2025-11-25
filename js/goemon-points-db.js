@@ -142,17 +142,29 @@ async function usePoints(userId, points, reason, orderId = null) {
  */
 async function awardPurchasePoints(userId, amount, orderId) {
     try {
-        // 500円につき1ポイント付与
-        const pointsToAward = Math.floor(amount / 500);
+        // サイト設定からポイント付与レートを取得（デフォルト: 500円 = 1pt）
+        let pointRate = 500;
+        try {
+            const rateSetting = await fetchSiteSetting('point_award_rate');
+            if (rateSetting && rateSetting.value) {
+                pointRate = parseInt(rateSetting.value);
+            }
+        } catch (settingError) {
+            console.warn('ポイント付与レート取得エラー。デフォルト値(500)を使用:', settingError);
+        }
+
+        // 設定されたレートに応じてポイント付与
+        const pointsToAward = Math.floor(amount / pointRate);
 
         if (pointsToAward <= 0) {
-            console.log('ポイント付与なし（購入金額が500円未満）');
+            console.log(`ポイント付与なし（購入金額が${pointRate}円未満）`);
             return 0;
         }
 
         const reason = `注文 #${orderId} によるポイント付与 (¥${amount.toLocaleString()})`;
         await addPoints(userId, pointsToAward, reason, orderId);
 
+        console.log(`ポイント付与: ${pointsToAward}pt (購入金額: ¥${amount.toLocaleString()}, レート: ${pointRate}円/pt)`);
         return pointsToAward;
     } catch (error) {
         console.error('購入ポイント付与エラー:', error);

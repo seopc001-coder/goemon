@@ -38,6 +38,9 @@ async function loadPointsData(userId) {
         const history = await fetchPointHistory(userId, 100);
         displayPointsHistory(history);
 
+        // ポイント付与レートを取得して表示
+        await displayPointRate();
+
     } catch (error) {
         console.error('ポイントデータ読み込みエラー:', error);
         showAlertModal('ポイント情報の読み込みに失敗しました', 'error');
@@ -96,4 +99,29 @@ function displayPointsHistory(history) {
             </div>
         </li>
     `).join('');
+}
+
+/**
+ * ポイント付与レートを表示
+ */
+async function displayPointRate() {
+    try {
+        // サイト設定からポイント付与レートを取得
+        let pointRate = 500; // デフォルト
+        const rateSetting = await fetchSiteSetting('point_award_rate');
+        if (rateSetting && rateSetting.value) {
+            pointRate = parseInt(rateSetting.value);
+        }
+
+        // ポイント付与説明を更新
+        const pointEarnInfo = document.getElementById('pointEarnInfo');
+        if (pointEarnInfo) {
+            pointEarnInfo.textContent = `お買い物${pointRate.toLocaleString()}円（送料別）ごとに1ポイント付与されます`;
+        }
+
+        console.log('ポイント付与レート表示:', pointRate);
+    } catch (error) {
+        console.error('ポイント付与レート表示エラー:', error);
+        // エラー時はデフォルトの表示を維持
+    }
 }

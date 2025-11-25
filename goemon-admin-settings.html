@@ -48,6 +48,9 @@
                 <button class="settings-tab" onclick="switchTab('hero')">
                     <i class="fas fa-image"></i> ヒーロー画像設定
                 </button>
+                <button class="settings-tab" onclick="switchTab('system')">
+                    <i class="fas fa-cogs"></i> システム設定
+                </button>
             </div>
 
             <!-- カテゴリ管理タブ -->
@@ -109,6 +112,57 @@
 
                     <div id="heroImagesList" class="hero-images-list">
                         <!-- ヒーロー画像リストがここに表示されます -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- システム設定タブ -->
+            <div id="systemTab" class="settings-tab-content">
+                <div class="content-header">
+                    <h2><i class="fas fa-cogs"></i> システム設定</h2>
+                </div>
+
+                <div class="system-settings-container">
+                    <div class="info-box" style="margin-bottom: 20px;">
+                        <i class="fas fa-info-circle"></i>
+                        <p>サイト全体のシステム設定を管理します。変更は即座に反映されます。</p>
+                    </div>
+
+                    <!-- ポイント設定 -->
+                    <div class="settings-section" style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                        <h3 style="font-size: 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-coins" style="color: #667eea;"></i>
+                            ポイント設定
+                        </h3>
+
+                        <form id="pointSettingsForm">
+                            <div class="form-group">
+                                <label for="pointAwardRate">
+                                    ポイント付与レート <span style="color: #f44336;">*</span>
+                                </label>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <input
+                                        type="number"
+                                        id="pointAwardRate"
+                                        class="form-control"
+                                        min="1"
+                                        max="10000"
+                                        required
+                                        style="max-width: 200px;"
+                                    >
+                                    <span style="color: #666;">円につき 1 ポイント</span>
+                                </div>
+                                <small style="color: #666; font-size: 12px; display: block; margin-top: 8px;">
+                                    例: 500と入力すると、500円の購入ごとに1ポイント付与されます（現在の設定: <span id="currentPointRate">500</span>円 = 1pt）
+                                </small>
+                            </div>
+
+                            <div class="modal-actions" style="margin-top: 30px;">
+                                <button type="submit" class="btn-cmn-02">
+                                    <i class="fas fa-save"></i> 保存
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

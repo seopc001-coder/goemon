@@ -245,6 +245,39 @@ async function fetchAllSiteSettings() {
     }
 }
 
+/**
+ * サイト設定を更新または作成
+ */
+async function updateSiteSetting(key, value) {
+    try {
+        // 既存の設定を確認
+        const existing = await fetchSiteSetting(key);
+
+        if (existing) {
+            // 更新
+            const { error } = await supabase
+                .from('site_settings')
+                .update({ value: value })
+                .eq('key', key);
+
+            if (error) throw error;
+        } else {
+            // 新規作成
+            const { error } = await supabase
+                .from('site_settings')
+                .insert([{ key: key, value: value }]);
+
+            if (error) throw error;
+        }
+
+        console.log(`サイト設定を更新しました: ${key} = ${value}`);
+        return true;
+    } catch (error) {
+        console.error('サイト設定更新エラー:', error);
+        throw error;
+    }
+}
+
 // ===================================
 // フォールバック用LocalStorage関数
 // ===================================
