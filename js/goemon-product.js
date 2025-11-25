@@ -1,8 +1,6 @@
 // 五右衛門 ECサイト - 商品詳細ページ JavaScript
 
 // グローバル変数
-let selectedColor = 'white';
-let selectedSize = 'M';
 let quantity = 1;
 let productData = {
     id: '1',
