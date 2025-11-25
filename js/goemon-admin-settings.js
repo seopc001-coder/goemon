@@ -721,9 +721,13 @@ function renderHeroImages() {
             const action = this.dataset.action;
             const imageId = this.dataset.imageId;
 
+            console.log('Hero image button clicked:', { action, imageId, dataset: this.dataset });
+
             if (action === 'edit') {
+                console.log('Calling editHeroImage with id:', imageId);
                 window.editHeroImage(imageId);
             } else if (action === 'delete') {
+                console.log('Calling deleteHeroImage with id:', imageId);
                 window.deleteHeroImage(imageId);
             }
         });
@@ -784,8 +788,12 @@ window.openAddHeroImageModal = function() {
 
 // ヒーロー画像編集モーダルを開く
 window.editHeroImage = function(id) {
-    console.log('editHeroImage called with id:', id);
-    const image = heroImages.find(img => img.id === id);
+    console.log('editHeroImage called with id:', id, 'type:', typeof id);
+    // IDを数値に変換（データベースのIDは数値型）
+    const numId = typeof id === 'string' ? parseInt(id) : id;
+    console.log('Converted id:', numId, 'type:', typeof numId);
+    console.log('Available hero images:', heroImages.map(img => ({ id: img.id, type: typeof img.id })));
+    const image = heroImages.find(img => img.id === numId);
 
     if (!image) {
         console.error('Hero image not found:', id);
@@ -899,7 +907,9 @@ async function handleHeroImageFormSubmit(e) {
 
 // ヒーロー画像を削除
 window.deleteHeroImage = function(id) {
-    const image = heroImages.find(img => img.id === id);
+    // IDを数値に変換（データベースのIDは数値型）
+    const numId = typeof id === 'string' ? parseInt(id) : id;
+    const image = heroImages.find(img => img.id === numId);
 
     if (!image) {
         showAlertModal('画像が見つかりません', 'error');
@@ -911,9 +921,9 @@ window.deleteHeroImage = function(id) {
         async () => {
             try {
                 // Supabaseから削除
-                await window.deleteHeroImageFromDB(id);
+                await window.deleteHeroImageFromDB(numId);
 
-                heroImages = heroImages.filter(img => img.id !== id);
+                heroImages = heroImages.filter(img => img.id !== numId);
                 showAlertModal('ヒーロー画像を削除しました', 'success');
                 renderHeroImages();
             } catch (error) {
