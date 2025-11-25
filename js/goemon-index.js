@@ -412,7 +412,8 @@ function createRankingSection() {
 
     section.innerHTML = `
         <div class="section-header-top">
-            <h2 class="section-title-top">人気ランキング</h2>
+            <h2 class="section-title-top section-title-top-en">RANKING</h2>
+            <p class="section-subtitle-top">売れ筋アイテム</p>
         </div>
         <div class="list-products-01" id="rankingProducts">
             <!-- ランキング商品（自動生成） -->
