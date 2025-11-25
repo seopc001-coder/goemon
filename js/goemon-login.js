@@ -193,6 +193,9 @@ async function submitLogin(email, password) {
 
         localStorage.setItem('goemonloggedin', 'true');
 
+        // カートデータをlocalStorageからSupabaseに移行
+        await migrateCartToSupabase(data.user.id);
+
         // URLパラメータから戻り先URLを取得
         const urlParams = new URLSearchParams(window.location.search);
         const returnUrl = urlParams.get('returnUrl') || 'goemon-index.html';
@@ -207,5 +210,41 @@ async function submitLogin(email, password) {
         showAlertModal('ログイン処理中にエラーが発生しました。もう一度お試しください。', 'error');
         submitBtn.textContent = originalText;
         submitBtn.disabled = false;
+    }
+}
+
+/**
+ * カートデータをlocalStorageからSupabaseに移行
+ */
+async function migrateCartToSupabase(userId) {
+    try {
+        // localStorageからカートデータを取得
+        const localCart = JSON.parse(localStorage.getItem('goemoncart')) || [];
+
+        if (localCart.length === 0) {
+            console.log('移行するカートアイテムがありません');
+            return;
+        }
+
+        console.log('カートアイテムを移行中:', localCart.length, '件');
+
+        // Supabaseに各アイテムを追加
+        for (const item of localCart) {
+            await addToCart(userId, {
+                productId: item.id,
+                quantity: item.quantity,
+                color: item.color,
+                size: item.size
+            });
+        }
+
+        console.log('カートアイテムの移行が完了しました');
+
+        // 移行完了後、localStorageのカートをクリア
+        localStorage.removeItem('goemoncart');
+
+    } catch (error) {
+        console.error('カート移行エラー:', error);
+        // エラーが発生してもログイン処理は継続
     }
 }
