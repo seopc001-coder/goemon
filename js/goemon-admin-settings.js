@@ -738,7 +738,7 @@ async function updateHeroImageOrder() {
         for (let index = 0; index < items.length; index++) {
             const item = items[index];
             const id = item.dataset.id;
-            const image = heroImages.find(img => img.id === id);
+            const image = heroImages.find(img => String(img.id) === String(id));
             if (image) {
                 image.order = index;
                 // Supabaseに順序を更新
@@ -784,9 +784,9 @@ window.openAddHeroImageModal = function() {
 
 // ヒーロー画像編集モーダルを開く
 window.editHeroImage = function(id) {
-    // IDを数値に変換（データベースのIDは数値型）
-    const numId = typeof id === 'string' ? parseInt(id) : id;
-    const image = heroImages.find(img => img.id === numId);
+    // IDをそのまま使用（UUIDまたは数値の可能性があるため、文字列として比較）
+    const searchId = String(id);
+    const image = heroImages.find(img => String(img.id) === searchId);
 
     if (!image) {
         console.error('Hero image not found:', id);
@@ -794,7 +794,7 @@ window.editHeroImage = function(id) {
         return;
     }
 
-    editingHeroImageId = numId;
+    editingHeroImageId = searchId;
 
     document.getElementById('heroImageModalTitle').innerHTML = '<i class="fas fa-edit"></i> ヒーロー画像を編集';
     document.getElementById('heroImageId').value = id;
@@ -839,7 +839,7 @@ async function handleHeroImageFormSubmit(e) {
     try {
         if (editingHeroImageId) {
             // 編集モード
-            const index = heroImages.findIndex(img => img.id === editingHeroImageId);
+            const index = heroImages.findIndex(img => String(img.id) === String(editingHeroImageId));
             if (index !== -1) {
                 heroImages[index] = {
                     ...heroImages[index],
@@ -900,9 +900,9 @@ async function handleHeroImageFormSubmit(e) {
 
 // ヒーロー画像を削除
 window.deleteHeroImage = function(id) {
-    // IDを数値に変換（データベースのIDは数値型）
-    const numId = typeof id === 'string' ? parseInt(id) : id;
-    const image = heroImages.find(img => img.id === numId);
+    // IDをそのまま使用（UUIDまたは数値の可能性があるため、文字列として比較）
+    const searchId = String(id);
+    const image = heroImages.find(img => String(img.id) === searchId);
 
     if (!image) {
         showAlertModal('画像が見つかりません', 'error');
@@ -914,9 +914,9 @@ window.deleteHeroImage = function(id) {
         async () => {
             try {
                 // Supabaseから削除
-                await window.deleteHeroImageFromDB(numId);
+                await window.deleteHeroImageFromDB(searchId);
 
-                heroImages = heroImages.filter(img => img.id !== numId);
+                heroImages = heroImages.filter(img => String(img.id) !== searchId);
                 showAlertModal('ヒーロー画像を削除しました', 'success');
                 renderHeroImages();
             } catch (error) {
