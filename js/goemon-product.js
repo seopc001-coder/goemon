@@ -979,16 +979,10 @@ function checkAndDisplaySoldOutStatus() {
         isAllSoldOut = (productData.stock || 0) === 0;
     }
 
-    // 在庫状況表示を制御
+    // 在庫状況表示を常に非表示
     const stockStatusDisplay = document.getElementById('stockStatusDisplay');
     if (stockStatusDisplay) {
-        if (isAllSoldOut) {
-            // 全在庫売り切れの場合は非表示
-            stockStatusDisplay.style.display = 'none';
-        } else {
-            // 在庫ありの場合は表示
-            stockStatusDisplay.style.display = 'block';
-        }
+        stockStatusDisplay.style.display = 'none';
     }
 
     // 売り切れの場合、カートボタンを無効化
