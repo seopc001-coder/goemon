@@ -521,14 +521,22 @@ function searchProducts() {
 
 // 在庫が少ない商品をフィルタリング（バリエーション対応）
 function filterLowStockProducts() {
+    console.log('🔍 filterLowStockProducts 開始');
+    console.log('全商品数:', Object.keys(allProducts).length);
+
     filteredProducts = {};
 
     // 在庫が10未満かつ在庫アラート確認済みでない商品のみ抽出
     Object.keys(allProducts).forEach(key => {
         const product = allProducts[key];
 
+        console.log(`\n商品: ${product.name} (ID: ${key})`);
+        console.log('  - lowStockConfirmed:', product.lowStockConfirmed);
+        console.log('  - variants:', product.variants);
+
         // 在庫アラート確認済み商品を除外
         if (product.lowStockConfirmed) {
+            console.log('  ⏭️ 在庫アラート確認済みのためスキップ');
             return;
         }
 
@@ -537,9 +545,13 @@ function filterLowStockProducts() {
         // バリエーションがある場合
         if (product.variants && product.variants.stock) {
             const variantStock = product.variants.stock;
+            console.log('  - variant stock:', variantStock);
+
             // いずれかのバリエーションの在庫が10未満なら追加
-            for (const stock of Object.values(variantStock)) {
+            for (const [variantKey, stock] of Object.entries(variantStock)) {
+                console.log(`    - ${variantKey}: ${stock}`);
                 if (stock < 10) {
+                    console.log(`    ⚠️ 在庫少: ${variantKey} = ${stock}`);
                     hasLowStock = true;
                     break;
                 }
@@ -547,15 +559,24 @@ function filterLowStockProducts() {
         } else {
             // バリエーションがない場合は基本在庫をチェック
             const stock = product.stock || 0;
+            console.log('  - 基本在庫:', stock);
             if (stock < 10) {
+                console.log('  ⚠️ 基本在庫が10未満');
                 hasLowStock = true;
             }
         }
 
         if (hasLowStock) {
+            console.log('  ✅ 在庫アラート対象に追加');
             filteredProducts[key] = product;
+        } else {
+            console.log('  ⏭️ 在庫は十分');
         }
     });
+
+    console.log('\n📊 フィルタリング結果:');
+    console.log('在庫アラート対象商品数:', Object.keys(filteredProducts).length);
+    console.log('対象商品:', Object.values(filteredProducts).map(p => p.name));
 
     updateProductCount();
     renderProducts(filteredProducts);
