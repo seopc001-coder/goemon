@@ -479,9 +479,9 @@ async function saveCart() {
             // 既存のカートをクリア
             await clearCart(userId);
 
-            // 新しいカートアイテムを追加
+            // 新しいカートアイテムを追加（DB関数を直接呼び出し、無限ループを防ぐ）
             for (const item of cartItems) {
-                await addToCart(userId, {
+                await window.addToCart(userId, {
                     productId: item.id,
                     quantity: item.quantity,
                     color: item.color,

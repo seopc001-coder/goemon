@@ -575,14 +575,12 @@ async function addToCart(product) {
 
             // 既存のカートアイテムを取得
             const cartItems = await fetchCartItems(userId);
-            console.log('現在のカートアイテム:', cartItems);
 
             // 同じ商品・色・サイズのアイテムを探す
             const existingItem = cartItems.find(item => {
                 const isSameProduct = item.product_id == product.id;
                 const isSameColor = (item.color || '') === (product.color || '');
                 const isSameSize = (item.size || '') === (product.size || '');
-                console.log(`比較中: product_id=${item.product_id} vs ${product.id} (${isSameProduct}), color="${item.color}" vs "${product.color}" (${isSameColor}), size="${item.size}" vs "${product.size}" (${isSameSize})`);
                 return isSameProduct && isSameColor && isSameSize;
             });
 
@@ -1049,12 +1047,17 @@ function updateStockStatus() {
             addToCartBtn.textContent = '在庫切れ';
             addToCartBtn.style.background = '#ccc';
             addToCartBtn.style.cursor = 'not-allowed';
+            console.log('ボタンを無効化しました（在庫なし）');
         } else {
             addToCartBtn.disabled = false;
             addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> カートに追加';
             addToCartBtn.style.background = '';
             addToCartBtn.style.cursor = 'pointer';
+            console.log('ボタンを有効化しました（在庫あり:', stock, '個）');
+            console.log('ボタンのdisabled状態:', addToCartBtn.disabled);
         }
+    } else {
+        console.error('カートに追加ボタンが見つかりません');
     }
 }
 
