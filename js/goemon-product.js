@@ -57,10 +57,11 @@ async function loadProductData() {
 }
 
 // 閲覧数をカウント
+// TODO: view_countカラムがproductsテーブルに追加されたら有効化
 async function incrementViewCount(productId) {
     try {
-        await incrementProductViewCount(productId);
-        console.log('View count incremented for product:', productId);
+        // await incrementProductViewCount(productId);
+        // console.log('View count incremented for product:', productId);
     } catch (error) {
         console.error('Error incrementing view count:', error);
     }
