@@ -945,7 +945,7 @@ function updateStockStatus() {
     console.log('====================');
 
     // カートボタンの有効/無効を切り替え
-    const addToCartBtn = document.querySelector('.btn-add-to-cart');
+    const addToCartBtn = document.querySelector('.btn-add-to-cart-large');
     if (addToCartBtn) {
         if (stock <= 0) {
             addToCartBtn.disabled = true;
@@ -991,7 +991,7 @@ function checkAndDisplaySoldOutStatus() {
         }
 
         // カートボタンを無効化
-        const addToCartBtn = document.querySelector('.btn-add-to-cart');
+        const addToCartBtn = document.querySelector('.btn-add-to-cart-large');
         if (addToCartBtn) {
             addToCartBtn.disabled = true;
             addToCartBtn.textContent = '売り切れ';
