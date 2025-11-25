@@ -533,6 +533,7 @@ function initializeAddToCart() {
             size: selectedSize
         };
 
+        console.log('カートに追加しようとしている商品:', product);
         await addToCart(product);
         showModal();
         updateModalContent(product);
@@ -561,13 +562,16 @@ async function addToCart(product) {
 
             // 既存のカートアイテムを取得
             const cartItems = await fetchCartItems(userId);
+            console.log('現在のカートアイテム:', cartItems);
 
             // 同じ商品・色・サイズのアイテムを探す
-            const existingItem = cartItems.find(item =>
-                item.product_id == product.id &&
-                (item.color || '') === (product.color || '') &&
-                (item.size || '') === (product.size || '')
-            );
+            const existingItem = cartItems.find(item => {
+                const isSameProduct = item.product_id == product.id;
+                const isSameColor = (item.color || '') === (product.color || '');
+                const isSameSize = (item.size || '') === (product.size || '');
+                console.log(`比較中: product_id=${item.product_id} vs ${product.id} (${isSameProduct}), color="${item.color}" vs "${product.color}" (${isSameColor}), size="${item.size}" vs "${product.size}" (${isSameSize})`);
+                return isSameProduct && isSameColor && isSameSize;
+            });
 
             if (existingItem) {
                 // 既存アイテムの数量を更新
