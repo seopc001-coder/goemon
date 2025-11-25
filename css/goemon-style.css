@@ -626,7 +626,7 @@ input, select, textarea {
 /* 英語のセクションタイトルは筆記体に */
 .section-title-en,
 .section-title-top-en {
-    font-family: 'Pacifico', 'Brush Script MT', cursive;
+    font-family: 'Segoe Script', 'Brush Script MT', cursive;
     font-weight: normal;
 }
 
