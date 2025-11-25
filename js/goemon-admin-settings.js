@@ -863,7 +863,7 @@ async function handleHeroImageFormSubmit(e) {
 
             // Supabase Storageにアップロード
             const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('images')
+                .from('hero_images')
                 .upload(filePath, file, {
                     cacheControl: '3600',
                     upsert: false
@@ -877,7 +877,7 @@ async function handleHeroImageFormSubmit(e) {
 
             // アップロードされた画像の公開URLを取得
             const { data: publicUrlData } = supabase.storage
-                .from('images')
+                .from('hero_images')
                 .getPublicUrl(filePath);
 
             url = publicUrlData.publicUrl;
