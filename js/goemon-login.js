@@ -218,8 +218,18 @@ async function submitLogin(email, password) {
  */
 async function migrateCartToSupabase(userId) {
     try {
+        // Supabaseに既存のカートがあるか確認
+        const existingCart = await fetchCartItems(userId);
+
         // localStorageからカートデータを取得
         const localCart = JSON.parse(localStorage.getItem('goemoncart')) || [];
+
+        // 既存のSupabaseカートがある場合は、localStorageのカートは無視
+        if (existingCart && existingCart.length > 0) {
+            console.log('Supabaseに既存のカートがあります。localStorageのカートは無視します。');
+            localStorage.removeItem('goemoncart');
+            return;
+        }
 
         if (localCart.length === 0) {
             console.log('移行するカートアイテムがありません');

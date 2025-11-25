@@ -131,6 +131,7 @@ function initializeLogout() {
 
             // ローカルストレージをクリア
             localStorage.removeItem('goemonloggedin');
+            localStorage.removeItem('goemoncart'); // カートデータもクリア
 
             // 完了モーダルを表示
             logoutCompleteModal.classList.add('active');

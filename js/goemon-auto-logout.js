@@ -86,6 +86,7 @@ async function performAutoLogout() {
 
         // ローカルストレージをクリア
         localStorage.removeItem('goemonloggedin');
+        localStorage.removeItem('goemoncart'); // カートデータもクリア
 
         // ログインページにリダイレクト（メッセージなし）
         window.location.href = 'goemon-login.html';
