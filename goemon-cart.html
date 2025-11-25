@@ -72,10 +72,11 @@
                             ※ ¥5,000以上で送料無料
                         </div>
 
-                        <!-- クーポン適用 -->
+                        <!-- クーポン選択 -->
                         <div class="coupon-section">
-                            <input type="text" class="coupon-input" placeholder="クーポンコードを入力">
-                            <button class="btn-apply-coupon">適用</button>
+                            <select class="coupon-select" id="couponSelect">
+                                <option value="">クーポンを選択してください</option>
+                            </select>
                         </div>
 
                         <div class="summary-row summary-discount" style="display: none;">
@@ -88,6 +89,11 @@
                         <div class="summary-row summary-total">
                             <span>合計（税込）</span>
                             <span class="total-amount">¥6,980</span>
+                        </div>
+
+                        <div class="summary-row summary-points" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; color: #f44336;">
+                            <span>今回獲得ポイント</span>
+                            <span class="earn-points">0 pt</span>
                         </div>
 
                         <button class="btn-cmn-02 btn-checkout" onclick="proceedToCheckout()">

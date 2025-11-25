@@ -3,6 +3,8 @@
 // グローバル変数
 let cartItems = [];
 let productsData = {};
+let availableCoupons = [];
+let selectedCoupon = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeCartPage();
@@ -18,6 +20,9 @@ async function initializeCartPage() {
         productsData = {};
     }
 
+    // 有効なクーポンを読み込み
+    await loadAvailableCoupons();
+
     // カートデータを読み込み
     await loadCartData();
 
@@ -27,8 +32,8 @@ async function initializeCartPage() {
     // カートサマリーを描画
     renderCartSummary();
 
-    // クーポン入力を初期化
-    initializeCouponInput();
+    // クーポン選択を初期化
+    initializeCouponSelect();
 }
 
 // カートデータを読み込み（認証ユーザーはSupabase、ゲストはlocalStorage）
@@ -380,6 +385,7 @@ function renderCartSummary() {
     const shipping = calculateShipping(subtotal);
     const discount = getCurrentDiscount();
     const total = subtotal + shipping - discount;
+    const earnPoints = calculateEarnPoints(total);
 
     // 小計表示
     const subtotalElement = document.querySelector('.summary-subtotal');
@@ -405,6 +411,17 @@ function renderCartSummary() {
     if (totalElement) {
         totalElement.textContent = formatPrice(total);
     }
+
+    // 獲得ポイント表示
+    const earnPointsElement = document.querySelector('.earn-points');
+    if (earnPointsElement) {
+        earnPointsElement.textContent = earnPoints + ' pt';
+    }
+}
+
+// 獲得ポイント計算（合計金額の1%）
+function calculateEarnPoints(total) {
+    return Math.floor(total * 0.01);
 }
 
 // レジに進む処理（認証チェック付き）
@@ -445,59 +462,125 @@ function calculateShipping(subtotal) {
     return subtotal >= 5000 ? 0 : 500;
 }
 
-// クーポン割引を取得
-function getCurrentDiscount() {
-    // クーポン情報をローカルストレージから取得
-    const appliedCoupon = localStorage.getItem('goemonappliedcoupon');
-    return appliedCoupon ? parseInt(appliedCoupon) : 0;
-}
-
-// クーポン適用
-function initializeCouponInput() {
-    const applyCouponBtn = document.querySelector('.btn-apply-coupon');
-
-    if (applyCouponBtn) {
-        applyCouponBtn.addEventListener('click', function() {
-            const couponInput = document.querySelector('.coupon-input');
-            const couponCode = couponInput.value.trim();
-
-            if (!couponCode) {
-                showAlertModal('クーポンコードを入力してください', 'warning');
-                return;
-            }
-
-            applyCoupon(couponCode);
-        });
+// 有効なクーポンを読み込み
+async function loadAvailableCoupons() {
+    try {
+        availableCoupons = await fetchValidCoupons();
+        console.log('Available coupons loaded:', availableCoupons.length);
+    } catch (error) {
+        console.error('Error loading coupons:', error);
+        availableCoupons = [];
     }
 }
 
-// クーポン適用
-function applyCoupon(couponCode) {
-    // デモ用クーポン
-    const validCoupons = {
-        'WELCOME500': 500,
-        'SPRING1000': 1000,
-        'VIP2000': 2000
-    };
+// クーポン選択を初期化
+function initializeCouponSelect() {
+    const couponSelect = document.getElementById('couponSelect');
+    if (!couponSelect) return;
 
-    if (validCoupons[couponCode]) {
-        const discountAmount = validCoupons[couponCode];
-        localStorage.setItem('goemonappliedcoupon', discountAmount);
+    // クーポンオプションを追加
+    availableCoupons.forEach(coupon => {
+        const option = document.createElement('option');
+        option.value = coupon.id;
+        option.dataset.coupon = JSON.stringify(coupon);
 
-        // 割引行を表示
-        const discountRow = document.querySelector('.summary-discount');
-        if (discountRow) {
-            discountRow.style.display = 'flex';
-            const discountElement = discountRow.querySelector('.discount-amount');
-            if (discountElement) {
-                discountElement.textContent = '-' + formatPrice(discountAmount);
-            }
+        // クーポン表示テキスト作成
+        let displayText = coupon.code + ' - ';
+        if (coupon.type === 'percentage') {
+            displayText += coupon.value + '%OFF';
+        } else {
+            displayText += formatPrice(coupon.value) + '引き';
         }
 
-        renderCartSummary();
-        showAlertModal('クーポン「' + couponCode + '」が適用されました！\n' + formatPrice(discountAmount) + '割引', 'success');
-    } else {
-        showAlertModal('無効なクーポンコードです', 'error');
+        if (coupon.description) {
+            displayText += ' (' + coupon.description + ')';
+        }
+
+        option.textContent = displayText;
+        couponSelect.appendChild(option);
+    });
+
+    // 選択イベントを設定
+    couponSelect.addEventListener('change', function() {
+        if (this.value) {
+            const couponData = JSON.parse(this.selectedOptions[0].dataset.coupon);
+            applyCoupon(couponData);
+        } else {
+            // クーポン選択解除
+            selectedCoupon = null;
+            hideCouponDiscount();
+            renderCartSummary();
+        }
+    });
+}
+
+// クーポン割引を取得
+function getCurrentDiscount() {
+    if (!selectedCoupon) return 0;
+
+    const subtotal = calculateSubtotal();
+    let discount = 0;
+
+    if (selectedCoupon.type === 'fixed') {
+        // 固定額割引
+        discount = selectedCoupon.value;
+    } else if (selectedCoupon.type === 'percentage') {
+        // パーセント割引
+        discount = Math.floor(subtotal * (selectedCoupon.value / 100));
+
+        // 最大割引額の制限
+        if (selectedCoupon.max_discount && discount > selectedCoupon.max_discount) {
+            discount = selectedCoupon.max_discount;
+        }
+    }
+
+    // 小計を超える割引は適用しない
+    return Math.min(discount, subtotal);
+}
+
+// クーポン適用
+function applyCoupon(coupon) {
+    const subtotal = calculateSubtotal();
+
+    // 最小購入金額チェック
+    if (coupon.min_purchase && subtotal < coupon.min_purchase) {
+        showAlertModal(
+            'このクーポンは' + formatPrice(coupon.min_purchase) + '以上のご購入で利用可能です',
+            'warning'
+        );
+        // 選択をリセット
+        const couponSelect = document.getElementById('couponSelect');
+        if (couponSelect) couponSelect.value = '';
+        return;
+    }
+
+    selectedCoupon = coupon;
+
+    // 割引額を計算
+    const discountAmount = getCurrentDiscount();
+
+    // 割引行を表示
+    const discountRow = document.querySelector('.summary-discount');
+    if (discountRow) {
+        discountRow.style.display = 'flex';
+        const discountElement = discountRow.querySelector('.discount-amount');
+        if (discountElement) {
+            discountElement.textContent = '-' + formatPrice(discountAmount);
+        }
+    }
+
+    renderCartSummary();
+
+    let message = 'クーポン「' + coupon.code + '」が適用されました！\n';
+    message += formatPrice(discountAmount) + '割引';
+    showAlertModal(message, 'success');
+}
+
+// クーポン割引を非表示
+function hideCouponDiscount() {
+    const discountRow = document.querySelector('.summary-discount');
+    if (discountRow) {
+        discountRow.style.display = 'none';
     }
 }
 

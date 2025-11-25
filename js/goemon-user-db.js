@@ -571,3 +571,71 @@ async function markAllNotificationsAsRead(userId) {
         throw error;
     }
 }
+
+// ===================================
+// クーポン管理
+// ===================================
+
+/**
+ * 有効なクーポンを取得（有効期限内、使用上限未達）
+ */
+async function fetchValidCoupons() {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+
+        const { data, error } = await supabase
+            .from('coupons')
+            .select('*')
+            .gte('expiry_date', today)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // 使用上限チェック（usage_limitがnullの場合は無制限）
+        const validCoupons = (data || []).filter(coupon => {
+            if (coupon.usage_limit === null) return true;
+            return coupon.used_count < coupon.usage_limit;
+        });
+
+        return validCoupons;
+    } catch (error) {
+        console.error('有効なクーポン取得エラー:', error);
+        throw error;
+    }
+}
+
+/**
+ * クーポンコードで検証
+ */
+async function validateCouponCode(couponCode) {
+    try {
+        const { data, error } = await supabase
+            .from('coupons')
+            .select('*')
+            .eq('code', couponCode)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') {
+                return { valid: false, message: '無効なクーポンコードです' };
+            }
+            throw error;
+        }
+
+        // 有効期限チェック
+        const today = new Date().toISOString().split('T')[0];
+        if (data.expiry_date < today) {
+            return { valid: false, message: 'このクーポンは有効期限が切れています' };
+        }
+
+        // 使用上限チェック
+        if (data.usage_limit !== null && data.used_count >= data.usage_limit) {
+            return { valid: false, message: 'このクーポンは使用上限に達しています' };
+        }
+
+        return { valid: true, coupon: data };
+    } catch (error) {
+        console.error('クーポン検証エラー:', error);
+        throw error;
+    }
+}
