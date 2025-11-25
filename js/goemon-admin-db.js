@@ -636,12 +636,12 @@ async function fetchAllUsers() {
 
         console.log('📊 RPC関数から取得したユーザーデータ:', usersData);
 
-        // 各ユーザーの登録住所を取得（user_profilesテーブルから）
+        // 各ユーザーの登録住所とポイントを取得（user_profilesテーブルから）
         const usersWithAddresses = await Promise.all((usersData || []).map(async (user) => {
-            // ユーザープロファイルから住所情報を取得
+            // ユーザープロファイルから住所情報とポイントを取得
             const { data: profile, error: profileError } = await supabase
                 .from('user_profiles')
-                .select('postal_code, prefecture, city, address1, address2, phone')
+                .select('postal_code, prefecture, city, address1, address2, phone, points')
                 .eq('id', user.user_id)
                 .single();
 
@@ -703,6 +703,7 @@ async function fetchAllUsers() {
                     deleted_at: user.deleted_at
                 },
                 order_count: user.order_count,
+                points: profile?.points || 0,
                 addresses: addresses
             };
         }));

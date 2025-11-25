@@ -37,7 +37,7 @@ async function checkLoginStatus() {
 }
 
 // ユーザー情報を読み込み（Supabase連携）
-function loadUserInfo(user) {
+async function loadUserInfo(user) {
     // デバッグ: user_metadataを確認
     console.log('Loading user info:', user.email);
     console.log('User metadata:', user.user_metadata);
@@ -55,8 +55,32 @@ function loadUserInfo(user) {
         favoritesCountElement.textContent = `お気に入り: ${wishlist.length}件`;
     }
 
+    // ポイント残高を表示
+    await loadUserPoints(user.id);
+
     // 住所情報を読み込み
     loadAddresses(user);
+}
+
+// ユーザーのポイント残高を読み込み
+async function loadUserPoints(userId) {
+    try {
+        const { data, error } = await supabase
+            .from('user_profiles')
+            .select('points')
+            .eq('id', userId)
+            .single();
+
+        if (error) throw error;
+
+        const points = data?.points || 0;
+        const pointsElement = document.getElementById('userPoints');
+        if (pointsElement) {
+            pointsElement.textContent = `${points.toLocaleString()} pt`;
+        }
+    } catch (error) {
+        console.error('ポイント残高取得エラー:', error);
+    }
 }
 
 // ログアウト機能（Supabase連携）

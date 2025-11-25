@@ -78,6 +78,7 @@ function renderUsers() {
                 <td>${displayName}</td>
                 <td>${formatDate(user.created_at)}</td>
                 <td>${user.order_count || 0}</td>
+                <td>${(user.points || 0).toLocaleString()} pt</td>
                 <td>
                     <span class="status-badge ${isWithdrawn ? 'inactive' : 'active'}">
                         ${isWithdrawn ? '退会済み' : 'アクティブ'}
@@ -157,6 +158,14 @@ window.viewUserDetail = async function(userId) {
                     <div class="detail-label">退会日時</div>
                     <div>${formatDateTime(user.user_metadata?.deleted_at)}</div>
                 ` : ''}
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h3><i class="fas fa-gift"></i> ポイント情報</h3>
+            <div class="detail-grid">
+                <div class="detail-label">保有ポイント</div>
+                <div><strong style="font-size: 18px; color: #4CAF50;">${(user.points || 0).toLocaleString()} pt</strong> (${(user.points || 0).toLocaleString()}円相当)</div>
             </div>
         </div>
 

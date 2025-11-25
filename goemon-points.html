@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ポイント | 五右衛門</title>
+    <link rel="stylesheet" href="./css/goemon-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .points-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .points-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .points-balance {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .points-balance-label {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .points-value {
+            font-size: 16px;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        .points-info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .info-card i {
+            font-size: 36px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .info-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .info-card p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .points-history {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .history-header h2 {
+            font-size: 22px;
+            color: #333;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+
+        .history-item:hover {
+            background: #f9f9f9;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-date {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .history-reason {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .history-order {
+            font-size: 12px;
+            color: #667eea;
+        }
+
+        .history-points {
+            text-align: right;
+            margin-left: 20px;
+        }
+
+        .points-amount {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .points-amount.positive {
+            color: #4CAF50;
+        }
+
+        .points-amount.negative {
+            color: #f44336;
+        }
+
+        .points-balance-after {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-history i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 768px) {
+            .points-balance {
+                font-size: 36px;
+            }
+
+            .history-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .history-points {
+                margin-left: 0;
+                margin-top: 10px;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="container">
+            <div class="header-logo">
+                <a href="goemon-index.html">
+                    <h1>五右衛門</h1>
+                </a>
+            </div>
+
+            <nav class="header-nav">
+                <a href="goemon-products.html">商品一覧</a>
+                <a href="goemon-about.html">五右衛門について</a>
+            </nav>
+
+            <div class="header-utilities">
+                <div class="utility-search">
+                    <input type="text" placeholder="商品を検索" class="search-input" id="headerSearch">
+                    <button class="search-button" id="headerSearchBtn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+
+                <a href="goemon-mypage.html" class="utility-icon" id="userIcon">
+                    <i class="fas fa-user"></i>
+                </a>
+
+                <a href="goemon-favorites.html" class="utility-icon">
+                    <i class="fas fa-heart"></i>
+                    <span class="badge" id="wishlistBadge">0</span>
+                </a>
+
+                <a href="goemon-cart.html" class="utility-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="badge" id="cartBadge">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- パンくずリスト -->
+    <nav class="breadcrumb">
+        <div class="container">
+            <ul>
+                <li><a href="goemon-index.html">ホーム</a></li>
+                <li><a href="goemon-mypage.html">マイページ</a></li>
+                <li>ポイント</li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- メインコンテンツ -->
+    <main>
+        <div class="points-container">
+            <!-- ポイント残高カード -->
+            <div class="points-header">
+                <div class="points-balance-label">保有ポイント</div>
+                <div class="points-balance" id="pointsBalance">0 pt</div>
+                <div class="points-value" id="pointsValue">0円相当</div>
+            </div>
+
+            <!-- ポイント情報カード -->
+            <div class="points-info-cards">
+                <div class="info-card">
+                    <i class="fas fa-shopping-bag"></i>
+                    <h3>ポイントの貯め方</h3>
+                    <p>お買い物500円（送料別）ごとに1ポイント付与されます</p>
+                </div>
+
+                <div class="info-card">
+                    <i class="fas fa-coins"></i>
+                    <h3>ポイントの使い方</h3>
+                    <p>1ポイント = 1円として、お買い物時にご利用いただけます</p>
+                </div>
+
+                <div class="info-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <h3>有効期限</h3>
+                    <p>ポイントに有効期限はありません。いつでもご利用いただけます</p>
+                </div>
+            </div>
+
+            <!-- ポイント履歴 -->
+            <div class="points-history">
+                <div class="history-header">
+                    <h2><i class="fas fa-history"></i> ポイント履歴</h2>
+                </div>
+
+                <ul class="history-list" id="historyList">
+                    <li class="empty-history">
+                        <i class="fas fa-inbox"></i>
+                        <p>ポイント履歴を読み込み中...</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h3>ショッピングガイド</h3>
+                    <ul>
+                        <li><a href="#">ご利用ガイド</a></li>
+                        <li><a href="#">配送・送料について</a></li>
+                        <li><a href="#">返品・交換について</a></li>
+                        <li><a href="#">お支払い方法</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>サポート</h3>
+                    <ul>
+                        <li><a href="#">よくある質問</a></li>
+                        <li><a href="#">お問い合わせ</a></li>
+                        <li><a href="#">サイズガイド</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>会社情報</h3>
+                    <ul>
+                        <li><a href="#">会社概要</a></li>
+                        <li><a href="#">採用情報</a></li>
+                        <li><a href="#">プライバシーポリシー</a></li>
+                        <li><a href="#">利用規約</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>SNS</h3>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="LINE"><i class="fab fa-line"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 五右衛門 All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- スクロールトップボタン -->
+    <button class="scroll-to-top" id="scrollToTop" aria-label="トップへ戻る">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/goemon-points-db.js"></script>
+    <script src="./js/goemon-auto-logout.js"></script>
+    <script src="./js/goemon-modal.js"></script>
+    <script src="./js/goemon-main.js"></script>
+    <script src="./js/goemon-points.js"></script>
+</body>
+</html>
