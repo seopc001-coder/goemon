@@ -166,26 +166,19 @@ window.switchTab = function(tabName) {
 // カテゴリ管理
 // ========================================
 
-// カテゴリデータを読み込み
-function loadCategories() {
+// カテゴリデータを読み込み(Supabaseから)
+async function loadCategories() {
     try {
-        const savedCategories = localStorage.getItem('goemoncategories');
-        if (savedCategories) {
-            categories = JSON.parse(savedCategories);
-        } else {
-            // デフォルトカテゴリ（ECサイトの並び順）
-            categories = [
-                { id: 'outer', name: 'アウター', slug: 'outer', description: 'ジャケット、コートなど', order: 0 },
-                { id: 'tops', name: 'トップス', slug: 'tops', description: 'シャツ、カットソーなど', order: 1 },
-                { id: 'bottoms', name: 'ボトムス', slug: 'bottoms', description: 'パンツ、スカートなど', order: 2 },
-                { id: 'onepiece', name: 'ワンピース', slug: 'onepiece', description: 'ワンピース・ドレス', order: 3 },
-                { id: 'shoes', name: 'シューズ', slug: 'shoes', description: '靴・スニーカー', order: 4 },
-                { id: 'bags', name: 'バッグ', slug: 'bags', description: 'バッグ・小物', order: 5 },
-                { id: 'accessories', name: 'アクセサリー', slug: 'accessories', description: 'アクセサリー・小物', order: 6 }
-            ];
-            localStorage.setItem('goemoncategories', JSON.stringify(categories));
-        }
+        const data = await fetchAllCategories();
+        categories = data.map(dbCat => ({
+            id: dbCat.id,
+            name: dbCat.name,
+            slug: dbCat.slug || dbCat.name,
+            description: dbCat.description || '',
+            order: dbCat.display_order
+        }));
 
+        console.log('Loaded categories from Supabase:', categories.length);
         renderCategories();
     } catch (error) {
         console.error('Error loading categories:', error);
@@ -240,19 +233,27 @@ function renderCategories() {
     });
 }
 
-// カテゴリ順序を更新
-function updateCategoryOrder() {
+// カテゴリ順序を更新(Supabaseに保存)
+async function updateCategoryOrder() {
     const items = document.querySelectorAll('.category-item');
-    items.forEach((item, index) => {
-        const id = item.dataset.id;
-        const category = categories.find(c => c.id === id);
-        if (category) {
-            category.order = index;
-        }
-    });
 
-    localStorage.setItem('goemoncategories', JSON.stringify(categories));
-    showAlertModal('並び順を更新しました', 'success');
+    try {
+        for (let index = 0; index < items.length; index++) {
+            const item = items[index];
+            const id = item.dataset.id;
+            const category = categories.find(c => c.id === id);
+            if (category) {
+                category.order = index;
+                // Supabaseに順序を更新
+                await updateCategoryOrder_DB(id, index);
+            }
+        }
+
+        showAlertModal('並び順を更新しました', 'success');
+    } catch (error) {
+        console.error('並び順更新エラー:', error);
+        showAlertModal('並び順の更新に失敗しました: ' + error.message, 'error');
+    }
 }
 
 // カテゴリ追加モーダルを開く
@@ -308,8 +309,8 @@ window.editCategory = function(id) {
     }
 }
 
-// カテゴリフォーム送信処理
-function handleCategoryFormSubmit(e) {
+// カテゴリフォーム送信処理(Supabaseに保存)
+async function handleCategoryFormSubmit(e) {
     e.preventDefault();
 
     const name = document.getElementById('categoryName').value.trim();
@@ -339,42 +340,29 @@ function handleCategoryFormSubmit(e) {
         return;
     }
 
-    if (editingCategoryId) {
-        // 編集モード
-        const index = categories.findIndex(c => c.id === editingCategoryId);
-        if (index !== -1) {
-            categories[index] = {
-                ...categories[index],
-                name,
-                slug,
-                description
-            };
+    try {
+        if (editingCategoryId) {
+            // 編集モード - Supabaseを更新
+            await updateCategory_DB(editingCategoryId, name, slug, description);
+            showAlertModal('カテゴリを更新しました', 'success');
+        } else {
+            // 新規追加モード - Supabaseに追加
+            await addCategory_DB(name, slug, description, categories.length);
+            showAlertModal('カテゴリを追加しました', 'success');
         }
-        showAlertModal('カテゴリを更新しました', 'success');
-    } else {
-        // 新規追加モード
-        const newCategory = {
-            id: generateId(),
-            name,
-            slug,
-            description,
-            order: categories.length
-        };
-        categories.push(newCategory);
-        showAlertModal('カテゴリを追加しました', 'success');
+
+        // モーダルを閉じる
+        closeCategoryModal();
+
+        // カテゴリリストを再読み込み
+        await loadCategories();
+    } catch (error) {
+        console.error('カテゴリ保存エラー:', error);
+        showAlertModal('カテゴリの保存に失敗しました: ' + error.message, 'error');
     }
-
-    // localStorageに保存
-    localStorage.setItem('goemoncategories', JSON.stringify(categories));
-
-    // モーダルを閉じる
-    closeCategoryModal();
-
-    // カテゴリリストを再表示
-    renderCategories();
 }
 
-// カテゴリを削除
+// カテゴリを削除(Supabaseから削除)
 window.deleteCategory = function(id) {
     const category = categories.find(c => c.id === id);
 
@@ -385,12 +373,17 @@ window.deleteCategory = function(id) {
 
     showConfirmModal(
         `カテゴリ「${category.name}」を削除してもよろしいですか？\n\nこの操作は取り消せません。`,
-        () => {
-            categories = categories.filter(c => c.id !== id);
-            localStorage.setItem('goemoncategories', JSON.stringify(categories));
+        async () => {
+            try {
+                // Supabaseから削除
+                await window.deleteCategoryFromDB(id);
 
-            showAlertModal('カテゴリを削除しました', 'success');
-            renderCategories();
+                showAlertModal('カテゴリを削除しました', 'success');
+                await loadCategories();
+            } catch (error) {
+                console.error('カテゴリ削除エラー:', error);
+                showAlertModal('カテゴリの削除に失敗しました: ' + error.message, 'error');
+            }
         }
     );
 }
@@ -411,13 +404,26 @@ window.closeCategoryModal = function() {
 // 商品タイプ管理
 // ========================================
 
-// 商品タイプを読み込み
-function loadProductTypes() {
-    const savedProductTypes = localStorage.getItem('goemonproducttypes');
-    if (savedProductTypes) {
-        productTypes = JSON.parse(savedProductTypes);
+// 商品タイプを読み込み(Supabaseから)
+async function loadProductTypes() {
+    try {
+        const data = await fetchAllProductTypes();
+        productTypes = data.map(dbType => ({
+            id: dbType.id,
+            name: dbType.name,
+            slug: dbType.slug || dbType.name,
+            description: dbType.description || '',
+            tag: dbType.tag || '',
+            tagColor: dbType.tag_color || 'blue',
+            order: dbType.display_order
+        }));
+
+        console.log('Loaded product types from Supabase:', productTypes.length);
+        renderProductTypes();
+    } catch (error) {
+        console.error('Error loading product types:', error);
+        showAlertModal('商品タイプの読み込みに失敗しました', 'error');
     }
-    renderProductTypes();
 }
 
 // 商品タイプを表示
@@ -472,19 +478,27 @@ function renderProductTypes() {
     });
 }
 
-// 商品タイプ順序を更新
-function updateProductTypeOrder() {
+// 商品タイプ順序を更新(Supabaseに保存)
+async function updateProductTypeOrder() {
     const items = document.querySelectorAll('#productTypesList .category-item');
-    items.forEach((item, index) => {
-        const id = item.dataset.id;
-        const type = productTypes.find(t => t.id === id);
-        if (type) {
-            type.order = index;
-        }
-    });
 
-    localStorage.setItem('goemonproducttypes', JSON.stringify(productTypes));
-    showAlertModal('並び順を更新しました', 'success');
+    try {
+        for (let index = 0; index < items.length; index++) {
+            const item = items[index];
+            const id = item.dataset.id;
+            const type = productTypes.find(t => t.id === id);
+            if (type) {
+                type.order = index;
+                // Supabaseに順序を更新
+                await updateProductTypeOrder_DB(id, index);
+            }
+        }
+
+        showAlertModal('並び順を更新しました', 'success');
+    } catch (error) {
+        console.error('並び順更新エラー:', error);
+        showAlertModal('並び順の更新に失敗しました: ' + error.message, 'error');
+    }
 }
 
 // 商品タイプ追加モーダルを開く
@@ -542,8 +556,8 @@ window.editProductType = function(id) {
     }
 }
 
-// 商品タイプフォーム送信処理
-function handleProductTypeFormSubmit(e) {
+// 商品タイプフォーム送信処理(Supabaseに保存)
+async function handleProductTypeFormSubmit(e) {
     e.preventDefault();
 
     const name = document.getElementById('productTypeName').value.trim();
@@ -565,43 +579,29 @@ function handleProductTypeFormSubmit(e) {
         return;
     }
 
-    if (editingProductTypeId) {
-        // 編集
-        const type = productTypes.find(t => t.id === editingProductTypeId);
-        if (type) {
-            type.name = name;
-            type.slug = slug;
-            type.description = description;
-            type.tag = tag;
-            type.tagColor = tagColor;
+    try {
+        if (editingProductTypeId) {
+            // 編集モード - Supabaseを更新
+            await updateProductType_DB(editingProductTypeId, name, slug, description, tag, tagColor);
+            showAlertModal('商品タイプを更新しました', 'success');
+        } else {
+            // 新規追加モード - Supabaseに追加
+            await addProductType_DB(name, slug, description, tag, tagColor, productTypes.length);
+            showAlertModal('商品タイプを追加しました', 'success');
         }
-        showAlertModal('商品タイプを更新しました', 'success');
-    } else {
-        // 新規追加
-        const newType = {
-            id: slug,
-            name: name,
-            slug: slug,
-            description: description,
-            tag: tag,
-            tagColor: tagColor,
-            order: productTypes.length
-        };
-        productTypes.push(newType);
-        showAlertModal('商品タイプを追加しました', 'success');
+
+        // モーダルを閉じる
+        closeProductTypeModal();
+
+        // 商品タイプリストを再読み込み
+        await loadProductTypes();
+    } catch (error) {
+        console.error('商品タイプ保存エラー:', error);
+        showAlertModal('商品タイプの保存に失敗しました: ' + error.message, 'error');
     }
-
-    // localStorageに保存
-    localStorage.setItem('goemonproducttypes', JSON.stringify(productTypes));
-
-    // モーダルを閉じる
-    closeProductTypeModal();
-
-    // 商品タイプリストを再表示
-    renderProductTypes();
 }
 
-// 商品タイプを削除
+// 商品タイプを削除(Supabaseから削除)
 window.deleteProductType = function(id) {
     const type = productTypes.find(t => t.id === id);
 
@@ -612,12 +612,17 @@ window.deleteProductType = function(id) {
 
     showConfirmModal(
         `「${type.name}」を削除してもよろしいですか？`,
-        function() {
-            productTypes = productTypes.filter(t => t.id !== id);
-            localStorage.setItem('goemonproducttypes', JSON.stringify(productTypes));
+        async function() {
+            try {
+                // Supabaseから削除
+                await window.deleteProductTypeFromDB(id);
 
-            showAlertModal('商品タイプを削除しました', 'success');
-            renderProductTypes();
+                showAlertModal('商品タイプを削除しました', 'success');
+                await loadProductTypes();
+            } catch (error) {
+                console.error('商品タイプ削除エラー:', error);
+                showAlertModal('商品タイプの削除に失敗しました: ' + error.message, 'error');
+            }
         }
     );
 }
@@ -641,7 +646,7 @@ window.closeProductTypeModal = function() {
 // ヒーロー画像データを読み込み
 async function loadHeroImages() {
     try {
-        const data = await fetchAllHeroImages();
+        const data = await window.fetchAllHeroImages();
         heroImages = data.map(dbImage => ({
             id: dbImage.id,
             url: dbImage.image_url,
@@ -692,10 +697,10 @@ function renderHeroImages() {
                 <span class="hero-image-order">表示順: ${index + 1}</span>
             </div>
             <div class="hero-image-actions">
-                <button class="btn-small btn-edit" onclick="editHeroImage('${image.id}')">
+                <button class="btn-small btn-edit" data-action="edit" data-image-id="${image.id}">
                     <i class="fas fa-edit"></i> 編集
                 </button>
-                <button class="btn-small btn-delete" onclick="deleteHeroImage('${image.id}')">
+                <button class="btn-small btn-delete" data-action="delete" data-image-id="${image.id}">
                     <i class="fas fa-trash"></i> 削除
                 </button>
             </div>
@@ -707,6 +712,21 @@ function renderHeroImages() {
         animation: 150,
         handle: '.hero-drag-handle',
         onEnd: updateHeroImageOrder
+    });
+
+    // ボタンのイベントリスナーを追加
+    list.querySelectorAll('button[data-action]').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const action = this.dataset.action;
+            const imageId = this.dataset.imageId;
+
+            if (action === 'edit') {
+                window.editHeroImage(imageId);
+            } else if (action === 'delete') {
+                window.deleteHeroImage(imageId);
+            }
+        });
     });
 }
 
@@ -722,7 +742,7 @@ async function updateHeroImageOrder() {
             if (image) {
                 image.order = index;
                 // Supabaseに順序を更新
-                await updateHeroImage(id, {
+                await window.updateHeroImage(id, {
                     imageUrl: image.url,
                     title: image.alt,
                     subtitle: image.title,
@@ -829,7 +849,7 @@ async function handleHeroImageFormSubmit(e) {
                 };
 
                 // Supabaseに更新
-                await updateHeroImage(editingHeroImageId, {
+                await window.updateHeroImage(editingHeroImageId, {
                     imageUrl: url,
                     title: alt,
                     subtitle: title,
@@ -851,7 +871,7 @@ async function handleHeroImageFormSubmit(e) {
             };
 
             // Supabaseに追加
-            const result = await addHeroImage({
+            const result = await window.addHeroImage({
                 imageUrl: url,
                 title: alt,
                 subtitle: title,
@@ -891,7 +911,7 @@ window.deleteHeroImage = function(id) {
         async () => {
             try {
                 // Supabaseから削除
-                await deleteHeroImage(id);
+                await window.deleteHeroImageFromDB(id);
 
                 heroImages = heroImages.filter(img => img.id !== id);
                 showAlertModal('ヒーロー画像を削除しました', 'success');

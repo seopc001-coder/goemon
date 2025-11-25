@@ -281,6 +281,70 @@ async function addCategory(name, displayOrder) {
 }
 
 /**
+ * カテゴリーを更新
+ */
+async function updateCategory_DB(categoryId, name, slug, description) {
+    try {
+        const { data, error } = await supabase
+            .from('categories')
+            .update({
+                name: name,
+                slug: slug,
+                description: description
+            })
+            .eq('id', categoryId)
+            .select();
+
+        if (error) throw error;
+        return data[0];
+    } catch (error) {
+        console.error('カテゴリー更新エラー:', error);
+        throw error;
+    }
+}
+
+/**
+ * カテゴリーの表示順序を更新
+ */
+async function updateCategoryOrder_DB(categoryId, displayOrder) {
+    try {
+        const { error } = await supabase
+            .from('categories')
+            .update({ display_order: displayOrder })
+            .eq('id', categoryId);
+
+        if (error) throw error;
+        return true;
+    } catch (error) {
+        console.error('カテゴリー順序更新エラー:', error);
+        throw error;
+    }
+}
+
+/**
+ * カテゴリーを追加(設定画面用 - slug, descriptionも含む)
+ */
+async function addCategory_DB(name, slug, description, displayOrder) {
+    try {
+        const { data, error } = await supabase
+            .from('categories')
+            .insert([{
+                name: name,
+                slug: slug,
+                description: description,
+                display_order: displayOrder || 0
+            }])
+            .select();
+
+        if (error) throw error;
+        return data[0];
+    } catch (error) {
+        console.error('カテゴリー追加エラー:', error);
+        throw error;
+    }
+}
+
+/**
  * カテゴリーを削除
  */
 async function deleteCategory(categoryId) {
@@ -410,6 +474,74 @@ async function deleteProductType(typeId) {
     }
 }
 
+/**
+ * 商品タイプを更新
+ */
+async function updateProductType_DB(typeId, name, slug, description, tag, tagColor) {
+    try {
+        const { data, error } = await supabase
+            .from('product_types')
+            .update({
+                name: name,
+                slug: slug,
+                description: description,
+                tag: tag,
+                tag_color: tagColor
+            })
+            .eq('id', typeId)
+            .select();
+
+        if (error) throw error;
+        return data[0];
+    } catch (error) {
+        console.error('商品タイプ更新エラー:', error);
+        throw error;
+    }
+}
+
+/**
+ * 商品タイプの表示順序を更新
+ */
+async function updateProductTypeOrder_DB(typeId, displayOrder) {
+    try {
+        const { error } = await supabase
+            .from('product_types')
+            .update({ display_order: displayOrder })
+            .eq('id', typeId);
+
+        if (error) throw error;
+        return true;
+    } catch (error) {
+        console.error('商品タイプ順序更新エラー:', error);
+        throw error;
+    }
+}
+
+/**
+ * 商品タイプを追加(設定画面用 - slug, description, tag, tag_colorも含む)
+ */
+async function addProductType_DB(name, slug, description, tag, tagColor, displayOrder) {
+    try {
+        const { data, error } = await supabase
+            .from('product_types')
+            .insert([{
+                name: name,
+                slug: slug,
+                description: description,
+                tag: tag,
+                tag_color: tagColor,
+                display_order: displayOrder || 0
+            }])
+            .select();
+
+        if (error) throw error;
+        return data[0];
+    } catch (error) {
+        console.error('商品タイプ追加エラー:', error);
+        throw error;
+    }
+}
+
 // 設定画面から呼び出すための別名エクスポート
 window.deleteProductTypeFromDB = deleteProductType;
 
@@ -503,6 +635,12 @@ async function deleteHeroImage(imageId) {
         throw error;
     }
 }
+
+// ヒーロー画像管理関数をグローバルに公開
+window.fetchAllHeroImages = fetchAllHeroImages;
+window.addHeroImage = addHeroImage;
+window.updateHeroImage = updateHeroImage;
+window.deleteHeroImageFromDB = deleteHeroImage;
 
 // ===================================
 // データ変換ヘルパー関数
