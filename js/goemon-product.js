@@ -132,6 +132,9 @@ function updateProductDisplay() {
     // バリエーション選択UIを生成
     setupProductVariants();
 
+    // 全体の売り切れ判定と表示
+    checkAndDisplaySoldOutStatus();
+
     // 商品画像を更新
     updateProductImages();
 
@@ -932,8 +935,14 @@ function updateStockStatus() {
     // 在庫数を取得
     const stock = variantsStock[stockKey] || 0;
 
-    // 在庫状況の表示を更新（ただし非表示のまま、管理用）
-    console.log(`Selected variant: ${stockKey}, Stock: ${stock}`);
+    // デバッグ用のログを追加
+    console.log('=== 在庫チェック詳細 ===');
+    console.log('選択された色:', selectedColor);
+    console.log('選択されたサイズ:', selectedSize);
+    console.log('生成されたキー:', stockKey);
+    console.log('利用可能な在庫キー:', Object.keys(variantsStock));
+    console.log('該当する在庫数:', stock);
+    console.log('====================');
 
     // カートボタンの有効/無効を切り替え
     const addToCartBtn = document.querySelector('.btn-add-to-cart');
@@ -948,6 +957,46 @@ function updateStockStatus() {
             addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> カートに追加';
             addToCartBtn.style.background = '';
             addToCartBtn.style.cursor = 'pointer';
+        }
+    }
+}
+
+/**
+ * 商品全体の売り切れ状態をチェックして表示
+ */
+function checkAndDisplaySoldOutStatus() {
+    let isAllSoldOut = false;
+
+    // バリエーションがある場合
+    if (productData && productData.variants && productData.variants.stock) {
+        const variantsStock = productData.variants.stock;
+        const allStockValues = Object.values(variantsStock);
+
+        // すべての在庫が0の場合
+        isAllSoldOut = allStockValues.every(stock => stock === 0);
+    } else {
+        // バリエーションがない場合は基本在庫をチェック
+        isAllSoldOut = (productData.stock || 0) === 0;
+    }
+
+    // 売り切れの場合、商品タイトルの下に「売り切れ」バッジを表示
+    if (isAllSoldOut) {
+        const titleElement = document.querySelector('.product-title');
+        if (titleElement && !document.querySelector('.sold-out-badge')) {
+            const soldOutBadge = document.createElement('span');
+            soldOutBadge.className = 'sold-out-badge';
+            soldOutBadge.style.cssText = 'display: inline-block; background: #ff4444; color: white; padding: 6px 15px; border-radius: 4px; font-size: 14px; font-weight: bold; margin-left: 15px; vertical-align: middle;';
+            soldOutBadge.innerHTML = '<i class="fas fa-times-circle"></i> 売り切れ';
+            titleElement.appendChild(soldOutBadge);
+        }
+
+        // カートボタンを無効化
+        const addToCartBtn = document.querySelector('.btn-add-to-cart');
+        if (addToCartBtn) {
+            addToCartBtn.disabled = true;
+            addToCartBtn.textContent = '売り切れ';
+            addToCartBtn.style.background = '#ccc';
+            addToCartBtn.style.cursor = 'not-allowed';
         }
     }
 }
