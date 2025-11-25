@@ -801,7 +801,6 @@ window.editHeroImage = function(id) {
     document.getElementById('heroImageUrl').value = image.url;
     document.getElementById('heroImageLink').value = image.link || '';
     document.getElementById('heroImageAlt').value = image.alt;
-    document.getElementById('heroImageTitle').value = image.title || '';
 
     const modal = document.getElementById('heroImageModal');
     if (modal) {
@@ -823,7 +822,7 @@ async function handleHeroImageFormSubmit(e) {
     const url = document.getElementById('heroImageUrl').value.trim();
     const link = document.getElementById('heroImageLink').value.trim();
     const alt = document.getElementById('heroImageAlt').value.trim();
-    const title = document.getElementById('heroImageTitle').value.trim();
+    const title = alt; // 代替テキストをサブタイトルとして使用
 
     // バリデーション
     if (!url) {
