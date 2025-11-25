@@ -279,8 +279,8 @@ async function loadProductTypeSections() {
         // 表示順でソート
         productTypes.sort((a, b) => a.display_order - b.display_order);
 
-        // 上から3つの商品タイプのみを使用
-        const topThreeTypes = productTypes.slice(0, 3);
+        // 上から2つの商品タイプのみを使用
+        const topThreeTypes = productTypes.slice(0, 2);
 
         // メインコンテンツエリアを取得
         const mainContent = document.querySelector('.contents-main');
@@ -296,7 +296,7 @@ async function loadProductTypeSections() {
         const oldSections = mainContent.querySelectorAll('.box-category-discount, .box-category-ranking, .box-category-sale');
         oldSections.forEach(section => section.remove());
 
-        // 上から3つの商品タイプのセクションを生成
+        // 上から2つの商品タイプのセクションを生成
         topThreeTypes.forEach((type, index) => {
             const section = createProductTypeSection(type, index);
 
