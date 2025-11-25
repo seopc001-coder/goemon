@@ -194,39 +194,42 @@
 <body>
     <!-- ヘッダー -->
     <header class="header">
-        <div class="container">
+        <div class="header-container">
             <div class="header-logo">
                 <a href="goemon-index.html">
                     <h1>五右衛門</h1>
                 </a>
             </div>
 
-            <nav class="header-nav">
-                <a href="goemon-products.html">商品一覧</a>
-                <a href="goemon-about.html">五右衛門について</a>
-            </nav>
-
-            <div class="header-utilities">
-                <div class="utility-search">
-                    <input type="text" placeholder="商品を検索" class="search-input" id="headerSearch">
-                    <button class="search-button" id="headerSearchBtn">
+            <div class="header-right">
+                <div class="header-search">
+                    <input type="text" placeholder="商品を検索" id="headerSearch">
+                    <button id="headerSearchBtn">
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
 
-                <a href="goemon-mypage.html" class="utility-icon" id="userIcon">
-                    <i class="fas fa-user"></i>
-                </a>
-
-                <a href="goemon-favorites.html" class="utility-icon">
-                    <i class="fas fa-heart"></i>
-                    <span class="badge" id="wishlistBadge">0</span>
-                </a>
-
-                <a href="goemon-cart.html" class="utility-icon">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="badge" id="cartBadge">0</span>
-                </a>
+                <div class="header-utility">
+                    <ul>
+                        <li>
+                            <a href="goemon-mypage.html" id="userIcon">
+                                <i class="fas fa-user"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="goemon-favorites.html">
+                                <i class="fas fa-heart"></i>
+                                <span class="txt-noti" id="wishlistBadge">0</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="goemon-cart.html">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="txt-noti" id="cartBadge">0</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </header>
