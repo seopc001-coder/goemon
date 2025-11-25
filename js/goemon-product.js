@@ -514,6 +514,8 @@ function initializeAddToCart() {
     addToCartBtn.addEventListener('click', async function() {
         console.log('=== カートに追加ボタンがクリックされました ===');
         console.log('現在の選択: color =', selectedColor, ', size =', selectedSize, ', quantity =', quantity);
+        console.log('現在のproductData:', productData);
+        console.log('現在のproductData.id:', productData?.id);
 
         try {
             // 商品が削除されていないか再確認(Supabaseから取得)
@@ -543,7 +545,10 @@ function initializeAddToCart() {
             };
 
             console.log('カートに追加しようとしている商品:', product);
+            console.log('addToCart関数を呼び出します...');
             await addToCart(product);
+            console.log('addToCart関数が完了しました');
+            console.log('モーダルを表示します');
             showModal();
             updateModalContent(product);
         } catch (error) {
@@ -557,17 +562,22 @@ function initializeAddToCart() {
 function getColorName(colorValue) {
     const colorMap = {
         'white': 'ホワイト',
+        '白': '白',
         'black': 'ブラック',
-        'pink': 'ピンク'
+        'pink': 'ピンク',
+        'red': 'red',
+        'レッド': 'レッド'
     };
-    return colorMap[colorValue] || 'ホワイト';
+    return colorMap[colorValue] || colorValue; // 見つからない場合はそのまま返す
 }
 
 // カートに追加
 async function addToCart(product) {
+    console.log('>>> addToCart関数が開始されました。product:', product);
     try {
         // Supabaseで認証状態をチェック
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('>>> セッション取得完了。ログイン状態:', session ? 'ログイン中' : 'ゲスト');
 
         if (session?.user) {
             // 認証ユーザー: Supabaseに追加
