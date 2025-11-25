@@ -516,7 +516,7 @@ async function saveCart() {
 
             // 新しいカートアイテムを追加（DB関数を直接呼び出し、無限ループを防ぐ）
             for (const item of cartItems) {
-                await window.addToCart(userId, {
+                await window.addCartItemToDb(userId, {
                     productId: item.id,
                     quantity: item.quantity,
                     color: item.color,
