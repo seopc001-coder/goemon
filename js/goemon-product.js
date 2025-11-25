@@ -545,9 +545,9 @@ function initializeAddToCart() {
             };
 
             console.log('カートに追加しようとしている商品:', product);
-            console.log('addToCart関数を呼び出します...');
-            await addToCart(product);
-            console.log('addToCart関数が完了しました');
+            console.log('addProductToCart関数を呼び出します...');
+            await addProductToCart(product);
+            console.log('addProductToCart関数が完了しました');
             console.log('モーダルを表示します');
             showModal();
             updateModalContent(product);
@@ -572,8 +572,8 @@ function getColorName(colorValue) {
 }
 
 // カートに追加
-async function addToCart(product) {
-    console.log('>>> addToCart関数が開始されました。product:', product);
+async function addProductToCart(product) {
+    console.log('>>> addProductToCart関数が開始されました。product:', product);
     try {
         // Supabaseで認証状態をチェック
         const { data: { session } } = await supabase.auth.getSession();
@@ -582,9 +582,13 @@ async function addToCart(product) {
         if (session?.user) {
             // 認証ユーザー: Supabaseに追加
             const userId = session.user.id;
+            console.log('>>> ユーザーID:', userId);
 
             // 既存のカートアイテムを取得
+            console.log('>>> fetchCartItems関数を呼び出します...');
             const cartItems = await fetchCartItems(userId);
+            console.log('>>> 取得したカートアイテム数:', cartItems ? cartItems.length : 'null/undefined');
+            console.log('>>> カートアイテム:', cartItems);
 
             // 同じ商品・色・サイズのアイテムを探す
             const existingItem = cartItems.find(item => {
@@ -596,18 +600,34 @@ async function addToCart(product) {
 
             if (existingItem) {
                 // 既存アイテムの数量を更新
+                console.log('>>> 既存アイテムを発見。数量更新を開始します。');
                 const newQuantity = existingItem.quantity + product.quantity;
                 await updateCartItemQuantity(existingItem.id, newQuantity);
                 console.log('カート数量を更新:', existingItem.id, newQuantity);
             } else {
-                // 新しいアイテムを追加
-                await window.addToCart(userId, {
+                // 新しいアイテムを追加 (goemon-user-db.jsのaddToCart関数を呼び出す)
+                console.log('>>> 新規アイテム追加を開始。addToCart関数の型:', typeof addToCart);
+                console.log('>>> 追加するデータ:', {
                     productId: product.id,
                     quantity: product.quantity,
                     color: product.color,
                     size: product.size
                 });
-                console.log('カートに新規追加:', product);
+
+                try {
+                    console.log('>>> addToCart関数を呼び出します...');
+                    await addToCart(userId, {
+                        productId: product.id,
+                        quantity: product.quantity,
+                        color: product.color,
+                        size: product.size
+                    });
+                    console.log('>>> addToCart関数が完了しました');
+                    console.log('カートに新規追加:', product);
+                } catch (addError) {
+                    console.error('>>> addToCart関数内でエラー発生:', addError);
+                    throw addError;
+                }
             }
         } else {
             // ゲストユーザー: localStorageに追加
