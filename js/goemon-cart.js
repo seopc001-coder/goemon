@@ -305,13 +305,28 @@ async function updateItemQuantity(cartItem, newQuantity) {
     const color = cartItem.dataset.color;
     const size = cartItem.dataset.size;
 
-    const item = cartItems.find(i =>
-        i.id == itemId &&
-        (i.color || '') === color &&
-        (i.size || '') === size
-    );
+    console.log('>>> updateItemQuantity called:', { itemId, color, size, newQuantity });
+
+    const item = cartItems.find(i => {
+        const matchId = i.id == itemId;
+        // 空文字列とundefinedを区別して比較
+        const matchColor = (i.color === undefined || i.color === null ? '' : i.color) === (color === undefined || color === null ? '' : color);
+        const matchSize = (i.size === undefined || i.size === null ? '' : i.size) === (size === undefined || size === null ? '' : size);
+
+        console.log(`>>> Checking item for update:`, {
+            id: i.id,
+            color: i.color,
+            size: i.size,
+            matchId,
+            matchColor,
+            matchSize
+        });
+
+        return matchId && matchColor && matchSize;
+    });
 
     if (item) {
+        console.log('>>> Found item to update:', item);
         item.quantity = newQuantity;
 
         const product = productsData[item.id] || {};
@@ -325,17 +340,37 @@ async function updateItemQuantity(cartItem, newQuantity) {
 
         await saveCart();
         renderCartSummary();
+    } else {
+        console.warn('>>> Item not found for update');
     }
 }
 
 // カートから商品を削除
 async function removeCartItem(itemId, color, size) {
+    console.log('>>> removeCartItem called:', { itemId, color, size });
+    console.log('>>> Current cartItems:', cartItems);
+
     cartItems = cartItems.filter(item => {
         const matchId = item.id == itemId;
-        const matchColor = (item.color || '') === color;
-        const matchSize = (item.size || '') === size;
-        return !(matchId && matchColor && matchSize);
+        // 空文字列とundefinedを区別して比較
+        const matchColor = (item.color === undefined || item.color === null ? '' : item.color) === (color === undefined || color === null ? '' : color);
+        const matchSize = (item.size === undefined || item.size === null ? '' : item.size) === (size === undefined || size === null ? '' : size);
+
+        const shouldRemove = matchId && matchColor && matchSize;
+        console.log(`>>> Checking item:`, {
+            id: item.id,
+            color: item.color,
+            size: item.size,
+            matchId,
+            matchColor,
+            matchSize,
+            shouldRemove
+        });
+
+        return !shouldRemove;
     });
+
+    console.log('>>> Filtered cartItems:', cartItems);
     await saveCart();
 }
 
