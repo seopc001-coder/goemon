@@ -949,14 +949,33 @@ function generateId() {
 
 // 画像アップロード機能を初期化
 function initializeImageUploads() {
-    // 画像アップロードライブラリが読み込まれているか確認
-    if (typeof setupFileInput !== 'function') {
-        console.warn('Image upload library not loaded');
-        return;
-    }
+    // ヒーロー画像のファイル入力イベント
+    const heroImageFile = document.getElementById('heroImageFile');
+    const heroImageUrl = document.getElementById('heroImageUrl');
 
-    // ヒーロー画像のファイル入力を設定
-    setupFileInput('heroImageFile', 'heroImagePreview', 'heroImageUrl');
+    if (heroImageFile && heroImageUrl) {
+        heroImageFile.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // ファイルが選択された場合、仮のURLを設定
+                // 実際のアップロードはフォーム送信時に行う
+                heroImageUrl.value = 'uploading/' + file.name;
+                heroImageUrl.disabled = true;
+                console.log('File selected:', file.name);
+            } else {
+                heroImageUrl.value = '';
+                heroImageUrl.disabled = false;
+            }
+        });
+
+        // URLフィールドが変更されたらファイル選択をクリア
+        heroImageUrl.addEventListener('input', function() {
+            if (heroImageFile.value) {
+                heroImageFile.value = '';
+                heroImageUrl.disabled = false;
+            }
+        });
+    }
 
     console.log('Image upload functionality initialized for hero images');
 }
