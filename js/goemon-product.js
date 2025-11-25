@@ -605,8 +605,8 @@ async function addProductToCart(product) {
                 await updateCartItemQuantity(existingItem.id, newQuantity);
                 console.log('カート数量を更新:', existingItem.id, newQuantity);
             } else {
-                // 新しいアイテムを追加 (goemon-user-db.jsのaddToCart関数を呼び出す)
-                console.log('>>> 新規アイテム追加を開始。addToCart関数の型:', typeof addToCart);
+                // 新しいアイテムを追加 (goemon-user-db.jsのaddCartItemToDb関数を呼び出す)
+                console.log('>>> 新規アイテム追加を開始。addCartItemToDb関数の型:', typeof addCartItemToDb);
                 console.log('>>> 追加するデータ:', {
                     productId: product.id,
                     quantity: product.quantity,
@@ -615,17 +615,17 @@ async function addProductToCart(product) {
                 });
 
                 try {
-                    console.log('>>> addToCart関数を呼び出します...');
-                    await addToCart(userId, {
+                    console.log('>>> addCartItemToDb関数を呼び出します...');
+                    await addCartItemToDb(userId, {
                         productId: product.id,
                         quantity: product.quantity,
                         color: product.color,
                         size: product.size
                     });
-                    console.log('>>> addToCart関数が完了しました');
+                    console.log('>>> addCartItemToDb関数が完了しました');
                     console.log('カートに新規追加:', product);
                 } catch (addError) {
-                    console.error('>>> addToCart関数内でエラー発生:', addError);
+                    console.error('>>> addCartItemToDb関数内でエラー発生:', addError);
                     throw addError;
                 }
             }

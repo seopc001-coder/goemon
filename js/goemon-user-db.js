@@ -220,10 +220,11 @@ async function fetchCartItems(userId) {
 }
 
 /**
- * カートにアイテムを追加
+ * カートにアイテムを追加（Supabaseに直接追加）
+ * goemon-cart.jsのaddToCart関数と区別するため名前を変更
  */
-async function addToCart(userId, item) {
-    console.log('>>> [goemon-user-db.js] addToCart関数が開始されました');
+async function addCartItemToDb(userId, item) {
+    console.log('>>> [goemon-user-db.js] addCartItemToDb関数が開始されました');
     console.log('>>> [goemon-user-db.js] userId:', userId);
     console.log('>>> [goemon-user-db.js] item:', item);
 
@@ -247,7 +248,7 @@ async function addToCart(userId, item) {
             throw error;
         }
 
-        console.log('>>> [goemon-user-db.js] addToCart関数が正常に完了しました');
+        console.log('>>> [goemon-user-db.js] addCartItemToDb関数が正常に完了しました');
         return data[0];
     } catch (error) {
         console.error('>>> [goemon-user-db.js] カート追加エラー:', error);
