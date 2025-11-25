@@ -979,18 +979,20 @@ function checkAndDisplaySoldOutStatus() {
         isAllSoldOut = (productData.stock || 0) === 0;
     }
 
-    // 売り切れの場合、商品タイトルの下に「売り切れ」バッジを表示
-    if (isAllSoldOut) {
-        const titleElement = document.querySelector('.product-title');
-        if (titleElement && !document.querySelector('.sold-out-badge')) {
-            const soldOutBadge = document.createElement('span');
-            soldOutBadge.className = 'sold-out-badge';
-            soldOutBadge.style.cssText = 'display: inline-block; background: #ff4444; color: white; padding: 6px 15px; border-radius: 4px; font-size: 14px; font-weight: bold; margin-left: 15px; vertical-align: middle;';
-            soldOutBadge.innerHTML = '<i class="fas fa-times-circle"></i> 売り切れ';
-            titleElement.appendChild(soldOutBadge);
+    // 在庫状況表示を制御
+    const stockStatusDisplay = document.getElementById('stockStatusDisplay');
+    if (stockStatusDisplay) {
+        if (isAllSoldOut) {
+            // 全在庫売り切れの場合は非表示
+            stockStatusDisplay.style.display = 'none';
+        } else {
+            // 在庫ありの場合は表示
+            stockStatusDisplay.style.display = 'block';
         }
+    }
 
-        // カートボタンを無効化
+    // 売り切れの場合、カートボタンを無効化
+    if (isAllSoldOut) {
         const addToCartBtn = document.querySelector('.btn-add-to-cart-large');
         if (addToCartBtn) {
             addToCartBtn.disabled = true;
