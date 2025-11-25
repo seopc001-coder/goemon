@@ -319,19 +319,21 @@ function renderProducts(products) {
     grid.innerHTML = productsArray.map(product => {
         // 在庫数を取得（初期データ作成時に設定済み）
         const stock = product.stock || 0;
-        const soldOutConfirmed = product.soldOutConfirmed || false;
         const isPublished = product.isPublished !== false; // デフォルトはtrue
 
         // バリエーション情報を生成
         let stockDisplay = '';
         let isLowStock = false;
-        let isSoldOut = false;
+        let hasAnyStock = stock > 0; // 在庫があるかどうか（バリエーション含む）
 
         if (product.variants && product.variants.stock) {
             // バリエーションがある場合
             const variants = product.variants;
             const colors = variants.colors || [];
             const variantStock = variants.stock;
+
+            // バリエーション在庫があるかチェック
+            hasAnyStock = Object.values(variantStock).some(s => s > 0);
 
             // 色が複数ある場合：色ごとに在庫をまとめて表示
             if (colors.length > 1) {
@@ -342,9 +344,6 @@ function renderProducts(products) {
                     if (stockValue < 10) {
                         isLowStock = true;
                     }
-                    if (stockValue === 0) {
-                        isSoldOut = true;
-                    }
 
                     // キーから色を抽出（例: "レッド-M" → "レッド"）
                     const color = key.split('-')[0];
@@ -353,7 +352,8 @@ function renderProducts(products) {
                         colorStockMap[color] = {
                             items: [],
                             hasLowStock: false,
-                            minStock: Infinity
+                            minStock: Infinity,
+                            allSoldOut: true // 初期値はtrue
                         };
                     }
 
@@ -364,11 +364,23 @@ function renderProducts(products) {
                     if (stockValue < colorStockMap[color].minStock) {
                         colorStockMap[color].minStock = stockValue;
                     }
+                    // いずれかのサイズに在庫があれば、その色は売り切れではない
+                    if (stockValue > 0) {
+                        colorStockMap[color].allSoldOut = false;
+                    }
                 }
 
                 // 色ごとの在庫表示を生成
                 const colorStockDetails = [];
+                const soldOutColors = []; // 売り切れの色を追跡
+
                 for (const [color, data] of Object.entries(colorStockMap)) {
+                    const isColorSoldOut = data.allSoldOut;
+
+                    if (isColorSoldOut) {
+                        soldOutColors.push(color);
+                    }
+
                     const colorStyle = data.hasLowStock ? 'color: #ff4444; font-weight: bold;' : '';
                     const itemsText = data.items.map(item => {
                         const sizeText = item.key.includes('-') ? item.key.split('-')[1] : '';
@@ -384,8 +396,7 @@ function renderProducts(products) {
                         <div style="font-size: 11px; margin-top: 4px; line-height: 1.6;">
                             ${colorStockDetails.join('<br>')}
                         </div>
-                        ${isSoldOut && !soldOutConfirmed ? '<span style="color: #ff4444; font-weight: bold; margin-left: 8px; display: block; margin-top: 4px;">一部売り切れ</span>' : ''}
-                        ${soldOutConfirmed ? '<span style="color: #999; margin-left: 8px; display: block; margin-top: 4px;">売切確認済み</span>' : ''}
+                        ${soldOutColors.length > 0 ? '<span style="color: #ff4444; font-weight: bold; margin-left: 8px; display: block; margin-top: 4px;">売り切れの色: ' + soldOutColors.join(', ') + '</span>' : ''}
                     </span>
                 `;
             } else {
@@ -395,12 +406,10 @@ function renderProducts(products) {
                     if (stockValue < 10) {
                         isLowStock = true;
                     }
-                    if (stockValue === 0) {
-                        isSoldOut = true;
-                    }
                     // 在庫が少ないものを強調表示
                     const lowStockStyle = stockValue < 10 ? 'color: #ff4444; font-weight: bold;' : '';
-                    stockDetails.push(`<span style="${lowStockStyle}">${key}: ${stockValue}</span>`);
+                    const soldOutLabel = stockValue === 0 ? ' <span style="color: #ff4444; font-size: 10px;">(売り切れ)</span>' : '';
+                    stockDetails.push(`<span style="${lowStockStyle}">${key}: ${stockValue}${soldOutLabel}</span>`);
                 }
 
                 stockDisplay = `
@@ -409,20 +418,17 @@ function renderProducts(products) {
                         <div style="font-size: 11px; margin-top: 4px; line-height: 1.6;">
                             ${stockDetails.join('<br>')}
                         </div>
-                        ${isSoldOut && !soldOutConfirmed ? '<span style="color: #ff4444; font-weight: bold; margin-left: 8px; display: block; margin-top: 4px;">一部売り切れ</span>' : ''}
-                        ${soldOutConfirmed ? '<span style="color: #999; margin-left: 8px; display: block; margin-top: 4px;">売切確認済み</span>' : ''}
                     </span>
                 `;
             }
         } else {
             // バリエーションがない場合は基本在庫表示
             isLowStock = stock < 10;
-            isSoldOut = stock === 0;
+            const isSoldOut = stock === 0;
             stockDisplay = `
                 <span class="stock-info ${isLowStock ? 'stock-low' : ''}">
                     <i class="fas fa-boxes"></i> 在庫: ${stock}
-                    ${isSoldOut && !soldOutConfirmed ? '<span style="color: #ff4444; font-weight: bold; margin-left: 8px;">売り切れ</span>' : ''}
-                    ${soldOutConfirmed ? '<span style="color: #999; margin-left: 8px;">売切確認済み</span>' : ''}
+                    ${isSoldOut ? '<span style="color: #ff4444; font-weight: bold; margin-left: 8px;">売り切れ</span>' : ''}
                 </span>
             `;
         }
@@ -451,9 +457,9 @@ function renderProducts(products) {
                         </span>
                     </div>
                     <div class="product-actions">
-                        ${isSoldOut && !soldOutConfirmed ? `
-                            <button class="btn-small btn-confirm-soldout" data-product-id="${product.id}" data-action="confirm-soldout" style="background: #ff9800; color: white;">
-                                <i class="fas fa-check"></i> 売り切れ確認
+                        ${isLowStock && !product.lowStockConfirmed && hasAnyStock ? `
+                            <button class="btn-small btn-confirm-lowstock" data-product-id="${product.id}" data-action="confirm-lowstock" style="background: #4CAF50; color: white; grid-column: 1 / -1;">
+                                <i class="fas fa-check"></i> 在庫アラート確認済み
                             </button>
                         ` : ''}
                         <button class="btn-small btn-edit" data-product-id="${product.id}" data-action="edit">
@@ -498,8 +504,8 @@ function attachProductButtonListeners() {
             case 'delete':
                 deleteProduct(productId);
                 break;
-            case 'confirm-soldout':
-                confirmSoldOut(productId);
+            case 'confirm-lowstock':
+                confirmLowStock(productId);
                 break;
         }
     });
@@ -517,12 +523,12 @@ function searchProducts() {
 function filterLowStockProducts() {
     filteredProducts = {};
 
-    // 在庫が10未満かつ売り切れ確認済みでない商品のみ抽出
+    // 在庫が10未満かつ在庫アラート確認済みでない商品のみ抽出
     Object.keys(allProducts).forEach(key => {
         const product = allProducts[key];
 
-        // 売り切れ確認済み商品を除外
-        if (product.soldOutConfirmed) {
+        // 在庫アラート確認済み商品を除外
+        if (product.lowStockConfirmed) {
             return;
         }
 
@@ -922,13 +928,15 @@ async function handleProductFormSubmit(e) {
         // 一旦警告のみで保存は許可（デバッグ用）
     }
 
-    // 在庫数が変更された場合、売切確認済みフラグをクリア
-    let soldOutConfirmed = undefined; // デフォルトは未定義（更新しない）
+    // 在庫数が変更された場合、在庫アラート確認フラグをクリア
+    let lowStockConfirmed = undefined; // デフォルトは未定義（更新しない）
     if (editingProductId) {
         const existingProduct = allProducts[editingProductId];
         if (existingProduct && existingProduct.stock !== productStock) {
-            // 在庫数が変更された場合、売切確認済みフラグをクリア
-            soldOutConfirmed = false;
+            // 在庫が10以上になった場合は在庫アラート確認フラグをクリア
+            if (productStock >= 10) {
+                lowStockConfirmed = false;
+            }
         }
     }
 
@@ -954,9 +962,9 @@ async function handleProductFormSubmit(e) {
         variants: variants // バリエーションデータを追加
     };
 
-    // 在庫数が変更された場合のみ soldOutConfirmed を追加
-    if (soldOutConfirmed !== undefined) {
-        productData.soldOutConfirmed = soldOutConfirmed;
+    // 在庫数が変更された場合のみ lowStockConfirmed を追加
+    if (lowStockConfirmed !== undefined) {
+        productData.lowStockConfirmed = lowStockConfirmed;
     }
 
     // 新規追加時のIDを外側のスコープで宣言
@@ -1103,8 +1111,8 @@ function deleteProduct(productId) {
 // グローバルスコープに公開
 window.deleteProduct = deleteProduct;
 
-// 売り切れ確認
-function confirmSoldOut(productId) {
+// 在庫アラート確認
+function confirmLowStock(productId) {
     const product = allProducts[productId];
 
     if (!product) {
@@ -1112,26 +1120,20 @@ function confirmSoldOut(productId) {
         return;
     }
 
-    if (product.stock !== 0) {
-        showAlertModal('この商品は売り切れではありません', 'error');
-        return;
-    }
-
     showConfirmModal(
-        `「${product.name}」の売り切れを確認しますか？\n\n確認すると在庫アラートから除外されます。`,
+        `「${product.name}」の在庫アラートを確認済みにしますか？\n\n在庫アラートのリストから除外されます。\n（在庫が補充されると自動的にリセットされます）`,
         async () => {
             try {
-                // 売り切れ確認フラグを設定
-                allProducts[productId].soldOutConfirmed = true;
+                allProducts[productId].lowStockConfirmed = true;
 
                 // Supabaseに保存
-                await updateProduct(productId, { soldOutConfirmed: true });
+                await updateProduct(productId, { lowStockConfirmed: true });
 
-                showAlertModal('売り切れを確認しました', 'success');
+                showAlertModal('在庫アラートを確認済みにしました', 'success');
                 searchProducts();
             } catch (error) {
-                console.error('Error confirming sold out:', error);
-                showAlertModal('売り切れ確認の保存に失敗しました', 'error');
+                console.error('Error confirming low stock:', error);
+                showAlertModal('在庫アラート確認の保存に失敗しました', 'error');
             }
         }
     );

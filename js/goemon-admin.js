@@ -159,38 +159,20 @@ async function calculateLowStockCount() {
         let lowStockCount = 0;
 
         products.forEach(product => {
-            // 売り切れ確認済み商品は除外
-            if (product.sold_out_confirmed) {
+            // 在庫アラート確認済み商品は除外
+            if (product.low_stock_confirmed) {
                 return;
             }
 
             // バリエーションがある場合
             if (product.variants && product.variants.stock) {
-                const variants = product.variants;
-                const colors = variants.colors || [];
-                const variantStock = variants.stock;
+                const variantStock = product.variants.stock;
 
-                // 色が複数ある場合：色ごとに在庫をチェック
-                if (colors.length > 1) {
-                    const lowStockColors = new Set();
-
-                    for (const [key, stock] of Object.entries(variantStock)) {
-                        if (stock < 10) {
-                            // キーから色を抽出（例: "レッド-M" → "レッド"）
-                            const color = key.split('-')[0];
-                            lowStockColors.add(color);
-                        }
-                    }
-
-                    // 在庫が少ない色の数をカウント
-                    lowStockCount += lowStockColors.size;
-                } else {
-                    // 色が1つまたは0の場合：従来通り各バリエーションをカウント
-                    for (const stock of Object.values(variantStock)) {
-                        if (stock < 10) {
-                            lowStockCount++;
-                            break; // 1つでも在庫が少なければカウント（重複を避ける）
-                        }
+                // いずれかのバリエーションの在庫が10未満ならカウント
+                for (const stock of Object.values(variantStock)) {
+                    if (stock < 10) {
+                        lowStockCount++;
+                        break; // 1つでも在庫が少なければカウント（重複を避ける）
                     }
                 }
             } else {

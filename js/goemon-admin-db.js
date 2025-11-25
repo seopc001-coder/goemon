@@ -73,7 +73,9 @@ async function addProduct(product) {
             ranking_position: product.rankingPosition || null,
             is_published: product.isPublished !== false,
             sold_out_confirmed: product.soldOutConfirmed || false,
-            variants: product.variants || null
+            low_stock_confirmed: product.lowStockConfirmed || false,
+            variants: product.variants || null,
+            confirmed_sold_out_colors: product.confirmedSoldOutColors || null
         };
 
         // 直接INSERTで商品を追加
@@ -139,7 +141,9 @@ async function updateProduct(productId, updates) {
         if (updates.rankingPosition !== undefined) updateData.ranking_position = updates.rankingPosition || null;
         if (updates.isPublished !== undefined) updateData.is_published = updates.isPublished;
         if (updates.soldOutConfirmed !== undefined) updateData.sold_out_confirmed = updates.soldOutConfirmed;
+        if (updates.lowStockConfirmed !== undefined) updateData.low_stock_confirmed = updates.lowStockConfirmed;
         if (updates.variants !== undefined) updateData.variants = updates.variants || null;
+        if (updates.confirmedSoldOutColors !== undefined) updateData.confirmed_sold_out_colors = updates.confirmedSoldOutColors || null;
 
         const { data, error } = await supabase
             .from('products')
@@ -525,7 +529,9 @@ function convertProductFromDB(dbProduct) {
         rankingPosition: dbProduct.ranking_position,
         isPublished: dbProduct.is_published,
         soldOutConfirmed: dbProduct.sold_out_confirmed,
+        lowStockConfirmed: dbProduct.low_stock_confirmed,
         variants: dbProduct.variants, // バリエーションデータを追加
+        confirmedSoldOutColors: dbProduct.confirmed_sold_out_colors, // 色別売り切れ確認データを追加
         createdAt: dbProduct.created_at,
         updatedAt: dbProduct.updated_at
     };
