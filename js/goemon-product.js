@@ -575,11 +575,16 @@ function getColorName(colorValue) {
 async function addProductToCart(product) {
     console.log('>>> addProductToCart関数が開始されました。product:', product);
     try {
+        // まずlocalStorageのログイン状態フラグをチェック
+        const isLoggedIn = localStorage.getItem('goemonloggedin') === 'true';
+        console.log('>>> localStorage goemonloggedin:', isLoggedIn);
+
         // Supabaseで認証状態をチェック
         const { data: { session } } = await supabase.auth.getSession();
         console.log('>>> セッション取得完了。ログイン状態:', session ? 'ログイン中' : 'ゲスト');
 
-        if (session?.user) {
+        // 両方でログイン状態を確認（より確実）
+        if (isLoggedIn && session?.user) {
             // 認証ユーザー: Supabaseに追加
             const userId = session.user.id;
             console.log('>>> ユーザーID:', userId);
@@ -631,7 +636,9 @@ async function addProductToCart(product) {
             }
         } else {
             // ゲストユーザー: localStorageに追加
+            console.log('>>> ゲストユーザーとして処理します');
             let cart = JSON.parse(localStorage.getItem('goemoncart')) || [];
+            console.log('>>> 現在のlocalStorageカート:', cart);
 
             const existingItem = cart.find(item =>
                 item.id === product.id &&
@@ -640,12 +647,16 @@ async function addProductToCart(product) {
             );
 
             if (existingItem) {
+                console.log('>>> 既存アイテムを更新。旧数量:', existingItem.quantity);
                 existingItem.quantity += product.quantity;
+                console.log('>>> 新数量:', existingItem.quantity);
             } else {
+                console.log('>>> 新規アイテムを追加');
                 cart.push(product);
             }
 
             localStorage.setItem('goemoncart', JSON.stringify(cart));
+            console.log('>>> localStorageに保存完了。カート:', cart);
         }
 
         updateCartCount();

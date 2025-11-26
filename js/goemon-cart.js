@@ -42,16 +42,21 @@ async function initializeCartPage() {
 
 // カートデータを読み込み（認証ユーザーはSupabase、ゲストはlocalStorage）
 async function loadCartData() {
+    console.log('=== loadCartData開始 ===');
     try {
         // まずlocalStorageのログイン状態フラグをチェック
         const isLoggedIn = localStorage.getItem('goemonloggedin') === 'true';
+        console.log('localStorage goemonloggedin:', isLoggedIn);
 
         // Supabaseで認証状態をチェック
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('Supabase session exists:', !!session);
+        console.log('Supabase user exists:', !!session?.user);
 
         // 両方でログイン状態を確認（より確実）
         if (isLoggedIn && session?.user) {
             // 認証ユーザー: Supabaseからカートを読み込み
+            console.log('>>> 認証ユーザーとして処理します');
             const userId = session.user.id;
             const dbCartItems = await fetchCartItems(userId);
 
@@ -66,18 +71,26 @@ async function loadCartData() {
                 cartItemId: item.id // DB上のカートアイテムID
             }));
 
-            console.log('Loaded cart from Supabase:', cartItems.length, 'items');
+            console.log('Supabaseからカートを読み込み:', cartItems.length, 'items');
+            console.log('カートアイテム:', cartItems);
         } else {
             // ゲストユーザー: localStorageから読み込み
-            cartItems = JSON.parse(localStorage.getItem('goemoncart')) || [];
-            console.log('Loaded cart from localStorage:', cartItems.length, 'items');
+            console.log('>>> ゲストユーザーとして処理します');
+            const rawCart = localStorage.getItem('goemoncart');
+            console.log('Raw localStorage data:', rawCart);
+            cartItems = JSON.parse(rawCart) || [];
+            console.log('localStorageからカートを読み込み:', cartItems.length, 'items');
+            console.log('カートアイテム:', cartItems);
         }
     } catch (error) {
-        console.error('Error loading cart:', error);
+        console.error('カート読み込みエラー:', error);
         // エラー時はlocalStorageから読み込み
-        cartItems = JSON.parse(localStorage.getItem('goemoncart')) || [];
-        console.log('Error fallback - loaded cart from localStorage:', cartItems.length, 'items');
+        const rawCart = localStorage.getItem('goemoncart');
+        console.log('エラーフォールバック - Raw localStorage:', rawCart);
+        cartItems = JSON.parse(rawCart) || [];
+        console.log('エラーフォールバック - localStorageからカートを読み込み:', cartItems.length, 'items');
     }
+    console.log('=== loadCartData完了 ===');
 }
 
 // カートアイテムを描画
