@@ -70,8 +70,65 @@
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./js/supabase-config.js"></script>
+    <script src="./js/goemon-user-db.js"></script>
     <script src="./js/goemon-auto-logout.js"></script>
     <script>
+        /**
+         * カートデータをlocalStorageからSupabaseに移行（既存カートとマージ）
+         */
+        async function migrateCartToSupabase(userId) {
+            try {
+                // localStorageからカートデータを取得
+                const localCart = JSON.parse(localStorage.getItem('goemoncart')) || [];
+
+                if (localCart.length === 0) {
+                    console.log('移行するカートアイテムがありません');
+                    return;
+                }
+
+                console.log('カートアイテムを移行中:', localCart.length, '件');
+
+                // Supabaseに既存のカートがあるか確認
+                const existingCart = await fetchCartItems(userId);
+                console.log('Supabase既存カート:', existingCart?.length || 0, '件');
+
+                // Supabaseに各アイテムを追加（既存カートとマージ）
+                for (const item of localCart) {
+                    // 同じ商品・色・サイズが既にSupabaseカートにあるか確認
+                    const existingItem = existingCart?.find(dbItem =>
+                        String(dbItem.product_id) === String(item.id) &&
+                        (dbItem.color || '') === (item.color || '') &&
+                        (dbItem.size || '') === (item.size || '')
+                    );
+
+                    if (existingItem) {
+                        // 既存アイテムがある場合は数量を更新（既存 + 追加）
+                        const newQuantity = existingItem.quantity + item.quantity;
+                        console.log(`商品 ${item.id} の数量を更新: ${existingItem.quantity} → ${newQuantity}`);
+                        await updateCartItemQuantity(existingItem.id, newQuantity);
+                    } else {
+                        // 新規アイテムを追加
+                        console.log(`商品 ${item.id} を新規追加`);
+                        await addCartItemToDb(userId, {
+                            productId: item.id,
+                            quantity: item.quantity,
+                            color: item.color || '',
+                            size: item.size || ''
+                        });
+                    }
+                }
+
+                console.log('カートアイテムの移行が完了しました');
+
+                // 移行完了後、localStorageのカートをクリア
+                localStorage.removeItem('goemoncart');
+
+            } catch (error) {
+                console.error('カート移行エラー:', error);
+                // エラーが発生しても処理は継続
+            }
+        }
+
         // ページ読み込み時にログイン状態を確認して維持
         document.addEventListener('DOMContentLoaded', async function() {
             try {
@@ -88,6 +145,10 @@
                     if (!user.user_metadata || Object.keys(user.user_metadata).length === 0) {
                         console.warn('User metadata is empty. This may be a timing issue.');
                     }
+
+                    // カートデータをlocalStorageからSupabaseに移行
+                    console.log('🛒 カート移行を開始します...');
+                    await migrateCartToSupabase(user.id);
 
                     // 保留中のリダイレクト先を確認
                     const pendingRedirect = localStorage.getItem('goemon_pending_redirect');
