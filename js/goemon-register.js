@@ -430,8 +430,8 @@ async function migrateCartToSupabase(userId) {
                 await addToCart(userId, {
                     productId: item.id,
                     quantity: item.quantity,
-                    color: item.color,
-                    size: item.size
+                    color: item.color || '',
+                    size: item.size || ''
                 });
             }
         }
