@@ -389,7 +389,7 @@ function renderCartSummary() {
     const shipping = calculateShipping(subtotal);
     const discount = getCurrentDiscount();
     const total = subtotal + shipping - discount;
-    const earnPoints = calculateEarnPoints(total);
+    const earnPoints = calculateEarnPoints(subtotal); // 小計に対してポイント計算
 
     // 小計表示
     const subtotalElement = document.querySelector('.summary-subtotal');
