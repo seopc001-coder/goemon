@@ -374,64 +374,111 @@ window.deleteUser = async function(userId, userEmail) {
     }
 
     try {
-        console.log('ユーザー削除開始:', userId, userEmail);
+        console.log('=== ユーザー削除開始 ===');
+        console.log('User ID:', userId);
+        console.log('Email:', userEmail);
+
+        let deletionResults = {
+            cart: false,
+            favorites: false,
+            addresses: false,
+            profile: false,
+            auth: false
+        };
 
         // 1. カートデータを削除
-        const { error: cartError } = await supabase
+        console.log('1. カート削除を試行中...');
+        const { data: cartData, error: cartError } = await supabase
             .from('carts')
             .delete()
-            .eq('user_id', userId);
+            .eq('user_id', userId)
+            .select();
 
         if (cartError) {
-            console.error('カート削除エラー:', cartError);
+            console.error('❌ カート削除エラー:', cartError);
+        } else {
+            console.log('✅ カート削除成功:', cartData);
+            deletionResults.cart = true;
         }
 
         // 2. お気に入りを削除
-        const { error: favError } = await supabase
+        console.log('2. お気に入り削除を試行中...');
+        const { data: favData, error: favError } = await supabase
             .from('favorites')
             .delete()
-            .eq('user_id', userId);
+            .eq('user_id', userId)
+            .select();
 
         if (favError) {
-            console.error('お気に入り削除エラー:', favError);
+            console.error('❌ お気に入り削除エラー:', favError);
+        } else {
+            console.log('✅ お気に入り削除成功:', favData);
+            deletionResults.favorites = true;
         }
 
         // 3. 配送先住所を削除
-        const { error: addressError } = await supabase
+        console.log('3. 配送先住所削除を試行中...');
+        const { data: addressData, error: addressError } = await supabase
             .from('shipping_addresses')
             .delete()
-            .eq('user_id', userId);
+            .eq('user_id', userId)
+            .select();
 
         if (addressError) {
-            console.error('配送先住所削除エラー:', addressError);
+            console.error('❌ 配送先住所削除エラー:', addressError);
+        } else {
+            console.log('✅ 配送先住所削除成功:', addressData);
+            deletionResults.addresses = true;
         }
 
         // 4. ユーザープロファイルを削除
-        const { error: profileError } = await supabase
+        console.log('4. ユーザープロファイル削除を試行中...');
+        const { data: profileData, error: profileError } = await supabase
             .from('user_profiles')
             .delete()
-            .eq('id', userId);
+            .eq('id', userId)
+            .select();
 
         if (profileError) {
-            console.error('プロファイル削除エラー:', profileError);
+            console.error('❌ プロファイル削除エラー:', profileError);
             throw profileError;
+        } else {
+            console.log('✅ プロファイル削除成功:', profileData);
+            deletionResults.profile = true;
         }
 
         // 5. Auth ユーザーを削除（管理者権限が必要）
-        const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+        console.log('5. Auth ユーザー削除を試行中...');
+        const { data: authData, error: authError } = await supabase.auth.admin.deleteUser(userId);
 
         if (authError) {
-            console.error('Auth削除エラー:', authError);
-            showAlertModal('ユーザーの認証情報の削除に失敗しました。\nデータベースからは削除されましたが、認証ユーザーは残っています。', 'warning');
+            console.error('❌ Auth削除エラー:', authError);
+            console.error('エラー詳細:', {
+                message: authError.message,
+                status: authError.status,
+                code: authError.code
+            });
+            showAlertModal('ユーザーの認証情報の削除に失敗しました。\nデータベースからは削除されましたが、認証ユーザーは残っています。\n\nエラー: ' + authError.message, 'warning');
+        } else {
+            console.log('✅ Auth削除成功:', authData);
+            deletionResults.auth = true;
         }
 
-        showAlertModal('ユーザーを削除しました', 'success');
+        console.log('=== 削除結果サマリー ===');
+        console.log(deletionResults);
+
+        // 削除成功のメッセージ
+        if (deletionResults.auth) {
+            showAlertModal('ユーザーを完全に削除しました', 'success');
+        } else {
+            showAlertModal('ユーザーデータは削除されましたが、認証情報の削除に失敗しました。\n\nこのユーザーはログインできますが、データは存在しません。', 'warning');
+        }
 
         // ユーザーリストを再読み込み
         await loadUsers();
 
     } catch (error) {
-        console.error('ユーザー削除エラー:', error);
+        console.error('❌ ユーザー削除エラー:', error);
         showAlertModal('ユーザーの削除に失敗しました: ' + error.message, 'error');
     }
 };
