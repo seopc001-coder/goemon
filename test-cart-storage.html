@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カートストレージテスト</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .success { background: #4CAF50; color: white; }
+        .error { background: #f44336; color: white; }
+        .info { background: #2196F3; color: white; }
+        #output {
+            background: #f5f5f5;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>カートlocalStorageテスト</h1>
+    <p>このページはカートの localStorage 機能をテストします。</p>
+
+    <div>
+        <button class="success" onclick="testAddItem()">1. カートにアイテムを追加</button>
+        <button class="info" onclick="testReadCart()">2. カートを読み込む</button>
+        <button class="error" onclick="testClearCart()">3. カートをクリア</button>
+    </div>
+
+    <div id="output">テスト結果がここに表示されます...</div>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            output.textContent += message + '\n';
+        }
+
+        function clearLog() {
+            document.getElementById('output').textContent = '';
+        }
+
+        // テスト1: カートにアイテムを追加
+        function testAddItem() {
+            clearLog();
+            log('=== カートにアイテムを追加テスト ===\n');
+
+            try {
+                // 既存のカートを読み込む
+                let cart = JSON.parse(localStorage.getItem('goemoncart')) || [];
+                log('現在のカート: ' + JSON.stringify(cart, null, 2) + '\n');
+
+                // 新しいアイテムを追加
+                const newItem = {
+                    id: 'test-' + Date.now(),
+                    name: 'テスト商品',
+                    price: 1000,
+                    quantity: 1,
+                    color: 'ホワイト',
+                    size: 'M'
+                };
+
+                cart.push(newItem);
+
+                // localStorageに保存
+                localStorage.setItem('goemoncart', JSON.stringify(cart));
+                log('新しいアイテムを追加しました:');
+                log(JSON.stringify(newItem, null, 2) + '\n');
+
+                // 確認のため再度読み込む
+                const savedCart = JSON.parse(localStorage.getItem('goemoncart'));
+                log('保存後のカート:');
+                log(JSON.stringify(savedCart, null, 2));
+
+                log('\n✓ テスト成功!');
+            } catch (error) {
+                log('✗ エラー: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        // テスト2: カートを読み込む
+        function testReadCart() {
+            clearLog();
+            log('=== カート読み込みテスト ===\n');
+
+            try {
+                const cart = JSON.parse(localStorage.getItem('goemoncart')) || [];
+                log('カート内のアイテム数: ' + cart.length);
+
+                if (cart.length > 0) {
+                    log('\nカートの内容:');
+                    log(JSON.stringify(cart, null, 2));
+                } else {
+                    log('\nカートは空です。');
+                }
+
+                log('\n✓ テスト成功!');
+            } catch (error) {
+                log('✗ エラー: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        // テスト3: カートをクリア
+        function testClearCart() {
+            clearLog();
+            log('=== カートクリアテスト ===\n');
+
+            try {
+                const beforeCart = JSON.parse(localStorage.getItem('goemoncart')) || [];
+                log('クリア前のアイテム数: ' + beforeCart.length);
+
+                localStorage.removeItem('goemoncart');
+                log('カートをクリアしました。\n');
+
+                const afterCart = JSON.parse(localStorage.getItem('goemoncart')) || [];
+                log('クリア後のアイテム数: ' + afterCart.length);
+
+                log('\n✓ テスト成功!');
+            } catch (error) {
+                log('✗ エラー: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        // ページ読み込み時に現在のカート状態を表示
+        window.addEventListener('DOMContentLoaded', function() {
+            testReadCart();
+        });
+    </script>
+</body>
+</html>
