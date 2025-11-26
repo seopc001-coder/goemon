@@ -52,7 +52,7 @@ function renderUsers() {
     if (filteredUsers.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" class="empty-state">
+                <td colspan="9" class="empty-state">
                     <i class="fas fa-users"></i>
                     <p>表示するユーザーがいません</p>
                 </td>
@@ -69,19 +69,50 @@ function renderUsers() {
     tbody.innerHTML = sortedUsers.map(user => {
         const status = user.user_metadata?.status || 'active';
         const isWithdrawn = status === 'withdrawn';
+        const isVerified = !!user.email_confirmed_at; // メール認証済みかチェック
         const displayName = `${user.user_metadata?.lastName || ''} ${user.user_metadata?.firstName || ''}`.trim() || '未設定';
+
+        // 電話番号を取得（優先順位: user_metadata.phone > デフォルト住所 > 最初の住所）
+        let phoneNumber = '未登録';
+
+        // まずuser_metadataから取得
+        if (user.user_metadata?.phone) {
+            phoneNumber = user.user_metadata.phone;
+        }
+        // user_metadataになければ住所から取得
+        else if (user.addresses && user.addresses.length > 0) {
+            const defaultAddress = user.addresses.find(addr => addr.is_default);
+            const firstAddress = user.addresses[0];
+            const phone = (defaultAddress || firstAddress)?.phone_number;
+            if (phone) {
+                phoneNumber = phone;
+            }
+        }
+
+        // ステータス判定: 退会 > 未認証 > アクティブ の優先順位
+        let statusBadgeClass = 'active';
+        let statusText = 'アクティブ';
+
+        if (isWithdrawn) {
+            statusBadgeClass = 'withdrawn';
+            statusText = '退会済み';
+        } else if (!isVerified) {
+            statusBadgeClass = 'unverified';
+            statusText = '未認証';
+        }
 
         return `
             <tr>
                 <td>${user.id.substring(0, 8)}...</td>
                 <td>${user.email}</td>
                 <td>${displayName}</td>
+                <td>${phoneNumber}</td>
                 <td>${formatDate(user.created_at)}</td>
                 <td>${user.order_count || 0}</td>
                 <td>${(user.points || 0).toLocaleString()} pt</td>
                 <td>
-                    <span class="status-badge ${isWithdrawn ? 'inactive' : 'active'}">
-                        ${isWithdrawn ? '退会済み' : 'アクティブ'}
+                    <span class="status-badge ${statusBadgeClass}">
+                        ${statusText}
                     </span>
                 </td>
                 <td>
@@ -108,7 +139,20 @@ window.viewUserDetail = async function(userId) {
 
     const status = user.user_metadata?.status || 'active';
     const isWithdrawn = status === 'withdrawn';
+    const isVerified = !!user.email_confirmed_at; // メール認証済みかチェック
     const displayName = `${user.user_metadata?.lastName || ''} ${user.user_metadata?.firstName || ''}`.trim() || '未設定';
+
+    // ステータス判定
+    let statusBadgeClass = 'active';
+    let statusText = 'アクティブ';
+
+    if (isWithdrawn) {
+        statusBadgeClass = 'withdrawn';
+        statusText = '退会済み';
+    } else if (!isVerified) {
+        statusBadgeClass = 'unverified';
+        statusText = '未認証';
+    }
 
     // 住所情報のHTML生成
     let addressesHtml = '';
@@ -140,10 +184,17 @@ window.viewUserDetail = async function(userId) {
                 <div>${displayName}</div>
                 <div class="detail-label">メールアドレス</div>
                 <div>${user.email}</div>
+                <div class="detail-label">メール認証</div>
+                <div>
+                    ${isVerified ?
+                        `<span style="color: #4CAF50;"><i class="fas fa-check-circle"></i> 認証済み</span>` :
+                        `<span style="color: #ff9800;"><i class="fas fa-exclamation-circle"></i> 未認証</span>`
+                    }
+                </div>
                 <div class="detail-label">ステータス</div>
                 <div>
-                    <span class="status-badge ${isWithdrawn ? 'inactive' : 'active'}">
-                        ${isWithdrawn ? '退会済み' : 'アクティブ'}
+                    <span class="status-badge ${statusBadgeClass}">
+                        ${statusText}
                     </span>
                 </div>
             </div>
@@ -157,9 +208,20 @@ window.viewUserDetail = async function(userId) {
                 ${isWithdrawn ? `
                     <div class="detail-label">退会日時</div>
                     <div>${formatDateTime(user.user_metadata?.deleted_at)}</div>
+                    <div class="detail-label">利用期間</div>
+                    <div>${calculateDuration(user.created_at, user.user_metadata?.deleted_at)}</div>
                 ` : ''}
             </div>
         </div>
+
+        ${isWithdrawn && user.user_metadata?.deletion_reason ? `
+            <div class="detail-section">
+                <h3><i class="fas fa-comment"></i> 退会理由</h3>
+                <div style="padding: 10px; background: #f9f9f9; border-radius: 4px;">
+                    ${user.user_metadata.deletion_reason}
+                </div>
+            </div>
+        ` : ''}
 
         <div class="detail-section">
             <h3><i class="fas fa-gift"></i> ポイント情報</h3>
@@ -181,6 +243,15 @@ window.viewUserDetail = async function(userId) {
                 <div>${user.order_count || 0}件</div>
             </div>
         </div>
+
+        ${!isWithdrawn ? `
+            <div class="detail-section">
+                <h3><i class="fas fa-key"></i> アカウント管理</h3>
+                <button class="btn-cmn-02" onclick="resetUserPassword('${user.email}')" style="margin-top: 10px;">
+                    <i class="fas fa-envelope"></i> パスワード再設定メールを送信
+                </button>
+            </div>
+        ` : ''}
     `;
 
     // モーダルに表示
@@ -253,15 +324,31 @@ window.applyFilters = function() {
     const dateTo = document.getElementById('filterDateTo')?.value || '';
 
     filteredUsers = allUsers.filter(user => {
-        // ステータスフィルタ
-        if (statusFilter === 'active' && user.user_metadata?.status === 'withdrawn') return false;
-        if (statusFilter === 'withdrawn' && (!user.user_metadata || user.user_metadata.status !== 'withdrawn')) return false;
+        const isWithdrawn = user.user_metadata?.status === 'withdrawn';
+        const isVerified = !!user.email_confirmed_at;
 
-        // 検索フィルタ（メールまたは名前）
+        // ステータスフィルタ
+        if (statusFilter === 'active') {
+            // アクティブ: 退会済みではなく、かつメール認証済み
+            if (isWithdrawn || !isVerified) return false;
+        } else if (statusFilter === 'unverified') {
+            // 未認証: メール未認証で、かつ退会済みではない
+            if (isVerified || isWithdrawn) return false;
+        } else if (statusFilter === 'withdrawn') {
+            // 退会済み
+            if (!isWithdrawn) return false;
+        }
+
+        // 検索フィルタ（メール、名前、または電話番号）
         if (searchTerm) {
             const email = user.email.toLowerCase();
             const name = `${user.user_metadata?.lastName || ''} ${user.user_metadata?.firstName || ''}`.toLowerCase();
-            if (!email.includes(searchTerm) && !name.includes(searchTerm)) return false;
+            const phone = (user.user_metadata?.phone || '').toLowerCase();
+
+            // メール、名前、電話番号のいずれかに検索語が含まれているかチェック
+            if (!email.includes(searchTerm) && !name.includes(searchTerm) && !phone.includes(searchTerm)) {
+                return false;
+            }
         }
 
         // 日付フィルタ
@@ -302,13 +389,23 @@ function updateStatistics() {
 
     const stats = {
         total: allUsers.length,
-        active: allUsers.filter(u => !u.user_metadata || u.user_metadata.status !== 'withdrawn').length,
+        active: allUsers.filter(u => {
+            const isWithdrawn = u.user_metadata?.status === 'withdrawn';
+            const isVerified = !!u.email_confirmed_at;
+            return !isWithdrawn && isVerified;
+        }).length,
+        unverified: allUsers.filter(u => {
+            const isWithdrawn = u.user_metadata?.status === 'withdrawn';
+            const isVerified = !!u.email_confirmed_at;
+            return !isWithdrawn && !isVerified;
+        }).length,
         withdrawn: allUsers.filter(u => u.user_metadata && u.user_metadata.status === 'withdrawn').length,
         newThisMonth: allUsers.filter(u => new Date(u.created_at) >= thisMonthStart).length
     };
 
     document.getElementById('totalUsers').textContent = stats.total;
     document.getElementById('activeUsers').textContent = stats.active;
+    document.getElementById('unverifiedUsers').textContent = stats.unverified;
     document.getElementById('withdrawnUsers').textContent = stats.withdrawn;
     document.getElementById('newUsersThisMonth').textContent = stats.newThisMonth;
 }
@@ -358,6 +455,56 @@ window.closeUserModal = function() {
     const modal = document.getElementById('userModal');
     if (modal) {
         modal.classList.remove('active');
+    }
+};
+
+/**
+ * 利用期間を計算
+ */
+function calculateDuration(startDate, endDate) {
+    if (!startDate || !endDate) return '不明';
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 30) {
+        return `${diffDays}日`;
+    } else if (diffDays < 365) {
+        const months = Math.floor(diffDays / 30);
+        return `約${months}ヶ月`;
+    } else {
+        const years = Math.floor(diffDays / 365);
+        const months = Math.floor((diffDays % 365) / 30);
+        return `約${years}年${months}ヶ月`;
+    }
+}
+
+/**
+ * パスワード再設定メールを送信
+ */
+window.resetUserPassword = async function(email) {
+    if (!confirm(`${email} 宛にパスワード再設定メールを送信しますか?`)) {
+        return;
+    }
+
+    try {
+        console.log('📧 パスワード再設定メールを送信中...', email);
+
+        // Supabaseのリセットパスワードメールを送信
+        // 注意: メールテンプレートはSupabase Dashboardで日本語化する必要があります
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: 'https://goemon-flame.vercel.app/goemon-reset-password.html'
+        });
+
+        if (error) throw error;
+
+        showAlertModal('パスワード再設定メールを送信しました。\nユーザーのメールボックスをご確認ください。', 'success');
+        console.log('✅ パスワード再設定メール送信完了');
+    } catch (error) {
+        console.error('パスワード再設定メール送信エラー:', error);
+        showAlertModal('パスワード再設定メールの送信に失敗しました: ' + error.message, 'error');
     }
 };
 

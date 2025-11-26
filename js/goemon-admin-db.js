@@ -834,11 +834,14 @@ async function fetchAllUsers() {
                 id: user.user_id,
                 email: user.email,
                 created_at: user.created_at,
+                email_confirmed_at: user.email_confirmed_at, // メール認証日時を追加
                 user_metadata: {
                     lastName: user.last_name || '',
                     firstName: user.first_name || '',
+                    phone: user.phone || '',
                     status: user.status,
-                    deleted_at: user.deleted_at
+                    deleted_at: user.deleted_at,
+                    deletion_reason: user.deletion_reason || ''
                 },
                 order_count: user.order_count,
                 points: profile?.points || 0,

@@ -144,6 +144,11 @@
             color: #0a3622;
         }
 
+        .status-badge.unverified {
+            background: #fff3cd;
+            color: #856404;
+        }
+
         .status-badge.inactive {
             background: #f8d7da;
             color: #842029;
@@ -314,6 +319,10 @@
                     <div class="value" id="activeUsers" style="color: #4CAF50;">0</div>
                 </div>
                 <div class="stat-box">
+                    <h3>未認証ユーザー</h3>
+                    <div class="value" id="unverifiedUsers" style="color: #ff9800;">0</div>
+                </div>
+                <div class="stat-box">
                     <h3>退会済みユーザー</h3>
                     <div class="value" id="withdrawnUsers" style="color: #f44336;">0</div>
                 </div>
@@ -331,12 +340,13 @@
                         <select id="filterStatus">
                             <option value="">すべて</option>
                             <option value="active">アクティブ</option>
+                            <option value="unverified">未認証</option>
                             <option value="withdrawn">退会済み</option>
                         </select>
                     </div>
 
                     <div class="filter-group">
-                        <label for="filterSearch">検索（メール・名前）</label>
+                        <label for="filterSearch">検索（メール・名前・電話番号）</label>
                         <input type="text" id="filterSearch" placeholder="検索キーワード">
                     </div>
 
@@ -372,6 +382,7 @@
                             <th>ユーザーID</th>
                             <th>メールアドレス</th>
                             <th>氏名</th>
+                            <th>電話番号</th>
                             <th>登録日</th>
                             <th>注文数</th>
                             <th>ポイント</th>
@@ -381,7 +392,7 @@
                     </thead>
                     <tbody id="usersTableBody">
                         <tr>
-                            <td colspan="8" class="empty-state">
+                            <td colspan="9" class="empty-state">
                                 <i class="fas fa-spinner fa-spin"></i>
                                 <p>ユーザーデータを読み込み中...</p>
                             </td>
@@ -418,9 +429,9 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="./js/supabase-config.js?v=20251122000011"></script>
-    <script src="./js/goemon-admin-db.js?v=20251122000011"></script>
-    <script src="./js/goemon-modal.js?v=20251122000011"></script>
-    <script src="./js/goemon-admin-users-v2.js?v=20251122000011"></script>
+    <script src="./js/supabase-config.js?v=20251126003"></script>
+    <script src="./js/goemon-admin-db.js?v=20251126003"></script>
+    <script src="./js/goemon-modal.js?v=20251126003"></script>
+    <script src="./js/goemon-admin-users-v2.js?v=20251126005"></script>
 </body>
 </html>
