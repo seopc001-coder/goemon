@@ -262,7 +262,7 @@ function initializeFilters() {
 // フィルターをリセット
 function resetFilters() {
     // URLパラメータをすべてクリアしてページをリロード
-    window.location.href = 'goemon-products.html';
+    window.location.href = '/new';
 }
 
 // フィルターを適用
@@ -428,7 +428,7 @@ function createProductCard(product) {
 
     // 商品カードクリック
     card.addEventListener('click', function() {
-        window.location.href = `goemon-product.html?id=${product.id}`;
+        window.location.href = `/product/${product.id}`;
     });
 
     return card;

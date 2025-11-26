@@ -33,7 +33,7 @@ function displayWishlistItems(wishlist) {
     wishlistGrid.innerHTML = wishlist.map(item => `
         <div class="product-card" style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden; transition: transform 0.3s;">
             <div style="position: relative;">
-                <a href="goemon-product.html?id=${item.id}">
+                <a href="/product/${item.id}">
                     <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 250px; object-fit: cover;">
                 </a>
                 <button class="btn-remove-wishlist" data-id="${item.id}" style="position: absolute; top: 10px; right: 10px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s;">
@@ -42,14 +42,14 @@ function displayWishlistItems(wishlist) {
             </div>
             <div style="padding: 15px;">
                 <h3 style="font-size: 16px; margin-bottom: 10px; height: 48px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                    <a href="goemon-product.html?id=${item.id}" style="color: #333; text-decoration: none;">
+                    <a href="/product/${item.id}" style="color: #333; text-decoration: none;">
                         ${item.name}
                     </a>
                 </h3>
                 <p style="font-size: 20px; font-weight: bold; color: #e74c3c; margin-bottom: 15px;">
                     ¥${item.price.toLocaleString()}
                 </p>
-                <a href="goemon-product.html?id=${item.id}" class="btn-cmn-02" style="display: block; text-align: center; text-decoration: none; padding: 10px;">
+                <a href="/product/${item.id}" class="btn-cmn-02" style="display: block; text-align: center; text-decoration: none; padding: 10px;">
                     商品を見る
                 </a>
             </div>

@@ -3,6 +3,50 @@
     {
       "source": "/",
       "destination": "/goemon-index.html"
+    },
+    {
+      "source": "/new",
+      "destination": "/goemon-products.html?type=new"
+    },
+    {
+      "source": "/ranking",
+      "destination": "/goemon-products.html?type=ranking"
+    },
+    {
+      "source": "/limited",
+      "destination": "/goemon-products.html?type=limited"
+    },
+    {
+      "source": "/outer",
+      "destination": "/goemon-products.html?category=outer"
+    },
+    {
+      "source": "/tops",
+      "destination": "/goemon-products.html?category=tops"
+    },
+    {
+      "source": "/bottoms",
+      "destination": "/goemon-products.html?category=bottoms"
+    },
+    {
+      "source": "/onepiece",
+      "destination": "/goemon-products.html?category=onepiece"
+    },
+    {
+      "source": "/accessories",
+      "destination": "/goemon-products.html?category=accessories"
+    },
+    {
+      "source": "/sale",
+      "destination": "/goemon-products.html?type=sale"
+    },
+    {
+      "source": "/product/:id",
+      "destination": "/goemon-product.html?id=:id"
+    },
+    {
+      "source": "/p/:id",
+      "destination": "/goemon-product.html?id=:id"
     }
   ]
 }

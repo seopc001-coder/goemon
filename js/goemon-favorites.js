@@ -172,7 +172,7 @@
         // 商品カードクリック（ハートボタン以外）
         card.addEventListener('click', function(e) {
             if (!e.target.closest('.btn-wishlist')) {
-                window.location.href = `goemon-product.html?id=${product.id}`;
+                window.location.href = `/product/${product.id}`;
             }
         });
 

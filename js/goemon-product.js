@@ -836,7 +836,7 @@ function createProductCard(product) {
 
     // 商品カードクリック
     card.addEventListener('click', function() {
-        window.location.href = `goemon-product.html?id=${product.id}`;
+        window.location.href = `/product/${product.id}`;
     });
 
     return card;
