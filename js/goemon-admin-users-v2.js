@@ -89,6 +89,9 @@ function renderUsers() {
                         <button class="btn-small btn-view" onclick="viewUserDetail('${user.id}')">
                             <i class="fas fa-eye"></i> 詳細
                         </button>
+                        <button class="btn-small btn-danger" onclick="deleteUser('${user.id}', '${user.email}')">
+                            <i class="fas fa-trash"></i> 削除
+                        </button>
                     </div>
                 </td>
             </tr>
@@ -358,5 +361,77 @@ window.closeUserModal = function() {
     const modal = document.getElementById('userModal');
     if (modal) {
         modal.classList.remove('active');
+    }
+};
+
+/**
+ * ユーザーを削除
+ */
+window.deleteUser = async function(userId, userEmail) {
+    // 確認ダイアログ
+    if (!confirm(`ユーザー「${userEmail}」を完全に削除しますか?\n\nこの操作は取り消せません。\n- ユーザープロファイル\n- カートデータ\n- お気に入り\n- 配送先住所\nすべてのデータが削除されます。`)) {
+        return;
+    }
+
+    try {
+        console.log('ユーザー削除開始:', userId, userEmail);
+
+        // 1. カートデータを削除
+        const { error: cartError } = await supabase
+            .from('carts')
+            .delete()
+            .eq('user_id', userId);
+
+        if (cartError) {
+            console.error('カート削除エラー:', cartError);
+        }
+
+        // 2. お気に入りを削除
+        const { error: favError } = await supabase
+            .from('favorites')
+            .delete()
+            .eq('user_id', userId);
+
+        if (favError) {
+            console.error('お気に入り削除エラー:', favError);
+        }
+
+        // 3. 配送先住所を削除
+        const { error: addressError } = await supabase
+            .from('shipping_addresses')
+            .delete()
+            .eq('user_id', userId);
+
+        if (addressError) {
+            console.error('配送先住所削除エラー:', addressError);
+        }
+
+        // 4. ユーザープロファイルを削除
+        const { error: profileError } = await supabase
+            .from('user_profiles')
+            .delete()
+            .eq('id', userId);
+
+        if (profileError) {
+            console.error('プロファイル削除エラー:', profileError);
+            throw profileError;
+        }
+
+        // 5. Auth ユーザーを削除（管理者権限が必要）
+        const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+
+        if (authError) {
+            console.error('Auth削除エラー:', authError);
+            showAlertModal('ユーザーの認証情報の削除に失敗しました。\nデータベースからは削除されましたが、認証ユーザーは残っています。', 'warning');
+        }
+
+        showAlertModal('ユーザーを削除しました', 'success');
+
+        // ユーザーリストを再読み込み
+        await loadUsers();
+
+    } catch (error) {
+        console.error('ユーザー削除エラー:', error);
+        showAlertModal('ユーザーの削除に失敗しました: ' + error.message, 'error');
     }
 };
