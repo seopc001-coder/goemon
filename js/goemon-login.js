@@ -249,7 +249,7 @@ async function migrateCartToSupabase(userId) {
             } else {
                 // 新規アイテムを追加
                 console.log(`商品 ${item.id} を新規追加`);
-                await addToCart(userId, {
+                await addCartItemToDb(userId, {
                     productId: item.id,
                     quantity: item.quantity,
                     color: item.color || '',
