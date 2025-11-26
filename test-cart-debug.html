@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カート診断ツール | 五右衛門</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section h2::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #667eea;
+            border-radius: 2px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            word-break: break-all;
+        }
+        .info-value.success {
+            color: #28a745;
+        }
+        .info-value.error {
+            color: #dc3545;
+        }
+        .info-value.warning {
+            color: #ffc107;
+        }
+        .cart-items {
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .cart-item {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 150px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        .console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .log-success { color: #4ec9b0; }
+        .log-error { color: #f48771; }
+        .log-warning { color: #dcdcaa; }
+        .log-info { color: #9cdcfe; }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-badge.online {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-badge.offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 カート診断ツール</h1>
+            <p>認証状態とカートの状態を詳細に確認できます</p>
+        </div>
+
+        <div class="content">
+            <!-- 認証状態 -->
+            <div class="section">
+                <h2>🔐 認証状態</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">localStorage Flag</div>
+                        <div class="info-value" id="authFlag">読み込み中...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Supabase Session</div>
+                        <div class="info-value" id="supabaseSession">読み込み中...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">User Email</div>
+                        <div class="info-value" id="userEmail">読み込み中...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">判定結果</div>
+                        <div class="info-value" id="authResult">読み込み中...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- カート状態 -->
+            <div class="section">
+                <h2>📦 カート状態</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">localStorage カート</div>
+                        <div class="info-value" id="localCartCount">読み込み中...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Supabase カート</div>
+                        <div class="info-value" id="dbCartCount">読み込み中...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">表示されるカート</div>
+                        <div class="info-value" id="displayCart">読み込み中...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">合計金額</div>
+                        <div class="info-value" id="totalAmount">読み込み中...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- カート内容 -->
+            <div class="section">
+                <h2>🛍️ カート内容</h2>
+                <div id="cartItemsDisplay" class="cart-items">
+                    <div class="empty-state">
+                        読み込み中...
+                    </div>
+                </div>
+            </div>
+
+            <!-- コンソール -->
+            <div class="section">
+                <h2>💻 診断ログ</h2>
+                <div id="consoleOutput" class="console-output">システム起動中...</div>
+            </div>
+
+            <!-- アクション -->
+            <div class="section">
+                <h2>⚡ アクション</h2>
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="refreshAll()">🔄 再読み込み</button>
+                    <button class="btn-info" onclick="testAddToCart()">➕ テストアイテム追加</button>
+                    <button class="btn-success" onclick="goToCart()">🛒 カートページへ</button>
+                    <button class="btn-danger" onclick="clearLocalCart()">🗑️ localStorage クリア</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/goemon-user-db.js"></script>
+
+    <script>
+        let consoleLog = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString('ja-JP');
+            const logEntry = `[${timestamp}] ${message}`;
+            consoleLog.push({ message: logEntry, type });
+            updateConsoleDisplay();
+            console.log(message);
+        }
+
+        function updateConsoleDisplay() {
+            const output = document.getElementById('consoleOutput');
+            output.innerHTML = consoleLog.map(entry => {
+                const className = `log-${entry.type}`;
+                return `<div class="${className}">${entry.message}</div>`;
+            }).join('');
+            output.scrollTop = output.scrollHeight;
+        }
+
+        async function checkAuth() {
+            log('=== 認証状態チェック開始 ===', 'info');
+
+            // localStorage Flag
+            const isLoggedIn = localStorage.getItem('goemonloggedin') === 'true';
+            document.getElementById('authFlag').textContent = isLoggedIn ? 'true (ログイン済み)' : 'false (ゲスト)';
+            document.getElementById('authFlag').className = `info-value ${isLoggedIn ? 'success' : 'warning'}`;
+            log(`localStorage goemonloggedin: ${isLoggedIn}`, isLoggedIn ? 'success' : 'warning');
+
+            // Supabase Session
+            const { data: { session } } = await supabase.auth.getSession();
+            const hasSession = !!session;
+            document.getElementById('supabaseSession').textContent = hasSession ? 'あり (認証済み)' : 'なし (ゲスト)';
+            document.getElementById('supabaseSession').className = `info-value ${hasSession ? 'success' : 'warning'}`;
+            log(`Supabase session: ${hasSession ? '存在する' : '存在しない'}`, hasSession ? 'success' : 'warning');
+
+            // User Email
+            const email = session?.user?.email || 'ゲストユーザー';
+            document.getElementById('userEmail').textContent = email;
+            document.getElementById('userEmail').className = `info-value ${session?.user ? 'success' : 'warning'}`;
+            log(`User email: ${email}`, session?.user ? 'success' : 'info');
+
+            // 判定結果
+            const bothTrue = isLoggedIn && hasSession;
+            const resultText = bothTrue ? '認証ユーザー (Supabase使用)' : 'ゲストユーザー (localStorage使用)';
+            document.getElementById('authResult').textContent = resultText;
+            document.getElementById('authResult').className = `info-value ${bothTrue ? 'success' : 'warning'}`;
+            log(`最終判定: ${resultText}`, bothTrue ? 'success' : 'warning');
+
+            log('=== 認証状態チェック完了 ===', 'info');
+            return { isLoggedIn, hasSession, session };
+        }
+
+        async function checkCart(authInfo) {
+            log('=== カート状態チェック開始 ===', 'info');
+
+            // localStorage Cart
+            const rawLocalCart = localStorage.getItem('goemoncart');
+            const localCart = JSON.parse(rawLocalCart) || [];
+            document.getElementById('localCartCount').textContent = `${localCart.length} 件`;
+            document.getElementById('localCartCount').className = `info-value ${localCart.length > 0 ? 'success' : 'warning'}`;
+            log(`localStorage カート: ${localCart.length} 件`, localCart.length > 0 ? 'success' : 'warning');
+            log(`localStorage 生データ: ${rawLocalCart}`, 'info');
+
+            // Supabase Cart
+            let dbCart = [];
+            if (authInfo.hasSession && authInfo.session?.user) {
+                try {
+                    dbCart = await fetchCartItems(authInfo.session.user.id);
+                    document.getElementById('dbCartCount').textContent = `${dbCart.length} 件`;
+                    document.getElementById('dbCartCount').className = `info-value ${dbCart.length > 0 ? 'success' : 'warning'}`;
+                    log(`Supabase カート: ${dbCart.length} 件`, dbCart.length > 0 ? 'success' : 'warning');
+                } catch (error) {
+                    document.getElementById('dbCartCount').textContent = 'エラー';
+                    document.getElementById('dbCartCount').className = 'info-value error';
+                    log(`Supabase カート取得エラー: ${error.message}`, 'error');
+                }
+            } else {
+                document.getElementById('dbCartCount').textContent = '未認証 (N/A)';
+                document.getElementById('dbCartCount').className = 'info-value warning';
+                log('Supabase カート: 未認証のため取得しない', 'warning');
+            }
+
+            // 表示されるカート
+            const bothTrue = authInfo.isLoggedIn && authInfo.hasSession;
+            const displayedCart = bothTrue ? dbCart : localCart;
+            const displaySource = bothTrue ? 'Supabase' : 'localStorage';
+            document.getElementById('displayCart').textContent = `${displaySource} (${displayedCart.length} 件)`;
+            document.getElementById('displayCart').className = `info-value ${displayedCart.length > 0 ? 'success' : 'error'}`;
+            log(`表示カート: ${displaySource} から ${displayedCart.length} 件`, displayedCart.length > 0 ? 'success' : 'error');
+
+            // 合計金額
+            let total = 0;
+            displayedCart.forEach(item => {
+                const price = item.price || 0;
+                const quantity = item.quantity || 0;
+                total += price * quantity;
+            });
+            document.getElementById('totalAmount').textContent = `¥${total.toLocaleString()}`;
+            document.getElementById('totalAmount').className = `info-value ${total > 0 ? 'success' : 'warning'}`;
+            log(`合計金額: ¥${total.toLocaleString()}`, total > 0 ? 'success' : 'warning');
+
+            // カート内容表示
+            displayCartItems(displayedCart);
+
+            log('=== カート状態チェック完了 ===', 'info');
+        }
+
+        function displayCartItems(items) {
+            const container = document.getElementById('cartItemsDisplay');
+
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 48px; opacity: 0.3;">📭</div>
+                        <div style="font-size: 16px; color: #999; margin-top: 10px;">カートは空です</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = items.map((item, index) => `
+                <div class="cart-item">
+                    <div>
+                        <strong>#${index + 1} ${item.name || item.id || '商品名不明'}</strong><br>
+                        <small style="color: #666;">
+                            ${item.color ? `色: ${item.color}` : ''}
+                            ${item.size ? `サイズ: ${item.size}` : ''}
+                        </small>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 18px; font-weight: 600; color: #667eea;">
+                            ¥${(item.price || 0).toLocaleString()}
+                        </div>
+                        <small style="color: #666;">数量: ${item.quantity || 0}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function refreshAll() {
+            consoleLog = [];
+            log('🔄 診断を開始します...', 'info');
+
+            const authInfo = await checkAuth();
+            await checkCart(authInfo);
+
+            log('✅ 診断完了！', 'success');
+        }
+
+        function testAddToCart() {
+            log('➕ テストアイテムを追加します...', 'info');
+
+            const cart = JSON.parse(localStorage.getItem('goemoncart')) || [];
+            const testItem = {
+                id: 'test-' + Date.now(),
+                name: 'テスト商品',
+                price: 1000,
+                quantity: 1,
+                color: 'ホワイト',
+                size: 'M'
+            };
+
+            cart.push(testItem);
+            localStorage.setItem('goemoncart', JSON.stringify(cart));
+
+            log(`✅ テストアイテムを追加しました: ${JSON.stringify(testItem)}`, 'success');
+
+            setTimeout(refreshAll, 500);
+        }
+
+        function clearLocalCart() {
+            if (!confirm('localStorageのカートデータをクリアしますか？')) return;
+
+            log('🗑️ localStorageをクリアします...', 'warning');
+            localStorage.removeItem('goemoncart');
+            log('✅ クリア完了', 'success');
+
+            setTimeout(refreshAll, 500);
+        }
+
+        function goToCart() {
+            window.location.href = 'goemon-cart.html';
+        }
+
+        // 初期実行
+        window.addEventListener('DOMContentLoaded', () => {
+            log('🚀 カート診断ツールを起動しました', 'success');
+            refreshAll();
+        });
+    </script>
+</body>
+</html>
