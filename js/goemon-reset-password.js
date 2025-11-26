@@ -28,19 +28,32 @@ async function checkResetToken() {
     const resetForm = document.getElementById('resetPasswordForm');
 
     try {
-        // URLハッシュからアクセストークンを取得
+        // URLハッシュからアクセストークンとリフレッシュトークンを取得
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
         const type = hashParams.get('type');
 
         console.log('🔍 Token check:', {
             hasAccessToken: !!accessToken,
+            hasRefreshToken: !!refreshToken,
             type: type
         });
 
         if (!accessToken || type !== 'recovery') {
             throw new Error('無効なリセットリンクです');
         }
+
+        // セッションを設定
+        console.log('🔄 セッションを設定中...');
+        const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+        });
+
+        if (error) throw error;
+
+        console.log('✅ セッション設定完了:', data);
 
         // トークンが有効な場合、フォームを表示
         loadingSpinner.style.display = 'none';
