@@ -3,6 +3,38 @@
 // グローバル変数
 let allProducts = {};
 
+// URLマッピングヘルパー関数
+function getCategoryUrl(slug) {
+    const categoryMap = {
+        'outer': '/outer',
+        'tops': '/tops',
+        'bottoms': '/bottoms',
+        'onepiece': '/onepiece',
+        'accessories': '/accessories',
+        'アウター': '/outer',
+        'トップス': '/tops',
+        'ボトムス': '/bottoms',
+        'ワンピース': '/onepiece',
+        '小物': '/accessories'
+    };
+    return categoryMap[slug] || `/outer`;
+}
+
+function getTypeUrl(slug) {
+    const typeMap = {
+        'new': '/new',
+        'ranking': '/ranking',
+        'limited': '/limited',
+        'sale': '/sale',
+        'new-arrivals': '/new',
+        '新着': '/new',
+        'ランキング': '/ranking',
+        '期間限定': '/limited',
+        'セール': '/sale'
+    };
+    return typeMap[slug] || `/new`;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeIndexPage();
 });
@@ -80,7 +112,7 @@ async function loadHeroImages() {
         heroImages.forEach((image, index) => {
             const slide = document.createElement('div');
             slide.className = 'swiper-slide';
-            const link = image.linkUrl || 'goemon-products.html';
+            const link = image.linkUrl || '/new';
 
             slide.innerHTML = `
                 <a href="${link}" class="hero-slide-link">
@@ -204,7 +236,8 @@ async function loadCategories() {
         // カテゴリを動的に生成
         categories.forEach(category => {
             const li = document.createElement('li');
-            li.innerHTML = `<a href="goemon-products.html?category=${category.slug || encodeURIComponent(category.name)}">${category.name}</a>`;
+            const categorySlug = getCategoryUrl(category.slug || category.name);
+            li.innerHTML = `<a href="${categorySlug}">${category.name}</a>`;
             categoryList.appendChild(li);
         });
 
@@ -252,7 +285,8 @@ async function loadProductTypes() {
         // 商品タイプを動的に生成
         productTypes.forEach(type => {
             const li = document.createElement('li');
-            li.innerHTML = `<a href="goemon-products.html?type=${type.slug || encodeURIComponent(type.name)}">${type.name}</a>`;
+            const typeUrl = getTypeUrl(type.slug || type.name);
+            li.innerHTML = `<a href="${typeUrl}">${type.name}</a>`;
             productTypeList.appendChild(li);
         });
 
@@ -347,7 +381,7 @@ function createProductTypeSection(productType, index) {
             <!-- 商品カード（自動生成） -->
         </div>
         <div class="view-all-wrapper">
-            <a href="goemon-products.html?type=${productType.slug || encodeURIComponent(productType.name)}" class="view-all-link">すべて見る <i class="fas fa-chevron-right"></i></a>
+            <a href="${getTypeUrl(productType.slug || productType.name)}" class="view-all-link">すべて見る <i class="fas fa-chevron-right"></i></a>
         </div>
     `;
 
@@ -419,7 +453,7 @@ function createRankingSection() {
             <!-- ランキング商品（自動生成） -->
         </div>
         <div class="view-all-wrapper">
-            <a href="goemon-products.html?type=ranking" class="view-all-link">すべて見る <i class="fas fa-chevron-right"></i></a>
+            <a href="/ranking" class="view-all-link">すべて見る <i class="fas fa-chevron-right"></i></a>
         </div>
     `;
 
@@ -530,7 +564,7 @@ function loadNewArrivals() {
 
     // 「すべて見る」ボタンを商品タイプでフィルタリングするように更新
     if (viewAllButton) {
-        viewAllButton.href = 'goemon-products.html?type=new-arrivals';
+        viewAllButton.href = '/new';
     }
 
     console.log('New arrivals loaded:', newArrivalsProducts.length);
@@ -681,7 +715,7 @@ function loadSaleItems() {
 
     // 「すべて見る」ボタンを商品タイプでフィルタリングするように更新
     if (viewAllButton) {
-        viewAllButton.href = 'goemon-products.html?type=sale';
+        viewAllButton.href = '/sale';
     }
 
     console.log('Sale items loaded:', saleProducts.length);

@@ -157,7 +157,7 @@ async function loadCategories() {
 
         // 「すべて」を最初に追加
         const allCategory = document.createElement('li');
-        const allUrl = currentType ? `goemon-products.html?type=${currentType}` : 'goemon-products.html';
+        const allUrl = currentType ? `/new` : '/new';
         allCategory.innerHTML = `<a href="${allUrl}" class="active" data-category="all">すべて</a>`;
         categoryList.appendChild(allCategory);
 

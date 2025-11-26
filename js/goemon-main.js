@@ -389,7 +389,7 @@ function initializeProductCards() {
             !e.target.closest('button')) {
             const productId = productCard.dataset.productId;
             console.log('商品詳細へ遷移:', productId);
-            // 実装時: window.location.href = `goemon-product.html?id=${productId}`;
+            // 実装時: window.location.href = `/product/${productId}`;
             alert('商品詳細ページ（実装時に遷移します）\n商品ID: ' + productId);
         }
     });

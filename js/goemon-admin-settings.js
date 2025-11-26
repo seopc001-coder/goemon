@@ -85,7 +85,7 @@ function initializeDefaultData() {
             {
                 id: 'hero1',
                 url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200',
-                link: 'goemon-products.html',
+                link: '/new',
                 alt: '2025 SPRING COLLECTION',
                 title: '春の新作コレクション入荷',
                 order: 0
@@ -93,7 +93,7 @@ function initializeDefaultData() {
             {
                 id: 'hero2',
                 url: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200',
-                link: 'goemon-products.html',
+                link: '/new',
                 alt: 'SALE MAX 70% OFF',
                 title: '春夏アイテムがお買い得',
                 order: 1
