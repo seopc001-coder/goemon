@@ -657,6 +657,11 @@ async function addProductToCart(product) {
 
             localStorage.setItem('goemoncart', JSON.stringify(cart));
             console.log('>>> localStorageに保存完了。カート:', cart);
+
+            // 保存確認
+            const savedCart = localStorage.getItem('goemoncart');
+            console.log('>>> 保存確認 - localStorage読み取り:', savedCart);
+            console.log('>>> 保存確認 - パース結果:', JSON.parse(savedCart || '[]'));
         }
 
         updateCartCount();
