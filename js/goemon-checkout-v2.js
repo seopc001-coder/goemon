@@ -8,6 +8,8 @@ console.log('  - fetchCartItems:', typeof fetchCartItems);
 let checkoutCartItems = [];
 let checkoutProductsData = {};
 let checkoutCurrentUser = null;
+let checkoutUserPoints = 0; // ユーザーの保有ポイント
+let checkoutPointsToUse = 0; // 利用するポイント
 
 // 商品データを初期化
 async function initializeCheckoutProductsData() {
@@ -28,11 +30,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     // ログイン状態を確認
     await checkCheckoutLoginStatus();
 
+    // ポイント情報を読み込み
+    await loadCheckoutUserPoints();
+
     // カートデータを読み込み
     await loadCheckoutCartData();
 
     // 注文サマリーを表示
     renderCheckoutOrderSummary();
+
+    // ポイント入力フィールドのイベント
+    const pointsInput = document.getElementById('pointsToUse');
+    if (pointsInput) {
+        pointsInput.addEventListener('input', handleCheckoutPointsInput);
+    }
 
     // 確認ボタンのイベント
     document.getElementById('btnConfirmOrder').addEventListener('click', handleCheckoutConfirmOrder);
@@ -159,6 +170,13 @@ function renderCheckoutOrderSummary() {
     subtotalElem.textContent = `¥${subtotal.toLocaleString()}`;
     shippingElem.textContent = `¥${shipping.toLocaleString()}`;
     totalElem.textContent = `¥${total.toLocaleString()}`;
+
+    // 獲得予定ポイントを計算して表示（合計金額の1%）
+    const earnedPoints = Math.floor(total * 0.01);
+    const earnedPointsElem = document.getElementById('earnedPoints');
+    if (earnedPointsElem) {
+        earnedPointsElem.textContent = `${earnedPoints} pt`;
+    }
 }
 
 // 注文を確認
@@ -193,6 +211,12 @@ function handleCheckoutConfirmOrder() {
     }
 
     // 注文データを作成
+    const subtotal = calculateCheckoutSubtotal();
+    const shipping = 500;
+    const pointDiscount = checkoutPointsToUse;
+    const total = Math.max(0, subtotal + shipping - pointDiscount);
+    const earnedPoints = Math.floor(total * 0.01);
+
     const orderData = {
         shippingAddress: {
             name: `${lastName} ${firstName}`,
@@ -207,9 +231,12 @@ function handleCheckoutConfirmOrder() {
         },
         paymentMethod,
         items: checkoutCartItems,
-        subtotal: calculateCheckoutSubtotal(),
-        shipping: 500,
-        total: calculateCheckoutSubtotal() + 500
+        subtotal: subtotal,
+        shipping: shipping,
+        pointDiscount: pointDiscount,
+        total: total,
+        earnedPoints: earnedPoints,
+        usedPoints: checkoutPointsToUse
     };
 
     // セッションストレージに保存して確認ページへ
@@ -223,4 +250,79 @@ function calculateCheckoutSubtotal() {
         const product = checkoutProductsData[item.id];
         return sum + ((product ? product.price : item.price) * item.quantity);
     }, 0);
+}
+
+// ユーザーのポイント情報を読み込み
+async function loadCheckoutUserPoints() {
+    try {
+        if (!checkoutCurrentUser) {
+            console.log('ログインしていないため、ポイント情報は表示しません');
+            return;
+        }
+
+        // user_metadataからポイントを取得
+        const points = checkoutCurrentUser.user_metadata?.points || 0;
+        checkoutUserPoints = points;
+
+        // UIに表示
+        const availablePointsElem = document.getElementById('availablePoints');
+        if (availablePointsElem) {
+            availablePointsElem.textContent = `${checkoutUserPoints.toLocaleString()} pt`;
+        }
+
+        console.log('保有ポイント:', checkoutUserPoints);
+    } catch (error) {
+        console.error('ポイント情報の読み込みエラー:', error);
+    }
+}
+
+// ポイント入力の処理
+function handleCheckoutPointsInput(event) {
+    const input = parseInt(event.target.value) || 0;
+    const subtotal = calculateCheckoutSubtotal();
+    const shipping = 500;
+    const maxUsablePoints = Math.min(checkoutUserPoints, subtotal + shipping);
+
+    // 入力値を制限
+    if (input > maxUsablePoints) {
+        event.target.value = maxUsablePoints;
+        checkoutPointsToUse = maxUsablePoints;
+        showAlertModal(`利用可能ポイントは${maxUsablePoints}ptまでです`, 'warning');
+    } else if (input < 0) {
+        event.target.value = 0;
+        checkoutPointsToUse = 0;
+    } else {
+        checkoutPointsToUse = input;
+    }
+
+    // 注文サマリーを再計算
+    updateCheckoutOrderSummary();
+}
+
+// 注文サマリーを更新（ポイント適用後）
+function updateCheckoutOrderSummary() {
+    const subtotal = calculateCheckoutSubtotal();
+    const shipping = 500;
+    const pointDiscount = checkoutPointsToUse;
+    const total = Math.max(0, subtotal + shipping - pointDiscount);
+
+    // 獲得ポイント（合計金額の1%、1円未満切り捨て）
+    const earnedPoints = Math.floor(total * 0.01);
+
+    // UIを更新
+    document.getElementById('subtotal').textContent = `¥${subtotal.toLocaleString()}`;
+    document.getElementById('shipping').textContent = `¥${shipping.toLocaleString()}`;
+
+    // ポイント割引の表示/非表示
+    const pointDiscountRow = document.getElementById('pointDiscountRow');
+    const pointDiscountElem = document.getElementById('pointDiscount');
+    if (pointDiscount > 0) {
+        pointDiscountRow.style.display = 'flex';
+        pointDiscountElem.textContent = `-¥${pointDiscount.toLocaleString()}`;
+    } else {
+        pointDiscountRow.style.display = 'none';
+    }
+
+    document.getElementById('total').textContent = `¥${total.toLocaleString()}`;
+    document.getElementById('earnedPoints').textContent = `${earnedPoints} pt`;
 }

@@ -179,10 +179,37 @@
                         <span>送料</span>
                         <span id="shipping">¥500</span>
                     </div>
+
+                    <!-- ポイント利用 -->
+                    <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <div style="margin-bottom: 10px;">
+                            <span style="font-weight: 500;">保有ポイント:</span>
+                            <span id="availablePoints" style="color: #d63384; font-weight: bold;">0 pt</span>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="pointsToUse" class="form-label" style="font-size: 14px;">利用ポイント</label>
+                            <input type="number" id="pointsToUse" class="form-input" placeholder="0" min="0" value="0" style="margin-bottom: 5px;">
+                            <small style="color: #6c757d; font-size: 12px;">1ポイント = 1円として利用できます</small>
+                        </div>
+                    </div>
+
+                    <!-- ポイント割引 -->
+                    <div class="summary-row" id="pointDiscountRow" style="display: none; color: #d63384;">
+                        <span>ポイント利用</span>
+                        <span id="pointDiscount">-¥0</span>
+                    </div>
+
                     <div class="summary-row total">
                         <span>合計</span>
                         <span id="total">¥0</span>
                     </div>
+
+                    <!-- 獲得予定ポイント -->
+                    <div style="margin: 10px 0; padding: 10px; background: #fff3cd; border-radius: 8px; text-align: center;">
+                        <span style="color: #856404; font-size: 14px;">今回獲得ポイント: </span>
+                        <span id="earnedPoints" style="color: #d63384; font-weight: bold; font-size: 16px;">0 pt</span>
+                    </div>
+
                     <button class="btn-cmn-02 btn-full" id="btnConfirmOrder">
                         注文を確認する
                     </button>
