@@ -701,7 +701,20 @@ function updateModalContent(product) {
     if (nameElement) nameElement.textContent = product.name;
     if (priceElement) priceElement.textContent = formatPrice(product.price);
     if (optionsElement) {
-        optionsElement.textContent = `カラー: ${product.color} / サイズ: ${product.size} / 数量: ${product.quantity}`;
+        // バリエーション情報を構築
+        let optionsParts = [];
+
+        if (product.color && product.color !== 'null') {
+            optionsParts.push(`カラー: ${product.color}`);
+        }
+
+        if (product.size && product.size !== 'null') {
+            optionsParts.push(`サイズ: ${product.size}`);
+        }
+
+        optionsParts.push(`数量: ${product.quantity}`);
+
+        optionsElement.textContent = optionsParts.join(' / ');
     }
 }
 
