@@ -43,10 +43,14 @@ async function initializeCartPage() {
 // カートデータを読み込み（認証ユーザーはSupabase、ゲストはlocalStorage）
 async function loadCartData() {
     try {
+        // まずlocalStorageのログイン状態フラグをチェック
+        const isLoggedIn = localStorage.getItem('goemonloggedin') === 'true';
+
         // Supabaseで認証状態をチェック
         const { data: { session } } = await supabase.auth.getSession();
 
-        if (session?.user) {
+        // 両方でログイン状態を確認（より確実）
+        if (isLoggedIn && session?.user) {
             // 認証ユーザー: Supabaseからカートを読み込み
             const userId = session.user.id;
             const dbCartItems = await fetchCartItems(userId);
@@ -72,6 +76,7 @@ async function loadCartData() {
         console.error('Error loading cart:', error);
         // エラー時はlocalStorageから読み込み
         cartItems = JSON.parse(localStorage.getItem('goemoncart')) || [];
+        console.log('Error fallback - loaded cart from localStorage:', cartItems.length, 'items');
     }
 }
 

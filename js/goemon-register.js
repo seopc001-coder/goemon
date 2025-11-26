@@ -537,8 +537,11 @@ async function submitRegistration() {
                 // プロファイル作成に失敗してもAuth登録は成功しているので続行
             }
 
-            // カートデータをlocalStorageからSupabaseに移行
-            await migrateCartToSupabase(data.user.id);
+            // ⚠️ カート移行はここでは行わない
+            // 理由: メール認証前はSupabaseセッションが確立されていないため、
+            // RLSポリシーによりcarts テーブルへの INSERT が失敗する可能性がある
+            // カートデータはメール認証完了後の初回ログイン時に移行される
+            console.log('📝 カート移行はメール認証完了後の初回ログイン時に実行されます');
         }
 
         // 登録成功 - 完了ページにリダイレクト
