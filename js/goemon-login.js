@@ -191,10 +191,11 @@ async function submitLogin(email, password) {
             localStorage.setItem('goemonemail', email);
         }
 
-        localStorage.setItem('goemonloggedin', 'true');
-
         // カートデータをlocalStorageからSupabaseに移行
         await migrateCartToSupabase(data.user.id);
+
+        // カート移行完了後にログイン状態フラグを設定
+        localStorage.setItem('goemonloggedin', 'true');
 
         // URLパラメータから戻り先URLを取得
         const urlParams = new URLSearchParams(window.location.search);

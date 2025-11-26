@@ -136,8 +136,6 @@
                 const { data: { user } } = await supabase.auth.getUser();
 
                 if (user) {
-                    // ログイン状態をローカルストレージに保存
-                    localStorage.setItem('goemonloggedin', 'true');
                     console.log('User is authenticated:', user.email);
                     console.log('User metadata:', user.user_metadata);
 
@@ -149,6 +147,10 @@
                     // カートデータをlocalStorageからSupabaseに移行
                     console.log('🛒 カート移行を開始します...');
                     await migrateCartToSupabase(user.id);
+
+                    // カート移行完了後にログイン状態フラグを設定
+                    localStorage.setItem('goemonloggedin', 'true');
+                    console.log('✅ ログイン状態フラグを設定しました');
 
                     // 保留中のリダイレクト先を確認
                     const pendingRedirect = localStorage.getItem('goemon_pending_redirect');
