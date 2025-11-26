@@ -214,22 +214,12 @@ async function submitLogin(email, password) {
 }
 
 /**
- * カートデータをlocalStorageからSupabaseに移行
+ * カートデータをlocalStorageからSupabaseに移行（既存カートとマージ）
  */
 async function migrateCartToSupabase(userId) {
     try {
-        // Supabaseに既存のカートがあるか確認
-        const existingCart = await fetchCartItems(userId);
-
         // localStorageからカートデータを取得
         const localCart = JSON.parse(localStorage.getItem('goemoncart')) || [];
-
-        // 既存のSupabaseカートがある場合は、localStorageのカートは無視
-        if (existingCart && existingCart.length > 0) {
-            console.log('Supabaseに既存のカートがあります。localStorageのカートは無視します。');
-            localStorage.removeItem('goemoncart');
-            return;
-        }
 
         if (localCart.length === 0) {
             console.log('移行するカートアイテムがありません');
@@ -238,14 +228,34 @@ async function migrateCartToSupabase(userId) {
 
         console.log('カートアイテムを移行中:', localCart.length, '件');
 
-        // Supabaseに各アイテムを追加
+        // Supabaseに既存のカートがあるか確認
+        const existingCart = await fetchCartItems(userId);
+        console.log('Supabase既存カート:', existingCart?.length || 0, '件');
+
+        // Supabaseに各アイテムを追加（既存カートとマージ）
         for (const item of localCart) {
-            await addToCart(userId, {
-                productId: item.id,
-                quantity: item.quantity,
-                color: item.color,
-                size: item.size
-            });
+            // 同じ商品・色・サイズが既にSupabaseカートにあるか確認
+            const existingItem = existingCart?.find(dbItem =>
+                String(dbItem.productId) === String(item.id) &&
+                (dbItem.color || '') === (item.color || '') &&
+                (dbItem.size || '') === (item.size || '')
+            );
+
+            if (existingItem) {
+                // 既存アイテムがある場合は数量を更新（既存 + 追加）
+                const newQuantity = existingItem.quantity + item.quantity;
+                console.log(`商品 ${item.id} の数量を更新: ${existingItem.quantity} → ${newQuantity}`);
+                await updateCartItemQuantity(existingItem.id, newQuantity);
+            } else {
+                // 新規アイテムを追加
+                console.log(`商品 ${item.id} を新規追加`);
+                await addToCart(userId, {
+                    productId: item.id,
+                    quantity: item.quantity,
+                    color: item.color,
+                    size: item.size
+                });
+            }
         }
 
         console.log('カートアイテムの移行が完了しました');
