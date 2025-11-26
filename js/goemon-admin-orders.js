@@ -429,6 +429,7 @@ async function updateOrderStatusUI(orderId) {
             'キャンセル': 'cancelled'
         };
         const dbStatus = statusMapReverse[newStatus] || 'pending';
+        const oldStatus = order.status;
 
         console.log('📝 注文ステータスを更新:', orderId, '→', newStatus, '(DB:', dbStatus, ')');
 
@@ -438,6 +439,29 @@ async function updateOrderStatusUI(orderId) {
             console.log('✅ Supabaseで注文ステータス更新完了:', order.dbId);
         } else {
             console.warn('⚠️ dbIdが見つかりません。Supabaseへの保存をスキップします');
+        }
+
+        // ステータスが「配送中」に変更された場合、ポイントを付与
+        if (oldStatus !== '配送中' && newStatus === '配送中' && order.customerId && order.subtotal) {
+            try {
+                console.log('🎁 ポイント付与処理を開始:', {
+                    userId: order.customerId,
+                    amount: order.subtotal,
+                    orderId: order.dbId
+                });
+
+                const pointsAwarded = await awardPurchasePoints(
+                    order.customerId,
+                    order.subtotal,
+                    order.dbId
+                );
+
+                console.log(`✅ ポイント付与完了: ${pointsAwarded}pt`);
+            } catch (pointError) {
+                console.error('❌ ポイント付与エラー:', pointError);
+                // ポイント付与失敗はステータス更新を妨げない
+                showAlertModal(`ステータスは更新されましたが、ポイント付与に失敗しました: ${pointError.message}`, 'warning');
+            }
         }
 
         // メモリ上のステータスを更新
@@ -450,7 +474,11 @@ async function updateOrderStatusUI(orderId) {
         closeOrderDetailModal();
 
         // 成功メッセージ
-        showAlertModal(`注文 #${orderId} のステータスを「${newStatus}」に更新しました`, 'success');
+        let successMessage = `注文 #${orderId} のステータスを「${newStatus}」に更新しました`;
+        if (oldStatus !== '配送中' && newStatus === '配送中') {
+            successMessage += '\n購入ポイントを付与しました';
+        }
+        showAlertModal(successMessage, 'success');
 
     } catch (error) {
         console.error('❌ 注文ステータス更新エラー:', error);
