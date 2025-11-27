@@ -73,38 +73,6 @@
             gap: 10px;
         }
 
-        .summary-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .summary-card {
-            background: white;
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .summary-card .label {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        .summary-card .value {
-            font-size: 32px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .summary-card .sub-value {
-            font-size: 14px;
-            color: #999;
-            margin-top: 8px;
-        }
-
         .sales-table-container {
             background: white;
             border-radius: 8px;
@@ -265,15 +233,6 @@
                 </div>
             </div>
 
-            <!-- サマリーカード -->
-            <div class="summary-cards">
-                <div class="summary-card">
-                    <div class="label">総売上</div>
-                    <div class="value" id="totalSales">¥0</div>
-                    <div class="sub-value" id="totalOrders">0件の注文</div>
-                </div>
-            </div>
-
             <!-- タブボタン -->
             <div class="tab-buttons">
                 <button class="tab-btn active" onclick="switchTab('daily')">
@@ -359,6 +318,6 @@
     <script src="./js/supabase-config.js"></script>
     <script src="./js/goemon-admin-db.js?v=20251125006"></script>
     <script src="./js/goemon-modal.js"></script>
-    <script src="./js/goemon-admin-sales.js?v=20251127005"></script>
+    <script src="./js/goemon-admin-sales.js?v=20251127006"></script>
 </body>
 </html>

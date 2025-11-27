@@ -88,9 +88,6 @@ function applyFilters() {
         return true;
     });
 
-    // サマリーを更新
-    updateSummary();
-
     // テーブルを更新
     if (currentTab === 'daily') {
         renderDailySales();
@@ -162,19 +159,6 @@ function getDateRange(period) {
     }
 
     return { start, end };
-}
-
-// サマリーを更新
-function updateSummary() {
-    const totalSales = filteredOrders.reduce((sum, order) => {
-        return sum + (order.total_amount || order.totalAmount || 0);
-    }, 0);
-
-    const totalOrders = filteredOrders.length;
-
-    // 表示を更新
-    document.getElementById('totalSales').textContent = `¥${totalSales.toLocaleString()}`;
-    document.getElementById('totalOrders').textContent = `${totalOrders}件の注文`;
 }
 
 // 日別売上を表示
