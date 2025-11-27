@@ -84,6 +84,9 @@
                 paymentMethod: order.payment_method,
                 subtotal: order.subtotal,
                 shipping: order.shipping_fee,
+                discount: order.discount,
+                couponCode: order.coupon_code,
+                pointsUsed: order.points_used || 0,
                 totalAmount: order.total
             }));
 
@@ -339,10 +342,39 @@
                 </div>
             </div>
 
-            <div style="border-top: 2px solid #333; padding-top: 15px;">
-                <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold;">
-                    <span>合計金額</span>
-                    <span>¥${order.totalAmount.toLocaleString()}</span>
+            <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>小計:</span>
+                    <strong>¥${(order.subtotal || 0).toLocaleString()}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>送料:</span>
+                    <strong>¥${(order.shipping || 0).toLocaleString()}</strong>
+                </div>
+                ${order.discount ? `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #f44336;">
+                        <span>割引:</span>
+                        <strong>-¥${order.discount.toLocaleString()}</strong>
+                    </div>
+                ` : ''}
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #2196F3;">
+                    <span>ポイント利用:</span>
+                    <strong>${order.pointsUsed || 0}ポイント</strong>
+                </div>
+                ${order.couponCode ? `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #4CAF50;">
+                        <span>クーポン利用:</span>
+                        <strong>${order.couponCode}</strong>
+                    </div>
+                ` : `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #999;">
+                        <span>クーポン利用:</span>
+                        <strong>なし</strong>
+                    </div>
+                `}
+                <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 2px solid #ddd; font-size: 18px; font-weight: bold;">
+                    <span>合計金額:</span>
+                    <span style="color: #f44336;">¥${order.totalAmount.toLocaleString()}</span>
                 </div>
             </div>
         `;

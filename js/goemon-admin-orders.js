@@ -92,6 +92,9 @@ async function loadOrders() {
             paymentMethod: order.payment_method,
             subtotal: order.subtotal,
             shipping: order.shipping_fee,
+            discount: order.discount,
+            couponCode: order.coupon_code,
+            pointsUsed: order.points_used || 0,
             totalAmount: order.total,
             dbId: order.id // Supabase上のID
         }));
@@ -389,6 +392,21 @@ function viewOrderDetail(orderId) {
                         <strong>-¥${order.discount.toLocaleString()}</strong>
                     </div>
                 ` : ''}
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #2196F3;">
+                    <span>ポイント利用:</span>
+                    <strong>${order.pointsUsed || 0}ポイント</strong>
+                </div>
+                ${order.couponCode ? `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #4CAF50;">
+                        <span>クーポン利用:</span>
+                        <strong>${order.couponCode}</strong>
+                    </div>
+                ` : `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #999;">
+                        <span>クーポン利用:</span>
+                        <strong>なし</strong>
+                    </div>
+                `}
                 <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 2px solid #ddd; font-size: 18px;">
                     <span>合計:</span>
                     <strong style="color: #f44336;">¥${(order.totalAmount || 0).toLocaleString()}</strong>
