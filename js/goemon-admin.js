@@ -76,11 +76,10 @@ async function loadStatistics() {
         updateStatCard('todayOrders', todayOrders.length, ordersChange, 'todayOrdersChange');
         updateStatCard('todaySales', `¥${todaySales.toLocaleString()}`, salesChange, 'todaySalesChange');
 
-        // ユーザー統計（デモデータ）
-        // 実際の実装ではSupabaseのユーザー数を取得
-        const totalUsers = calculateTotalUsers();
-        const usersChange = { value: 5, isPositive: true };
-        updateStatCard('totalUsers', totalUsers, usersChange, 'totalUsersChange');
+        // 当月の売上を計算
+        const { monthlySales, lastMonthSales } = calculateMonthlySales(orders);
+        const monthlySalesChange = calculateChange(monthlySales, lastMonthSales);
+        updateStatCard('monthlySales', `¥${monthlySales.toLocaleString()}`, monthlySalesChange, 'monthlySalesChange');
 
         // 在庫アラート（Supabaseから取得）
         const lowStockCount = await calculateLowStockCount();
@@ -131,19 +130,29 @@ function calculateChange(current, previous) {
     };
 }
 
-// 総ユーザー数を計算（デモ実装）
-function calculateTotalUsers() {
-    // 実際の実装ではSupabase Admin APIを使用
-    // const { data: { users }, error } = await supabase.auth.admin.listUsers();
+// 当月の売上を計算
+function calculateMonthlySales(orders) {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-11
 
-    // デモ: localStorageからの推定
-    const withdrawnUsers = JSON.parse(localStorage.getItem('goemonwithdrawnusers')) || [];
-    const orders = JSON.parse(localStorage.getItem('goemonorders')) || [];
+    // 先月の年月を計算
+    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
-    // 注文履歴から一意のメールアドレス数を取得
-    const uniqueEmails = new Set(orders.map(order => order.customerEmail));
+    // 当月の売上
+    const monthlySales = orders.filter(order => {
+        const orderDate = new Date(order.orderDate || order.created_at);
+        return orderDate.getFullYear() === currentYear && orderDate.getMonth() === currentMonth;
+    }).reduce((sum, order) => sum + (order.totalAmount || order.total_amount || 0), 0);
 
-    return uniqueEmails.size + withdrawnUsers.length;
+    // 先月の売上
+    const lastMonthSales = orders.filter(order => {
+        const orderDate = new Date(order.orderDate || order.created_at);
+        return orderDate.getFullYear() === lastMonthYear && orderDate.getMonth() === lastMonth;
+    }).reduce((sum, order) => sum + (order.totalAmount || order.total_amount || 0), 0);
+
+    return { monthlySales, lastMonthSales };
 }
 
 // 在庫アラート数を計算（バリエーション対応 - 色ごとにカウント）
