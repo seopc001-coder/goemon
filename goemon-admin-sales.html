@@ -163,6 +163,19 @@
         .tab-content.active {
             display: block;
         }
+
+        .period-info {
+            background: #f5f5f5;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .period-info strong {
+            color: #333;
+        }
     </style>
 </head>
 <body>
@@ -245,6 +258,9 @@
 
             <!-- 日別売上テーブル -->
             <div class="tab-content active" id="dailyTab">
+                <div class="period-info" id="periodInfo">
+                    表示期間: <strong id="periodText">-</strong>
+                </div>
                 <div class="sales-table-container">
                     <h2 class="section-title">
                         <i class="fas fa-calendar-day"></i> 日別売上
@@ -318,6 +334,6 @@
     <script src="./js/supabase-config.js"></script>
     <script src="./js/goemon-admin-db.js?v=20251125006"></script>
     <script src="./js/goemon-modal.js"></script>
-    <script src="./js/goemon-admin-sales.js?v=20251127006"></script>
+    <script src="./js/goemon-admin-sales.js?v=20251127007"></script>
 </body>
 </html>

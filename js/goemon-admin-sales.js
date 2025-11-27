@@ -88,6 +88,9 @@ function applyFilters() {
         return true;
     });
 
+    // 表示期間を更新
+    updatePeriodInfo();
+
     // テーブルを更新
     if (currentTab === 'daily') {
         renderDailySales();
@@ -316,6 +319,20 @@ function formatMonth(monthString) {
     return `${year}年${parseInt(month)}月`;
 }
 
+// 表示期間情報を更新
+function updatePeriodInfo() {
+    const period = document.getElementById('filterPeriod').value;
+    const dateRange = getDateRange(period);
+
+    const startStr = `${dateRange.start.getFullYear()}年${dateRange.start.getMonth() + 1}月${dateRange.start.getDate()}日`;
+    const endStr = `${dateRange.end.getFullYear()}年${dateRange.end.getMonth() + 1}月${dateRange.end.getDate()}日`;
+
+    const periodText = document.getElementById('periodText');
+    if (periodText) {
+        periodText.textContent = `${startStr} ～ ${endStr}`;
+    }
+}
+
 // タブ切り替え
 function switchTab(tab) {
     currentTab = tab;
@@ -331,11 +348,15 @@ function switchTab(tab) {
         content.classList.remove('active');
     });
 
+    // 期間情報の表示・非表示を切り替え
+    const periodInfo = document.getElementById('periodInfo');
     if (tab === 'daily') {
         document.getElementById('dailyTab').classList.add('active');
+        if (periodInfo) periodInfo.style.display = 'block';
         renderDailySales();
     } else {
         document.getElementById('monthlyTab').classList.add('active');
+        if (periodInfo) periodInfo.style.display = 'none';
         renderMonthlySales();
     }
 }
