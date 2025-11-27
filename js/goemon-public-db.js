@@ -43,6 +43,8 @@ async function fetchPublishedProducts() {
  */
 async function fetchProductById(productId) {
     try {
+        console.log('fetchProductById: 商品ID =', productId);
+
         const { data, error } = await supabase
             .from('products')
             .select(`
@@ -58,12 +60,19 @@ async function fetchProductById(productId) {
             .single();
 
         if (error) {
-            console.error('商品取得エラー:', error);
+            console.error('商品取得エラー - 詳細:', {
+                message: error.message,
+                details: error.details,
+                hint: error.hint,
+                code: error.code
+            });
             throw error;
         }
+
+        console.log('商品データ取得成功:', data);
         return data ? convertProductFromDB(data) : null;
     } catch (error) {
-        console.error('商品取得エラー:', error);
+        console.error('商品取得エラー - キャッチ:', error);
         return null;
     }
 }
