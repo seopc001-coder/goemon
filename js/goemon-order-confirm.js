@@ -114,6 +114,84 @@
         document.getElementById('total').textContent = `¥${orderData.total.toLocaleString()}`;
     }
 
+    // 在庫を減らす
+    async function deductProductStock(productId, quantity, color, size) {
+        try {
+            console.log(`🔍 在庫減少処理: 商品ID=${productId}, 数量=${quantity}, 色=${color}, サイズ=${size}`);
+
+            // Supabaseから商品を取得
+            const { data: product, error: fetchError } = await supabase
+                .from('products')
+                .select('*')
+                .eq('id', productId)
+                .single();
+
+            if (fetchError) {
+                console.error('商品取得エラー:', fetchError);
+                throw fetchError;
+            }
+
+            if (!product) {
+                throw new Error(`商品が見つかりません: ${productId}`);
+            }
+
+            // バリエーション商品の場合
+            if (product.variants && product.variants.stock && color) {
+                const variantStock = product.variants.stock;
+
+                if (variantStock[color] === undefined) {
+                    throw new Error(`カラー "${color}" の在庫が見つかりません`);
+                }
+
+                if (variantStock[color] < quantity) {
+                    throw new Error(`在庫不足: カラー "${color}" の在庫が足りません (在庫: ${variantStock[color]}, 注文: ${quantity})`);
+                }
+
+                // 在庫を減らす
+                variantStock[color] -= quantity;
+
+                // Supabaseを更新
+                const { error: updateError } = await supabase
+                    .from('products')
+                    .update({ variants: product.variants })
+                    .eq('id', productId);
+
+                if (updateError) {
+                    console.error('在庫更新エラー:', updateError);
+                    throw updateError;
+                }
+
+                console.log(`✅ バリエーション在庫減少: ${productId} (${color}) -${quantity} → 残り ${variantStock[color]}`);
+
+            } else {
+                // 通常商品の場合
+                if (product.stock < quantity) {
+                    throw new Error(`在庫不足: 商品の在庫が足りません (在庫: ${product.stock}, 注文: ${quantity})`);
+                }
+
+                // 在庫を減らす
+                const newStock = product.stock - quantity;
+
+                // Supabaseを更新
+                const { error: updateError } = await supabase
+                    .from('products')
+                    .update({ stock: newStock })
+                    .eq('id', productId);
+
+                if (updateError) {
+                    console.error('在庫更新エラー:', updateError);
+                    throw updateError;
+                }
+
+                console.log(`✅ 在庫減少: ${productId} -${quantity} → 残り ${newStock}`);
+            }
+
+        } catch (error) {
+            console.error('在庫減少エラー:', productId, error);
+            throw error;
+        }
+    }
+
     // 注文を確定
     async function handlePlaceOrder() {
         // ローディング表示
@@ -153,6 +231,13 @@
                 pointDiscount: orderData.pointDiscount || 0,
                 totalAmount: orderData.total
             };
+
+            // 在庫を減らす
+            console.log('🔄 在庫減少処理を開始');
+            for (const item of order.items) {
+                await deductProductStock(item.productId, item.quantity, item.color, item.size);
+            }
+            console.log('✅ 在庫減少完了');
 
             // localStorageに保存
             saveOrderToLocalStorage(order);
