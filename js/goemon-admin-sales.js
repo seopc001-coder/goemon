@@ -172,25 +172,9 @@ function updateSummary() {
 
     const totalOrders = filteredOrders.length;
 
-    const averageOrder = totalOrders > 0 ? Math.round(totalSales / totalOrders) : 0;
-
-    const maxOrder = filteredOrders.reduce((max, order) => {
-        const amount = order.total_amount || order.totalAmount || 0;
-        return amount > max ? amount : max;
-    }, 0);
-
-    const completedOrders = filteredOrders.filter(order => {
-        return order.status === '配送完了' || order.status === 'completed';
-    }).length;
-
-    const completionRate = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
-
     // 表示を更新
     document.getElementById('totalSales').textContent = `¥${totalSales.toLocaleString()}`;
     document.getElementById('totalOrders').textContent = `${totalOrders}件の注文`;
-    document.getElementById('averageOrder').textContent = `¥${averageOrder.toLocaleString()}`;
-    document.getElementById('maxOrder').textContent = `¥${maxOrder.toLocaleString()}`;
-    document.getElementById('completionRate').textContent = `${completionRate}%`;
 }
 
 // 日別売上を表示
