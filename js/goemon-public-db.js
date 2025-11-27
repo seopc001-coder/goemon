@@ -55,10 +55,12 @@ async function fetchProductById(productId) {
                 )
             `)
             .eq('id', productId)
-            .eq('is_published', true)
             .single();
 
-        if (error) throw error;
+        if (error) {
+            console.error('商品取得エラー:', error);
+            throw error;
+        }
         return data ? convertProductFromDB(data) : null;
     } catch (error) {
         console.error('商品取得エラー:', error);
