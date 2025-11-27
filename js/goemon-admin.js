@@ -144,13 +144,13 @@ function calculateMonthlySales(orders) {
     const monthlySales = orders.filter(order => {
         const orderDate = new Date(order.orderDate || order.created_at);
         return orderDate.getFullYear() === currentYear && orderDate.getMonth() === currentMonth;
-    }).reduce((sum, order) => sum + (order.totalAmount || order.total_amount || 0), 0);
+    }).reduce((sum, order) => sum + (order.total || order.totalAmount || 0), 0);
 
     // 先月の売上
     const lastMonthSales = orders.filter(order => {
         const orderDate = new Date(order.orderDate || order.created_at);
         return orderDate.getFullYear() === lastMonthYear && orderDate.getMonth() === lastMonth;
-    }).reduce((sum, order) => sum + (order.totalAmount || order.total_amount || 0), 0);
+    }).reduce((sum, order) => sum + (order.total || order.totalAmount || 0), 0);
 
     return { monthlySales, lastMonthSales };
 }
