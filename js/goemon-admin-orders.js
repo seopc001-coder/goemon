@@ -289,8 +289,8 @@ function resetFilters() {
 
 // 注文詳細を表示
 function viewOrderDetail(orderId) {
-    // order.id (UUID) または order.orderId (注文番号) で検索
-    const order = allOrders.find(o => o.id === orderId || o.orderId === orderId);
+    // order.dbId (UUID) または order.orderId (注文番号) で検索
+    const order = allOrders.find(o => o.dbId === orderId || o.orderId === orderId);
 
     if (!order) {
         showAlertModal('注文が見つかりません', 'error');
