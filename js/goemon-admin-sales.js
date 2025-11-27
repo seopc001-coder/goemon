@@ -70,6 +70,12 @@ function applyFilters() {
     filteredOrders = allOrders.filter(order => {
         const orderDate = new Date(order.created_at || order.orderDate);
 
+        // キャンセル注文を除外
+        const status = (order.status || '').toLowerCase();
+        if (status === 'cancelled' || status === 'キャンセル') {
+            return false;
+        }
+
         // 期間チェック
         if (orderDate < dateRange.start || orderDate > dateRange.end) {
             return false;
