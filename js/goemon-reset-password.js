@@ -111,7 +111,7 @@ async function handleResetPassword(e) {
 
         // 3秒後にログインページにリダイレクト
         setTimeout(() => {
-            window.location.href = 'https://goemon-flame.vercel.app/goemon-login.html';
+            window.location.href = 'goemon-login.html';
         }, 3000);
 
     } catch (error) {

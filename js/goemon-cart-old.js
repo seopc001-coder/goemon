@@ -228,7 +228,7 @@ function checkEmptyCart() {
             <div class="empty-cart">
                 <i class="fas fa-shopping-cart fa-4x"></i>
                 <p>カートに商品がありません</p>
-                <a href="goemon-index.html" class="btn-cmn-02">ショッピングを続ける</a>
+                <a href="/" class="btn-cmn-02">ショッピングを続ける</a>
             </div>
         `;
 

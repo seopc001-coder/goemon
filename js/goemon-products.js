@@ -171,11 +171,27 @@ async function loadCategories() {
             // 各カテゴリを追加
             categories.forEach(category => {
                 const li = document.createElement('li');
-                // 商品タイプパラメータがあれば保持
+                // カテゴリスラッグから清潔なURLにマッピング
                 const categorySlug = category.slug || encodeURIComponent(category.name);
-                const categoryUrl = currentType
-                    ? `goemon-products.html?type=${currentType}&category=${categorySlug}`
-                    : `goemon-products.html?category=${categorySlug}`;
+                const categoryUrlMap = {
+                    'outer': '/outer',
+                    'tops': '/tops',
+                    'bottoms': '/bottoms',
+                    'onepiece': '/onepiece',
+                    'accessories': '/accessories',
+                    'shoes': '/shoes',
+                    'bags': '/bags',
+                    'krcosmetics': '/krcosmetics',
+                    'アウター': '/outer',
+                    'トップス': '/tops',
+                    'ボトムス': '/bottoms',
+                    'ワンピース': '/onepiece',
+                    '小物': '/accessories',
+                    'シューズ': '/shoes',
+                    'バッグ': '/bags',
+                    '韓国コスメ': '/krcosmetics'
+                };
+                const categoryUrl = categoryUrlMap[categorySlug] || categoryUrlMap[category.name] || '/outer';
                 li.innerHTML = `<a href="${categoryUrl}" data-category="${category.name}">${category.name}</a>`;
                 categoryList.appendChild(li);
             });

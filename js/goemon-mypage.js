@@ -139,7 +139,7 @@ function initializeLogout() {
 
             // 2秒後にトップページへリダイレクト
             setTimeout(() => {
-                window.location.href = 'goemon-index.html';
+                window.location.href = '/';
             }, 2000);
 
         } catch (error) {

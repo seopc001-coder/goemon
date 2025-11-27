@@ -199,7 +199,7 @@ async function submitLogin(email, password) {
 
         // URLパラメータから戻り先URLを取得
         const urlParams = new URLSearchParams(window.location.search);
-        const returnUrl = urlParams.get('returnUrl') || 'goemon-index.html';
+        const returnUrl = urlParams.get('returnUrl') || '/';
 
         showAlertModal('ログインしました！', 'success');
         setTimeout(() => {

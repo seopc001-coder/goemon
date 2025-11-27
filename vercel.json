@@ -37,6 +37,18 @@
       "destination": "/goemon-products.html?category=accessories"
     },
     {
+      "source": "/shoes",
+      "destination": "/goemon-products.html?category=shoes"
+    },
+    {
+      "source": "/bags",
+      "destination": "/goemon-products.html?category=bags"
+    },
+    {
+      "source": "/krcosmetics",
+      "destination": "/goemon-products.html?category=krcosmetics"
+    },
+    {
       "source": "/sale",
       "destination": "/goemon-products.html?type=sale"
     },

@@ -207,7 +207,7 @@ async function processWithdrawal() {
 
         // 3秒後にトップページへリダイレクト
         setTimeout(() => {
-            window.location.href = 'goemon-index.html';
+            window.location.href = '/';
         }, 3000);
 
     } catch (error) {

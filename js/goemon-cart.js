@@ -107,7 +107,7 @@ function renderCartItems() {
             <div class="empty-cart" style="text-align: center; padding: 60px 20px;">
                 <i class="fas fa-shopping-cart fa-4x" style="color: #ddd; margin-bottom: 20px;"></i>
                 <p style="font-size: 18px; color: #666; margin-bottom: 20px;">カートに商品がありません</p>
-                <a href="goemon-index.html" class="btn-cmn-02">ショッピングを続ける</a>
+                <a href="/" class="btn-cmn-02">ショッピングを続ける</a>
             </div>
         `;
         const summaryElement = document.querySelector('.cart-summary');

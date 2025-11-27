@@ -80,7 +80,7 @@ function showProductNotFound() {
                 <p style="font-size: 16px; color: #666; margin-bottom: 40px;">
                     この商品は削除されたか、現在公開されていません。
                 </p>
-                <a href="goemon-index.html" style="display: inline-block; padding: 15px 40px; background: #8B4513; color: white; text-decoration: none; border-radius: 5px; font-size: 16px;">
+                <a href="/" style="display: inline-block; padding: 15px 40px; background: #8B4513; color: white; text-decoration: none; border-radius: 5px; font-size: 16px;">
                     トップページに戻る
                 </a>
             </div>

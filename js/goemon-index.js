@@ -11,11 +11,17 @@ function getCategoryUrl(slug) {
         'bottoms': '/bottoms',
         'onepiece': '/onepiece',
         'accessories': '/accessories',
+        'shoes': '/shoes',
+        'bags': '/bags',
+        'krcosmetics': '/krcosmetics',
         'アウター': '/outer',
         'トップス': '/tops',
         'ボトムス': '/bottoms',
         'ワンピース': '/onepiece',
-        '小物': '/accessories'
+        '小物': '/accessories',
+        'シューズ': '/shoes',
+        'バッグ': '/bags',
+        '韓国コスメ': '/krcosmetics'
     };
     return categoryMap[slug] || `/outer`;
 }
