@@ -165,7 +165,27 @@
 
         // 商品画像のHTMLを生成（最大3件）
         const itemsHTML = order.items.slice(0, 3).map(item => {
-            const product = productsData[item.productId];
+            // productIdを文字列と数値の両方で試す
+            const productId = item.productId;
+            let product = productsData[productId];
+
+            // 文字列/数値の変換を試みる
+            if (!product && typeof productId === 'string') {
+                product = productsData[parseInt(productId)];
+            } else if (!product && typeof productId === 'number') {
+                product = productsData[String(productId)];
+            }
+
+            // デバッグ: 商品が見つからない場合
+            if (!product) {
+                console.warn('Product not found for item:', {
+                    productId: productId,
+                    productIdType: typeof productId,
+                    availableProductIds: Object.keys(productsData).slice(0, 5),
+                    item: item
+                });
+            }
+
             const imageUrl = product && product.images && product.images.length > 0
                 ? product.images[0]
                 : '';
@@ -262,8 +282,29 @@
                 <p style="color: #999; margin-bottom: 10px;">注文商品</p>
                 <div style="border: 1px solid #ddd; border-radius: 5px; padding: 15px;">
                     ${order.items.map(item => {
-                        const product = productsData[item.productId];
-                        if (!product) return '';
+                        // productIdを文字列と数値の両方で試す
+                        const productId = item.productId;
+                        let product = productsData[productId];
+
+                        // 文字列/数値の変換を試みる
+                        if (!product && typeof productId === 'string') {
+                            product = productsData[parseInt(productId)];
+                        } else if (!product && typeof productId === 'number') {
+                            product = productsData[String(productId)];
+                        }
+
+                        if (!product) {
+                            // 商品が見つからない場合は注文データに保存されている情報を使用
+                            return `
+                                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
+                                    <div style="flex: 1;">
+                                        <p style="font-weight: bold;">${item.name || '商品情報なし'}</p>
+                                        <p style="color: #666; font-size: 14px;">数量: ${item.quantity}</p>
+                                    </div>
+                                    <p style="font-weight: bold;">¥${(item.price * item.quantity).toLocaleString()}</p>
+                                </div>
+                            `;
+                        }
                         return `
                             <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
                                 <div style="flex: 1;">
