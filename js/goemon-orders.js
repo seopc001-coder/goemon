@@ -176,6 +176,16 @@
                 product = productsData[String(productId)];
             }
 
+            // デバッグ: 商品の状態を常にログ出力
+            console.log('🔍 Image debug:', {
+                productId: productId,
+                productFound: !!product,
+                productName: product?.name,
+                hasImages: product?.images?.length > 0,
+                imageUrl: product?.images?.[0],
+                productKeys: Object.keys(productsData)
+            });
+
             // デバッグ: 商品が見つからない場合
             if (!product) {
                 console.warn('Product not found for item:', {

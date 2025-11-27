@@ -361,6 +361,14 @@ function getHeroImagesFromLocalStorage() {
  * Supabase商品データをアプリ用フォーマットに変換
  */
 function convertProductFromDB(dbProduct) {
+    // 個別の画像フィールドから配列を作成
+    const images = [
+        dbProduct.image,
+        dbProduct.image2,
+        dbProduct.image3,
+        dbProduct.image4
+    ].filter(img => img && img.trim() !== ''); // 空文字や null を除外
+
     return {
         id: dbProduct.id,
         name: dbProduct.name,
@@ -374,6 +382,7 @@ function convertProductFromDB(dbProduct) {
         image2: dbProduct.image2,
         image3: dbProduct.image3,
         image4: dbProduct.image4,
+        images: images, // 画像配列を追加
         showInRanking: dbProduct.show_in_ranking,
         rankingPosition: dbProduct.ranking_position,
         isPublished: dbProduct.is_published,
