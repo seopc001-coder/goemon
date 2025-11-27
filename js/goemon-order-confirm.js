@@ -135,16 +135,22 @@
                 customerId: currentUser ? currentUser.id : null,
                 customerEmail: currentUser ? currentUser.email : null,
                 customerName: orderData.shippingAddress.name || null,
-                items: orderData.items.map(item => ({
-                    productId: String(item.id),
-                    quantity: item.quantity,
-                    price: productsData[item.id] ? productsData[item.id].price : item.price,
-                    name: productsData[item.id] ? productsData[item.id].name : item.name
-                })),
+                items: orderData.items.map(item => {
+                    const itemId = item.id || item.productId;
+                    return {
+                        productId: String(itemId),
+                        quantity: item.quantity,
+                        price: productsData[itemId] ? productsData[itemId].price : item.price,
+                        name: productsData[itemId] ? productsData[itemId].name : item.name,
+                        color: item.color || null,
+                        size: item.size || null
+                    };
+                }),
                 shippingAddress: orderData.shippingAddress,
                 paymentMethod: orderData.paymentMethod,
                 subtotal: orderData.subtotal,
                 shipping: orderData.shipping,
+                pointDiscount: orderData.pointDiscount || 0,
                 totalAmount: orderData.total
             };
 
@@ -218,19 +224,19 @@
                 subtotal: order.subtotal || 0,
                 shippingFee: order.shipping || 0,
                 tax: 0, // 税金計算は別途実装が必要な場合
-                discount: 0,
-                total: order.totalAmount || 0,
+                discount: order.pointDiscount || 0,
+                total: order.total || order.totalAmount || 0,
                 couponCode: null,
                 deliveryDate: null,
                 deliveryTime: null,
                 notes: null,
                 items: order.items.map(item => ({
-                    productId: String(item.productId),
+                    productId: String(item.productId || item.id),
                     productName: item.name || '',
                     productPrice: item.price || 0,
                     quantity: item.quantity || 1,
-                    color: null,
-                    size: null,
+                    color: item.color || null,
+                    size: item.size || null,
                     subtotal: (item.price || 0) * (item.quantity || 1)
                 }))
             };
