@@ -10,8 +10,27 @@ let productData = {
 
 // ページ読み込み時にURLパラメータから商品IDを取得
 function getProductIdFromURL() {
+    // まずクエリパラメータをチェック (?id=xxx)
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('id') || '1';
+    const queryId = urlParams.get('id');
+
+    if (queryId) {
+        console.log('クエリパラメータからID取得:', queryId);
+        return queryId;
+    }
+
+    // クエリパラメータがない場合、URLパスからIDを取得 (/product/xxx)
+    const pathParts = window.location.pathname.split('/');
+    const productIndex = pathParts.findIndex(part => part === 'product');
+
+    if (productIndex !== -1 && pathParts[productIndex + 1]) {
+        const pathId = pathParts[productIndex + 1];
+        console.log('URLパスからID取得:', pathId);
+        return pathId;
+    }
+
+    console.log('IDが見つからないため、デフォルト値 "1" を使用');
+    return '1';
 }
 
 // 商品データを読み込み
