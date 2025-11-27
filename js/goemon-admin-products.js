@@ -952,6 +952,24 @@ async function handleProductFormSubmit(e) {
         }
     }
 
+    // ランキング順位の重複チェック
+    if (showInRanking && rankingPosition) {
+        const isDuplicate = Object.keys(allProducts).some(key => {
+            // 編集中の商品は除外
+            if (key === editingProductId) {
+                return false;
+            }
+            const product = allProducts[key];
+            // 同じランキング順位が既に使われているかチェック
+            return product.showInRanking && product.rankingPosition === rankingPosition;
+        });
+
+        if (isDuplicate) {
+            showAlertModal(`ランキング順位 ${rankingPosition}位 は既に使用されています。\n\n別の順位を選択してください。`, 'error');
+            return;
+        }
+    }
+
     // 画像アップロード中のチェック
     const imageFields = [productImage, productImage2, productImage3, productImage4].filter(img => img);
     const isUploading = imageFields.some(img => img === 'アップロード中...');
