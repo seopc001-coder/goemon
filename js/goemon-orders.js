@@ -151,14 +151,6 @@
                 showOrderDetail(orderId);
             });
         });
-
-        // 削除ボタンのイベント
-        document.querySelectorAll('.btn-delete-order').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const orderId = this.dataset.orderId;
-                confirmDeleteOrder(orderId);
-            });
-        });
     }
 
     // 注文カードを生成
@@ -203,9 +195,6 @@
                             <i class="fas fa-redo"></i> 再注文
                         </button>
                     ` : ''}
-                    <button class="btn-delete-order" data-order-id="${order.orderId}" style="padding: 8px 12px; background: #ef5350; color: white; border: none; border-radius: 5px; cursor: pointer; min-width: 100px;">
-                        <i class="fas fa-trash"></i> 削除
-                    </button>
                 </div>
             </div>
         `;
@@ -314,55 +303,6 @@
                 modal.querySelector('.modal-cmn-container').classList.remove('active');
             }
         });
-    }
-
-    // 注文削除の確認
-    function confirmDeleteOrder(orderId) {
-        const order = ordersData.find(o => o.orderId === orderId);
-        if (!order) return;
-
-        showConfirmModal(
-            `注文番号 ${orderId} を削除しますか？\nこの操作は取り消せません。`,
-            () => deleteOrder(orderId)
-        );
-    }
-
-    // 注文を削除
-    async function deleteOrder(orderId) {
-        try {
-            // localStorageから削除
-            ordersData = ordersData.filter(o => o.orderId !== orderId);
-            localStorage.setItem('goemonorders', JSON.stringify(ordersData));
-
-            // Supabaseから削除（ログインしている場合）
-            if (currentUser) {
-                await deleteOrderFromSupabase(orderId);
-            }
-
-            // 画面を更新
-            renderOrders();
-            showAlertModal('注文を削除しました', 'success');
-        } catch (error) {
-            console.error('Error deleting order:', error);
-            showAlertModal('注文の削除に失敗しました', 'error');
-        }
-    }
-
-    // Supabaseから注文を削除
-    async function deleteOrderFromSupabase(orderId) {
-        try {
-            // order_numberで検索して削除
-            const { error } = await supabase
-                .from('orders')
-                .delete()
-                .eq('order_number', orderId);
-
-            if (error) throw error;
-            console.log('Order deleted from Supabase:', orderId);
-        } catch (error) {
-            console.error('Error deleting order from Supabase:', error);
-            throw error;
-        }
     }
 
 })();
