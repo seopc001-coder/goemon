@@ -163,13 +163,28 @@
         // ステータスのラベルと色
         const statusInfo = getStatusInfo(order.status);
 
-        // 商品の画像とサマリー
-        const itemsSummary = order.items.slice(0, 3).map(item => {
+        // 商品画像のHTMLを生成（最大3件）
+        const itemsHTML = order.items.slice(0, 3).map(item => {
             const product = productsData[item.productId];
-            return product ? product.name : '商品';
-        }).join('、');
+            const imageUrl = product && product.images && product.images.length > 0
+                ? product.images[0]
+                : '';
 
-        const moreItems = order.items.length > 3 ? ` 他${order.items.length - 3}点` : '';
+            return `
+                <div style="width: 80px; height: 80px; background: #f5f5f5; border-radius: 5px; overflow: hidden; border: 1px solid #eee;">
+                    ${imageUrl ? `
+                        <img src="${imageUrl}" alt="${product ? product.name : '商品'}"
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                    ` : `
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                            <i class="fas fa-image" style="color: #ddd; font-size: 24px;"></i>
+                        </div>
+                    `}
+                </div>
+            `;
+        }).join('');
+
+        const moreItems = order.items.length > 3 ? `<p style="color: #999; font-size: 14px; margin: 5px 0 0 0;">他${order.items.length - 3}点</p>` : '';
 
         return `
             <div class="order-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; background: #fff;">
@@ -184,19 +199,17 @@
                 </div>
 
                 <div class="order-items" style="margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 5px;">
-                    <p style="color: #666; margin-bottom: 5px;"><i class="fas fa-box"></i> ${itemsSummary}${moreItems}</p>
-                    <p style="font-weight: bold; font-size: 18px; color: #333;">合計: ¥${order.totalAmount.toLocaleString()}</p>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+                        ${itemsHTML}
+                    </div>
+                    ${moreItems}
+                    <p style="font-weight: bold; font-size: 18px; color: #333; margin-top: 10px;">合計: ¥${order.totalAmount.toLocaleString()}</p>
                 </div>
 
                 <div class="order-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="btn-order-detail btn-cmn-01" data-order-id="${order.orderId}" style="flex: 1; min-width: 120px;">
+                    <button class="btn-order-detail btn-cmn-01" data-order-id="${order.orderId}" style="width: 100%;">
                         <i class="fas fa-info-circle"></i> 詳細を見る
                     </button>
-                    ${order.status === '発送完了' ? `
-                        <button class="btn-reorder btn-cmn-02" data-order-id="${order.orderId}" style="flex: 1; min-width: 120px;">
-                            <i class="fas fa-redo"></i> 再注文
-                        </button>
-                    ` : ''}
                 </div>
             </div>
         `;
