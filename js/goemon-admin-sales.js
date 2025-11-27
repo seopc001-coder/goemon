@@ -185,7 +185,7 @@ function renderDailySales() {
         }
 
         dailyData[dateKey].orders.push(order);
-        dailyData[dateKey].totalSales += (order.total_amount || order.totalAmount || 0);
+        dailyData[dateKey].totalSales += (order.total || order.totalAmount || 0);
 
         if (order.status === '配送完了' || order.status === 'completed') {
             dailyData[dateKey].completedCount++;
@@ -247,7 +247,7 @@ function renderMonthlySales() {
         }
 
         monthlyData[monthKey].orders.push(order);
-        monthlyData[monthKey].totalSales += (order.total_amount || order.totalAmount || 0);
+        monthlyData[monthKey].totalSales += (order.total || order.totalAmount || 0);
 
         if (order.status === '配送完了' || order.status === 'completed') {
             monthlyData[monthKey].completedCount++;
