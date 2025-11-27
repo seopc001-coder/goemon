@@ -164,7 +164,8 @@ function renderCheckoutOrderSummary() {
         `;
     }).join('');
 
-    const shipping = 500; // 送料固定
+    // 送料計算（¥5,000以上で送料無料）
+    const shipping = subtotal >= 5000 ? 0 : 500;
     const total = subtotal + shipping;
 
     subtotalElem.textContent = `¥${subtotal.toLocaleString()}`;
@@ -212,7 +213,7 @@ function handleCheckoutConfirmOrder() {
 
     // 注文データを作成
     const subtotal = calculateCheckoutSubtotal();
-    const shipping = 500;
+    const shipping = subtotal >= 5000 ? 0 : 500; // ¥5,000以上で送料無料
     const pointDiscount = checkoutPointsToUse;
     const total = Math.max(0, subtotal + shipping - pointDiscount);
     const earnedPoints = Math.floor(total * 0.01);
@@ -280,7 +281,7 @@ async function loadCheckoutUserPoints() {
 function handleCheckoutPointsInput(event) {
     const input = parseInt(event.target.value) || 0;
     const subtotal = calculateCheckoutSubtotal();
-    const shipping = 500;
+    const shipping = subtotal >= 5000 ? 0 : 500; // ¥5,000以上で送料無料
     const maxUsablePoints = Math.min(checkoutUserPoints, subtotal + shipping);
 
     // 入力値を制限
@@ -302,7 +303,7 @@ function handleCheckoutPointsInput(event) {
 // 注文サマリーを更新（ポイント適用後）
 function updateCheckoutOrderSummary() {
     const subtotal = calculateCheckoutSubtotal();
-    const shipping = 500;
+    const shipping = subtotal >= 5000 ? 0 : 500; // ¥5,000以上で送料無料
     const pointDiscount = checkoutPointsToUse;
     const total = Math.max(0, subtotal + shipping - pointDiscount);
 
