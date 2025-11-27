@@ -39,8 +39,8 @@ async function checkAdminAccess() {
 // 統計データを読み込み
 async function loadStatistics() {
     try {
-        // 注文データを取得
-        const orders = JSON.parse(localStorage.getItem('goemonorders')) || [];
+        // Supabaseから注文データを取得
+        const orders = await fetchAllOrders();
 
         // 今日の日付を取得
         const today = new Date();
@@ -52,21 +52,21 @@ async function loadStatistics() {
 
         // 本日の注文
         const todayOrders = orders.filter(order => {
-            const orderDate = new Date(order.orderDate);
+            const orderDate = new Date(order.created_at);
             orderDate.setHours(0, 0, 0, 0);
             return orderDate.getTime() === today.getTime();
         });
 
         // 昨日の注文
         const yesterdayOrders = orders.filter(order => {
-            const orderDate = new Date(order.orderDate);
+            const orderDate = new Date(order.created_at);
             orderDate.setHours(0, 0, 0, 0);
             return orderDate.getTime() === yesterday.getTime();
         });
 
         // 本日の売上
-        const todaySales = todayOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
-        const yesterdaySales = yesterdayOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+        const todaySales = todayOrders.reduce((sum, order) => sum + (order.total || 0), 0);
+        const yesterdaySales = yesterdayOrders.reduce((sum, order) => sum + (order.total || 0), 0);
 
         // 変化率を計算
         const ordersChange = calculateChange(todayOrders.length, yesterdayOrders.length);
@@ -240,14 +240,18 @@ async function loadRecentOrders() {
         }
 
         tbody.innerHTML = recentOrders.map(order => {
-            const statusInfo = getStatusInfo(order.status);
+            // ステータスを日本語に変換
+            const normalizedOrder = normalizeOrderStatus(order);
+            const statusInfo = getStatusInfo(normalizedOrder.status);
             const orderDate = new Date(order.created_at);
 
-            // 顧客名を取得（shipping_addressから）
-            const customerName = order.shipping_name || '未設定';
+            // 顧客名を取得（shipping_family_name + shipping_given_nameから構築）
+            const customerName = order.shipping_family_name && order.shipping_given_name
+                ? `${order.shipping_family_name} ${order.shipping_given_name}`
+                : order.shipping_family_name || order.shipping_given_name || '未設定';
 
             // 合計金額を計算
-            const totalAmount = order.total_amount || 0;
+            const totalAmount = order.total || 0;
 
             return `
                 <tr>

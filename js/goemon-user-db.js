@@ -421,10 +421,12 @@ async function fetchOrders(userId) {
 /**
  * 注文を作成
  */
-async function createOrder(userId, orderData) {
+async function createOrder(userId, orderData, orderNumber = null) {
     try {
-        // 注文番号を生成
-        const orderNumber = 'GO' + Date.now();
+        // 注文番号を生成（既に生成済みの場合はそれを使用）
+        if (!orderNumber) {
+            orderNumber = 'GO' + Date.now();
+        }
 
         // 注文を作成
         const { data: order, error: orderError } = await supabase
