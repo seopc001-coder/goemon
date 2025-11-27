@@ -147,6 +147,9 @@ function mapOrderStatus(status) {
 function renderOrders(orders) {
     const tbody = document.getElementById('ordersTableBody');
 
+    // 完了率を計算・表示
+    updateCompletionRate(orders);
+
     if (orders.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -484,6 +487,23 @@ async function updateOrderStatusUI(orderId) {
         console.error('❌ 注文ステータス更新エラー:', error);
         showAlertModal('ステータスの更新に失敗しました: ' + error.message, 'error');
     }
+}
+
+// 完了率を更新
+function updateCompletionRate(orders) {
+    const totalOrders = orders.length;
+
+    if (totalOrders === 0) {
+        document.getElementById('completionRate').textContent = '0%';
+        return;
+    }
+
+    const completedOrders = orders.filter(order => {
+        return order.status === '配送完了' || order.status === 'completed';
+    }).length;
+
+    const completionRate = Math.round((completedOrders / totalOrders) * 100);
+    document.getElementById('completionRate').textContent = `${completionRate}%`;
 }
 
 // 注文詳細モーダルを閉じる

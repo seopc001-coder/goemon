@@ -73,6 +73,32 @@
             gap: 15px;
         }
 
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .summary-card .label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .summary-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .summary-card .sub-value {
+            font-size: 14px;
+            color: #999;
+            margin-top: 8px;
+        }
+
         .orders-list {
             background: white;
             border-radius: 8px;
@@ -347,6 +373,13 @@
                 </div>
             </div>
 
+            <!-- サマリーカード -->
+            <div class="summary-card">
+                <div class="label">完了率</div>
+                <div class="value" id="completionRate">0%</div>
+                <div class="sub-value">配送完了した注文の割合（フィルター適用中の注文が対象）</div>
+            </div>
+
             <!-- 注文リスト -->
             <div class="orders-list">
                 <table class="orders-table">
@@ -403,6 +436,6 @@
     <script src="./js/supabase-config.js"></script>
     <script src="./js/goemon-admin-db.js?v=20251122173000"></script>
     <script src="./js/goemon-modal.js"></script>
-    <script src="./js/goemon-admin-orders.js"></script>
+    <script src="./js/goemon-admin-orders.js?v=20251127007"></script>
 </body>
 </html>
