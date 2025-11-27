@@ -153,7 +153,8 @@ function renderCheckoutOrderSummary() {
         `;
     }).join('');
 
-    const shipping = 500; // 送料固定
+    // 送料計算（¥5,000以上で送料無料）
+    const shipping = subtotal >= 5000 ? 0 : 500;
     const total = subtotal + shipping;
 
     subtotalElem.textContent = `¥${subtotal.toLocaleString()}`;
@@ -193,6 +194,9 @@ function handleCheckoutConfirmOrder() {
     }
 
     // 注文データを作成
+    const subtotal = calculateCheckoutSubtotal();
+    const shipping = subtotal >= 5000 ? 0 : 500; // ¥5,000以上で送料無料
+
     const orderData = {
         shippingAddress: {
             name: `${lastName} ${firstName}`,
@@ -207,9 +211,9 @@ function handleCheckoutConfirmOrder() {
         },
         paymentMethod,
         items: checkoutCartItems,
-        subtotal: calculateCheckoutSubtotal(),
-        shipping: 500,
-        total: calculateCheckoutSubtotal() + 500
+        subtotal: subtotal,
+        shipping: shipping,
+        total: subtotal + shipping
     };
 
     // セッションストレージに保存して確認ページへ
