@@ -735,6 +735,64 @@ async function updateOrderStatus(orderId, status) {
 }
 
 /**
+ * 注文ステータスと送り状番号を更新（管理者用）
+ */
+async function updateOrderStatusWithTracking(orderId, status, trackingNumber) {
+    try {
+        const updateData = { status: status };
+
+        // 送り状番号がある場合のみ追加
+        if (trackingNumber) {
+            updateData.tracking_number = trackingNumber;
+        }
+
+        const { data, error } = await supabase
+            .from('orders')
+            .update(updateData)
+            .eq('id', orderId)
+            .select();
+
+        if (error) throw error;
+        return data[0];
+    } catch (error) {
+        console.error('注文ステータス・送り状番号更新エラー:', error);
+        throw error;
+    }
+}
+
+/**
+ * 注文をキャンセルし、売上を調整（注文日の売上からマイナス）
+ * 注意: この関数は在庫復元は行いません。在庫復元は呼び出し元で行ってください。
+ */
+async function updateOrderStatusWithCancellation(orderId, status, totalAmount, orderDate) {
+    try {
+        // ステータスを更新
+        const { data, error } = await supabase
+            .from('orders')
+            .update({
+                status: status,
+                cancelled_at: new Date().toISOString()
+            })
+            .eq('id', orderId)
+            .select();
+
+        if (error) throw error;
+
+        console.log('✅ キャンセルステータス更新完了');
+        console.log('💰 売上調整: 注文日', new Date(orderDate).toLocaleDateString(), 'の売上から', totalAmount, '円をマイナス');
+
+        // 注: 実際の売上調整（日別・月別集計からのマイナス）は
+        // ダッシュボードや売上管理画面で注文データをフィルタリングする際に
+        // キャンセルステータスの注文を除外することで実現されます
+
+        return data[0];
+    } catch (error) {
+        console.error('注文キャンセル処理エラー:', error);
+        throw error;
+    }
+}
+
+/**
  * ユーザーIDで注文を取得
  */
 async function fetchOrdersByUserId(userId) {

@@ -42,8 +42,11 @@ async function checkAdminAccess() {
 function normalizeOrderStatus(order) {
     const statusMap = {
         'pending': '準備中',
-        'shipping': '配送中',
-        'completed': '配送完了',
+        'processing': '準備中',
+        'shipped': '発送完了',
+        'delivered': '発送完了',
+        'shipping': '発送完了',
+        'completed': '発送完了',
         'cancelled': 'キャンセル'
     };
 
@@ -136,8 +139,10 @@ function mapOrderStatus(status) {
     const statusMap = {
         'pending': '準備中',
         'processing': '準備中',
-        'shipped': '配送中',
-        'delivered': '配送完了',
+        'shipped': '発送完了',
+        'delivered': '発送完了',
+        'shipping': '発送完了',
+        'completed': '発送完了',
         'cancelled': 'キャンセル'
     };
     return statusMap[status] || status;
@@ -190,8 +195,7 @@ function renderOrders(orders) {
 function getStatusClass(status) {
     const statusMap = {
         '準備中': 'pending',
-        '配送中': 'shipping',
-        '配送完了': 'completed',
+        '発送完了': 'completed',
         'キャンセル': 'cancelled'
     };
     return statusMap[status] || 'pending';
@@ -397,13 +401,23 @@ function viewOrderDetail(orderId) {
             <h3 style="font-size: 16px; margin-bottom: 15px;">
                 <i class="fas fa-sync-alt"></i> ステータス更新
             </h3>
-            <select class="status-select" id="newStatusSelect">
+            <select class="status-select" id="newStatusSelect" onchange="toggleTrackingNumberField()">
                 <option value="準備中" ${order.status === '準備中' ? 'selected' : ''}>準備中</option>
-                <option value="配送中" ${order.status === '配送中' ? 'selected' : ''}>配送中</option>
-                <option value="配送完了" ${order.status === '配送完了' ? 'selected' : ''}>配送完了</option>
+                <option value="発送完了" ${order.status === '発送完了' ? 'selected' : ''}>発送完了</option>
                 <option value="キャンセル" ${order.status === 'キャンセル' ? 'selected' : ''}>キャンセル</option>
             </select>
-            <button class="btn-cmn-02" onclick="updateOrderStatusUI('${order.orderId}')" style="width: 100%;">
+
+            <!-- 送り状番号入力フィールド -->
+            <div id="trackingNumberField" style="display: none; margin-top: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">
+                    送り状番号 <span style="color: red;">*</span>
+                </label>
+                <input type="text" id="trackingNumberInput" class="form-input"
+                       placeholder="送り状番号を入力してください"
+                       style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            </div>
+
+            <button class="btn-cmn-02" onclick="updateOrderStatusUI('${order.orderId}')" style="width: 100%; margin-top: 15px;">
                 <i class="fas fa-save"></i> ステータスを更新
             </button>
         </div>
@@ -412,9 +426,29 @@ function viewOrderDetail(orderId) {
     modal.classList.add('active');
 }
 
+// 送り状番号フィールドの表示切り替え
+function toggleTrackingNumberField() {
+    const newStatus = document.getElementById('newStatusSelect').value;
+    const trackingField = document.getElementById('trackingNumberField');
+
+    if (newStatus === '発送完了') {
+        trackingField.style.display = 'block';
+    } else {
+        trackingField.style.display = 'none';
+    }
+}
+
 // 注文ステータスを更新
 async function updateOrderStatusUI(orderId) {
     const newStatus = document.getElementById('newStatusSelect').value;
+    const trackingNumberInput = document.getElementById('trackingNumberInput');
+    const trackingNumber = trackingNumberInput ? trackingNumberInput.value.trim() : '';
+
+    // 発送完了の場合、送り状番号のバリデーション
+    if (newStatus === '発送完了' && !trackingNumber) {
+        showAlertModal('発送完了にするには送り状番号を入力してください', 'error');
+        return;
+    }
 
     // メモリ上の注文を検索
     const order = allOrders.find(o => o.orderId === orderId);
@@ -428,8 +462,7 @@ async function updateOrderStatusUI(orderId) {
         // 日本語ステータスを英語にマッピング
         const statusMapReverse = {
             '準備中': 'pending',
-            '配送中': 'shipped',
-            '配送完了': 'delivered',
+            '発送完了': 'delivered',
             'キャンセル': 'cancelled'
         };
         const dbStatus = statusMapReverse[newStatus] || 'pending';
@@ -437,16 +470,44 @@ async function updateOrderStatusUI(orderId) {
 
         console.log('📝 注文ステータスを更新:', orderId, '→', newStatus, '(DB:', dbStatus, ')');
 
-        // Supabaseで更新（dbIdを使用）
+        // キャンセル時の在庫復元と売上調整
+        if (newStatus === 'キャンセル' && oldStatus !== 'キャンセル') {
+            try {
+                // 在庫復元
+                console.log('🔄 在庫復元処理を開始');
+                for (const item of order.items) {
+                    await restoreProductStock(item.productId, item.quantity, item.color, item.size);
+                }
+                console.log('✅ 在庫復元完了');
+
+                // 売上調整（注文日の売上をマイナス）
+                console.log('💰 売上調整処理を開始（注文日:', new Date(order.orderDate).toLocaleDateString(), ')');
+                // 売上調整はSupabaseで直接行うため、ここではログのみ
+                // 実際の売上調整はupdateOrderStatusWithCancellation関数内で行います
+
+            } catch (restoreError) {
+                console.error('❌ 在庫復元/売上調整エラー:', restoreError);
+                showAlertModal('在庫復元または売上調整に失敗しました: ' + restoreError.message, 'error');
+                return;
+            }
+        }
+
+        // Supabaseで更新（dbIdを使用、送り状番号とキャンセル処理を含む）
         if (order.dbId) {
-            await updateOrderStatus(order.dbId, dbStatus);
+            if (newStatus === 'キャンセル' && oldStatus !== 'キャンセル') {
+                // キャンセルの場合は専用関数を使用（売上調整含む）
+                await updateOrderStatusWithCancellation(order.dbId, dbStatus, order.totalAmount, order.orderDate);
+            } else {
+                // 通常のステータス更新（送り状番号を含む）
+                await updateOrderStatusWithTracking(order.dbId, dbStatus, trackingNumber);
+            }
             console.log('✅ Supabaseで注文ステータス更新完了:', order.dbId);
         } else {
             console.warn('⚠️ dbIdが見つかりません。Supabaseへの保存をスキップします');
         }
 
-        // ステータスが「配送中」に変更された場合、ポイントを付与
-        if (oldStatus !== '配送中' && newStatus === '配送中' && order.customerId && order.subtotal) {
+        // ステータスが「発送完了」に変更された場合、ポイントを付与
+        if (oldStatus !== '発送完了' && newStatus === '発送完了' && order.customerId && order.subtotal) {
             try {
                 console.log('🎁 ポイント付与処理を開始:', {
                     userId: order.customerId,
@@ -479,14 +540,60 @@ async function updateOrderStatusUI(orderId) {
 
         // 成功メッセージ
         let successMessage = `注文 #${orderId} のステータスを「${newStatus}」に更新しました`;
-        if (oldStatus !== '配送中' && newStatus === '配送中') {
+        if (oldStatus !== '発送完了' && newStatus === '発送完了') {
             successMessage += '\n購入ポイントを付与しました';
+        }
+        if (newStatus === 'キャンセル') {
+            successMessage += '\n在庫を復元し、売上を調整しました';
         }
         showAlertModal(successMessage, 'success');
 
     } catch (error) {
         console.error('❌ 注文ステータス更新エラー:', error);
         showAlertModal('ステータスの更新に失敗しました: ' + error.message, 'error');
+    }
+}
+
+// 在庫を復元する関数
+async function restoreProductStock(productId, quantity, color, size) {
+    try {
+        // 商品データを取得
+        const { data: product, error: fetchError } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', productId)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        // バリエーション商品の場合
+        if (product.variants && product.variants.stock && color) {
+            const variantStock = product.variants.stock;
+            if (variantStock[color] !== undefined) {
+                variantStock[color] += quantity;
+
+                // 更新
+                const { error: updateError } = await supabase
+                    .from('products')
+                    .update({ variants: product.variants })
+                    .eq('id', productId);
+
+                if (updateError) throw updateError;
+                console.log(`✅ バリエーション在庫復元: ${productId} (${color}) +${quantity}`);
+            }
+        } else {
+            // 通常商品の場合
+            const { error: updateError } = await supabase
+                .from('products')
+                .update({ stock: product.stock + quantity })
+                .eq('id', productId);
+
+            if (updateError) throw updateError;
+            console.log(`✅ 在庫復元: ${productId} +${quantity}`);
+        }
+    } catch (error) {
+        console.error('在庫復元エラー:', productId, error);
+        throw error;
     }
 }
 
@@ -500,7 +607,7 @@ function updateCompletionRate(orders) {
     }
 
     const completedOrders = orders.filter(order => {
-        return order.status === '配送完了' || order.status === 'completed';
+        return order.status === '発送完了' || order.status === 'delivered' || order.status === 'completed';
     }).length;
 
     const completionRate = Math.round((completedOrders / totalOrders) * 100);

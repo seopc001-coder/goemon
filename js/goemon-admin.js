@@ -50,21 +50,27 @@ async function loadStatistics() {
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
 
-        // 本日の注文
+        // キャンセル注文を除外するフィルター関数
+        const isNotCancelled = (order) => {
+            const status = order.status.toLowerCase();
+            return status !== 'cancelled' && status !== 'キャンセル';
+        };
+
+        // 本日の注文（キャンセル除外）
         const todayOrders = orders.filter(order => {
             const orderDate = new Date(order.created_at);
             orderDate.setHours(0, 0, 0, 0);
-            return orderDate.getTime() === today.getTime();
+            return orderDate.getTime() === today.getTime() && isNotCancelled(order);
         });
 
-        // 昨日の注文
+        // 昨日の注文（キャンセル除外）
         const yesterdayOrders = orders.filter(order => {
             const orderDate = new Date(order.created_at);
             orderDate.setHours(0, 0, 0, 0);
-            return orderDate.getTime() === yesterday.getTime();
+            return orderDate.getTime() === yesterday.getTime() && isNotCancelled(order);
         });
 
-        // 本日の売上
+        // 本日の売上（キャンセル除外）
         const todaySales = todayOrders.reduce((sum, order) => sum + (order.total || 0), 0);
         const yesterdaySales = yesterdayOrders.reduce((sum, order) => sum + (order.total || 0), 0);
 
@@ -140,16 +146,22 @@ function calculateMonthlySales(orders) {
     const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
     const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
-    // 当月の売上
+    // キャンセル注文を除外するフィルター関数
+    const isNotCancelled = (order) => {
+        const status = (order.status || '').toLowerCase();
+        return status !== 'cancelled' && status !== 'キャンセル';
+    };
+
+    // 当月の売上（キャンセル除外）
     const monthlySales = orders.filter(order => {
         const orderDate = new Date(order.orderDate || order.created_at);
-        return orderDate.getFullYear() === currentYear && orderDate.getMonth() === currentMonth;
+        return orderDate.getFullYear() === currentYear && orderDate.getMonth() === currentMonth && isNotCancelled(order);
     }).reduce((sum, order) => sum + (order.total || order.totalAmount || 0), 0);
 
-    // 先月の売上
+    // 先月の売上（キャンセル除外）
     const lastMonthSales = orders.filter(order => {
         const orderDate = new Date(order.orderDate || order.created_at);
-        return orderDate.getFullYear() === lastMonthYear && orderDate.getMonth() === lastMonth;
+        return orderDate.getFullYear() === lastMonthYear && orderDate.getMonth() === lastMonth && isNotCancelled(order);
     }).reduce((sum, order) => sum + (order.total || order.totalAmount || 0), 0);
 
     return { monthlySales, lastMonthSales };
@@ -203,8 +215,11 @@ async function calculateLowStockCount() {
 function normalizeOrderStatus(order) {
     const statusMap = {
         'pending': '準備中',
-        'shipping': '配送中',
-        'completed': '配送完了',
+        'processing': '準備中',
+        'shipped': '発送完了',
+        'delivered': '発送完了',
+        'shipping': '発送完了',
+        'completed': '発送完了',
         'cancelled': 'キャンセル'
     };
 
@@ -280,8 +295,7 @@ async function loadRecentOrders() {
 function getStatusInfo(status) {
     const statusMap = {
         '準備中': { class: 'pending', icon: 'fa-clock' },
-        '配送中': { class: 'shipping', icon: 'fa-truck' },
-        '配送完了': { class: 'completed', icon: 'fa-check-circle' },
+        '発送完了': { class: 'completed', icon: 'fa-check-circle' },
         'キャンセル': { class: 'cancelled', icon: 'fa-times-circle' }
     };
 
