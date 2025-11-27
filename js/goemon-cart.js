@@ -467,7 +467,7 @@ async function proceedToCheckout() {
 
         if (!session) {
             // 未ログインの場合、ログインページに遷移（戻り先URLを指定）
-            const returnUrl = encodeURIComponent('goemon-cart.html');
+            const returnUrl = encodeURIComponent('/cart');
             window.location.href = `goemon-login.html?returnUrl=${returnUrl}`;
             return;
         }
@@ -478,7 +478,7 @@ async function proceedToCheckout() {
     } catch (error) {
         console.error('Auth check error:', error);
         // エラー時もログインページに遷移
-        const returnUrl = encodeURIComponent('goemon-cart.html');
+        const returnUrl = encodeURIComponent('/cart');
         window.location.href = `goemon-login.html?returnUrl=${returnUrl}`;
     }
 }

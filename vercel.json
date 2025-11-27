@@ -59,6 +59,10 @@
     {
       "source": "/p/:id",
       "destination": "/goemon-product.html?id=:id"
+    },
+    {
+      "source": "/cart",
+      "destination": "/goemon-cart.html"
     }
   ]
 }

@@ -26,7 +26,7 @@
         const checkoutData = sessionStorage.getItem('checkoutData');
         if (!checkoutData) {
             alert('注文データが見つかりません');
-            window.location.href = 'goemon-cart.html';
+            window.location.href = '/cart';
             return;
         }
 
@@ -35,7 +35,7 @@
         } catch (error) {
             console.error('Error parsing checkout data:', error);
             alert('注文データの読み込みに失敗しました');
-            window.location.href = 'goemon-cart.html';
+            window.location.href = '/cart';
             return;
         }
 

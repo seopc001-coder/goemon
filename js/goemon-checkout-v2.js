@@ -134,7 +134,7 @@ async function loadCheckoutCartData() {
     if (checkoutCartItems.length === 0) {
         showAlertModal('カートが空です', 'warning');
         setTimeout(() => {
-            window.location.href = 'goemon-cart.html';
+            window.location.href = '/cart';
         }, 1500);
     }
 }
