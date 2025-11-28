@@ -31,9 +31,45 @@ async function initializeProductsPage() {
 
 // URLパラメータからフィルターを適用
 async function applyURLFilters() {
+    // URLパラメータを取得（クエリ文字列から）
     const urlParams = new URLSearchParams(window.location.search);
-    const categoryParam = urlParams.get('category');
-    const typeParam = urlParams.get('type');
+    let categoryParam = urlParams.get('category');
+    let typeParam = urlParams.get('type');
+
+    // クエリパラメータがない場合、パス名から推測
+    if (!categoryParam && !typeParam) {
+        const pathname = window.location.pathname;
+
+        // パス名と商品タイプ/カテゴリーのマッピング
+        const pathTypeMap = {
+            '/new': 'new',
+            '/ranking': 'ranking',
+            '/limited': 'pickup',
+            '/sale': 'sale',
+            '/pre-order': 'reservation',
+            '/restock': 'restock'
+        };
+
+        const pathCategoryMap = {
+            '/outer': 'outer',
+            '/tops': 'tops',
+            '/bottoms': 'bottoms',
+            '/onepiece': 'onepiece',
+            '/accessories': 'accessories',
+            '/shoes': 'shoes',
+            '/bags': 'bags',
+            '/krcosmetics': 'krcosmetics'
+        };
+
+        // パス名から商品タイプまたはカテゴリを判定
+        if (pathTypeMap[pathname]) {
+            typeParam = pathTypeMap[pathname];
+            console.log('🔄 Inferred type from pathname:', pathname, '→', typeParam);
+        } else if (pathCategoryMap[pathname]) {
+            categoryParam = pathCategoryMap[pathname];
+            console.log('🔄 Inferred category from pathname:', pathname, '→', categoryParam);
+        }
+    }
 
     if (categoryParam) {
         // slugまたはnameからnameを取得
