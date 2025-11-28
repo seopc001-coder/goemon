@@ -14,7 +14,7 @@
     },
     {
       "source": "/limited",
-      "destination": "/goemon-products.html?type=limited"
+      "destination": "/goemon-products.html?type=pickup"
     },
     {
       "source": "/outer",
@@ -54,15 +54,11 @@
     },
     {
       "source": "/pre-order",
-      "destination": "/goemon-products.html?type=pre-order"
+      "destination": "/goemon-products.html?type=reservation"
     },
     {
       "source": "/restock",
       "destination": "/goemon-products.html?type=restock"
-    },
-    {
-      "source": "/set",
-      "destination": "/goemon-products.html?type=set"
     },
     {
       "source": "/product/:id",
