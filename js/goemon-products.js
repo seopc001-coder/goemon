@@ -63,6 +63,9 @@ async function applyURLFilters() {
     if (typeParam) {
         // slugまたはnameからnameを取得
         const productTypes = await fetchProductTypes();
+        console.log('🔍 Available product types:', productTypes.map(t => ({ slug: t.slug, name: t.name })));
+        console.log('🔍 Looking for product type with slug or name:', typeParam);
+
         const productType = productTypes.find(t => t.slug === typeParam || t.name === typeParam);
 
         if (productType) {
@@ -74,7 +77,10 @@ async function applyURLFilters() {
                 updatePageTitle(typeParam, 'type');
             }
 
-            console.log('Applied product type filter from URL:', typeParam, '→', productType.name);
+            console.log('✅ Applied product type filter from URL:', typeParam, '→', productType.name);
+        } else {
+            console.warn('⚠️ Product type not found for slug/name:', typeParam);
+            console.warn('Available product types:', productTypes);
         }
     }
 
