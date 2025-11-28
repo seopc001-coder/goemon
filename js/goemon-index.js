@@ -33,12 +33,17 @@ function getTypeUrl(slug) {
         'limited': '/limited',
         'sale': '/sale',
         'new-arrivals': '/new',
+        'pre-order': '/pre-order',
+        'restock': '/restock',
         '新着': '/new',
         'ランキング': '/ranking',
         '期間限定': '/limited',
-        'セール': '/sale'
+        'セール': '/sale',
+        '予約販売': '/pre-order',
+        '再入荷': '/restock'
     };
-    return typeMap[slug] || `/new`;
+    // マッピングにない場合は、slugをそのままURLに使用
+    return typeMap[slug] || `/products?type=${encodeURIComponent(slug)}`;
 }
 
 document.addEventListener('DOMContentLoaded', function() {

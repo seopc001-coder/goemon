@@ -53,6 +53,14 @@
       "destination": "/goemon-products.html?type=sale"
     },
     {
+      "source": "/pre-order",
+      "destination": "/goemon-products.html?type=pre-order"
+    },
+    {
+      "source": "/restock",
+      "destination": "/goemon-products.html?type=restock"
+    },
+    {
       "source": "/product/:id",
       "destination": "/goemon-product.html?id=:id"
     },
