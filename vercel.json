@@ -61,6 +61,10 @@
       "destination": "/goemon-products.html?type=restock"
     },
     {
+      "source": "/set",
+      "destination": "/goemon-products.html?type=set"
+    },
+    {
       "source": "/product/:id",
       "destination": "/goemon-product.html?id=:id"
     },

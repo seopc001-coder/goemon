@@ -35,6 +35,7 @@ function getTypeUrl(slug) {
         'new-arrivals': '/new',
         'pre-order': '/pre-order',
         'restock': '/restock',
+        'set': '/set',
         '新着': '/new',
         '新着アイテム': '/new',
         'ランキング': '/ranking',
@@ -44,7 +45,9 @@ function getTypeUrl(slug) {
         '予約': '/pre-order',
         '再入荷': '/restock',
         '値下げアイテム': '/sale',
-        '特集': '/limited'
+        '特集': '/limited',
+        'セット商品': '/set',
+        'セット': '/set'
     };
     // マッピングにない場合は、slugをそのままURLに使用
     return typeMap[slug] || `/products?type=${encodeURIComponent(slug)}`;
